@@ -94,14 +94,16 @@ public class Glide : MonoBehaviour {
 		transform.rotation = Quaternion.Euler (rotation);
 
 		//apply upward and forward forces if flapping
-		if (animator.GetCurrentAnimatorStateInfo(0).IsName (flapClip.name) && !animator.IsInTransition(0)) {
+		bool flapAnimationPlaying = animator.GetCurrentAnimatorStateInfo(0).IsName (flapClip.name) && !animator.IsInTransition(0);
+		if (flapAnimationPlaying) {
 			rigidBody.AddForceAtPosition (transform.up*flapUpCoef, transform.position + wingForwardDistance*transform.forward, ForceMode.Impulse);
 			rigidBody.AddForceAtPosition (transform.forward*flapForwardCoef, transform.position + wingForwardDistance*transform.forward, ForceMode.Impulse);
 		}
 
 //		OriginalLift ();
-		if(!isFlapping)
+		if (!isFlapping || flapAnimationPlaying) {
 			WingLift ();
+		}
 
 		//apply gravity
 		if (!isGrounded ()) {
@@ -132,8 +134,8 @@ public class Glide : MonoBehaviour {
 		float angleOfAttackLeft = angleOffset + angleScale * pitchLeft + angleBetweenForwardAndSpeed;
 		float angleOfAttackRight = angleOffset + angleScale * pitchRight + angleBetweenForwardAndSpeed;
 
-		float liftLeft = (0.5f) * liftCoef * 1.29f * wingSurfaceArea * speed * speed * Mathf.Deg2Rad * angleOfAttackLeft * liftPercent;
-		float liftRight = (0.5f) * liftCoef * 1.29f * wingSurfaceArea * speed * speed * Mathf.Deg2Rad * angleOfAttackRight * liftPercent;
+		float liftLeft = 0.5f * liftCoef * 1.29f * wingSurfaceArea * speed * speed * Mathf.Deg2Rad * angleOfAttackLeft * liftPercent;
+		float liftRight = 0.5f * liftCoef * 1.29f * wingSurfaceArea * speed * speed * Mathf.Deg2Rad * angleOfAttackRight * liftPercent;
 
 		Debug.Log (angleOfAttackLeft + " " + liftLeft + " , " + angleOfAttackRight + " " + liftRight + ", " + liftPercent);
 
