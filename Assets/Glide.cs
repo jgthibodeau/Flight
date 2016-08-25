@@ -86,11 +86,7 @@ public class Glide : MonoBehaviour {
 	}
 
 	void FixedUpdate () {
-		Vector3 oldRotation = transform.rotation.eulerAngles;
 		Vector3 rotation = Quaternion.LookRotation(rigidBody.velocity, transform.up).eulerAngles;
-
-//		rotation.z = oldRotation.z;
-
 		transform.rotation = Quaternion.Euler (rotation);
 
 		//apply upward and forward forces if flapping
@@ -116,6 +112,13 @@ public class Glide : MonoBehaviour {
 //		rigidBody.AddForce (transform.forward*drag);
 	}
 
+	void OnTriggerEnter(Collider collisionInfo) {
+		Debug.Log (collisionInfo);
+		if (collisionInfo.gameObject.CompareTag ("Fish")) {
+			GameObject.Destroy (collisionInfo.gameObject);
+		}
+	}
+
 	float AngleSigned(Vector3 v1, Vector3 v2, Vector3 normal){
 		return Mathf.Atan2 (
 			Vector3.Dot (normal, Vector3.Cross (v1, v2)),
@@ -136,8 +139,6 @@ public class Glide : MonoBehaviour {
 
 		float liftLeft = 0.5f * liftCoef * 1.29f * wingSurfaceArea * speed * speed * Mathf.Deg2Rad * angleOfAttackLeft * liftPercent;
 		float liftRight = 0.5f * liftCoef * 1.29f * wingSurfaceArea * speed * speed * Mathf.Deg2Rad * angleOfAttackRight * liftPercent;
-
-		Debug.Log (angleOfAttackLeft + " " + liftLeft + " , " + angleOfAttackRight + " " + liftRight + ", " + liftPercent);
 
 		rigidBody.AddForceAtPosition (transform.up * liftLeft, transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, ForceMode.Force);
 		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, ForceMode.Force);
@@ -173,7 +174,6 @@ public class Glide : MonoBehaviour {
 		var lookPos = rigidBody.velocity;
 		//		lookPos.x = 0;
 		var rotation = Quaternion.LookRotation(lookPos).eulerAngles;
-		Debug.Log (rotation.x);
 		if (rotation.x < 270 && rotation.x > 230)
 			rotation.x = 275;
 		if (rotation.x > 80 && rotation.x < 120)
