@@ -1,3 +1,6 @@
+// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
+// Upgrade NOTE: replaced '_World2Object' with 'unity_WorldToObject'
+
 
 Shader "AxeyWorks/Distortion" 
 {
@@ -65,14 +68,14 @@ Shader "AxeyWorks/Distortion"
 
 			v2g vert(appdata_full v)
 			{
-				float3 v0 = mul(_Object2World, v.vertex).xyz;
+				float3 v0 = mul(unity_ObjectToWorld, v.vertex).xyz;
 
 				float phase0 = (_Height)* sin((_Time[1] * _Speed) + (v0.x * _Churn) + (v0.z * _Churn) + rand2(v0.xzz));
 				float phase0_1 = (_RandHeight)*sin(cos(rand(v0.xzz) * _RandHeight * cos(_Time[1] * _RandSpeed * sin(rand(v0.xxz)))));
 				
 				v0.y += phase0 + phase0_1;
 
-				v.vertex.xyz = mul((float3x3)_World2Object, v0);
+				v.vertex.xyz = mul((float3x3)unity_WorldToObject, v0);
 
     			v2g OUT;
 				OUT.pos = v.vertex;
@@ -92,8 +95,8 @@ Shader "AxeyWorks/Distortion"
 
 				float3 vn = normalize(cross(v1 - v0, v2 - v0));
 				
-				float4x4 modelMatrix = _Object2World;
-				float4x4 modelMatrixInverse = _World2Object;
+				float4x4 modelMatrix = unity_ObjectToWorld;
+				float4x4 modelMatrixInverse = unity_WorldToObject;
 
 				float3 normalDirection = normalize(
 					mul(float4(vn, 0.0), modelMatrixInverse).xyz);

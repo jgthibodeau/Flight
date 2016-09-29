@@ -1,3 +1,6 @@
+// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
+// Upgrade NOTE: replaced '_World2Object' with 'unity_WorldToObject'
+
 Shader "AxeyWorks/PolyWaterBlendFoam" {
 Properties { 
 
@@ -74,7 +77,7 @@ CGINCLUDE
 	{
 		v2f o;
 		
-		half3 worldSpaceVertex = mul(_Object2World,(v.vertex)).xyz;
+		half3 worldSpaceVertex = mul(unity_ObjectToWorld,(v.vertex)).xyz;
 		half3 vtxForAni = (worldSpaceVertex).xzz;
  
 		half3	offsets = half3(0,0,0);
@@ -82,7 +85,7 @@ CGINCLUDE
 		
 		v.vertex.xyz += offsets;
 		 
-		half2 tileableUv = mul(_Object2World,(v.vertex)).xz;
+		half2 tileableUv = mul(unity_ObjectToWorld,(v.vertex)).xz;
 		
 		o.bumpCoords.xyzw = (tileableUv.xyxy + _Time.xxxx * _BumpDirection.xyzw) * _BumpTiling.xyzw;
 
@@ -95,12 +98,12 @@ CGINCLUDE
 		
 		UNITY_TRANSFER_FOG(o,o.pos);
  		half3 worldNormal = UnityObjectToWorldNormal(v.normal); 
-   		float4x4 modelMatrix = _Object2World;
-        float4x4 modelMatrixInverse = _World2Object; 
+   		float4x4 modelMatrix = unity_ObjectToWorld;
+        float4x4 modelMatrixInverse = unity_WorldToObject; 
 	 	o.posWorld = mul(modelMatrix, v.vertex);
         o.normalDir = normalize( mul(float4(v.normal, 0.0), modelMatrixInverse).xyz); 
 
-        float3 worldPos = mul(_Object2World, v.vertex).xyz;
+        float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
         float3 worldViewDir = normalize(UnityWorldSpaceViewDir(worldPos)); 
         o.worldRefl = reflect(-worldViewDir, worldNormal);
 
