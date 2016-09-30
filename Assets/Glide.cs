@@ -135,7 +135,7 @@ public class Glide : MonoBehaviour {
 
 //		OriginalLift ();
 		if (!isFlapping){// || flapAnimationPlaying) {
-			WingLiftOneStickV2 ();
+			WingLiftV2 ();
 		}
 
 		//apply gravity
@@ -169,7 +169,7 @@ public class Glide : MonoBehaviour {
 		Debug.DrawRay (transform.position - transform.forward*wingForwardDistance, transform.forward*(-1)*drag, Color.red);
 	}
 
-	void WingLift(){
+	void WingLiftV1(){
 		float pitchLeft = -Input.GetAxis ("Vertical");
 		float pitchRight = -Input.GetAxis ("Vertical Right");
 
@@ -236,7 +236,7 @@ public class Glide : MonoBehaviour {
 		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
 	}
 
-	void WingLiftOneStick(){
+	void WingLiftOneStickV1(){
 		float y = Input.GetAxis ("Vertical");
 		float x = Input.GetAxis ("Horizontal");
 
@@ -371,6 +371,79 @@ public class Glide : MonoBehaviour {
 		float liftRight = 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * angleOfAttackRight * liftPercent;
 
 //		Debug.Log (angleOfAttackLeft + " " + angleOfAttackRight);
+
+		rigidBody.AddForceAtPosition (transform.up * liftLeft, transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, ForceMode.Force);
+		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, ForceMode.Force);
+
+		Debug.DrawRay (transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, transform.up * liftLeft, Color.green);
+		Debug.DrawRay (transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, transform.up * liftRight, Color.magenta);
+
+		//clamp to maxspeed
+		//		float brakePercent = 1f - Input.GetAxis ("Brake");
+		//		rigidBody.velocity = Vector3.ClampMagnitude (rigidBody.velocity, maxSpeed);
+
+		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
+	}
+
+	void WingLiftOneStickV3(){
+		float y = Input.GetAxis ("Vertical");
+		float x = Input.GetAxis ("Horizontal");
+
+		float angle = (2 * Mathf.Abs (Mathf.Atan2 (Mathf.Abs (y), Mathf.Abs (x)) / Mathf.PI));
+		float doubleAngle = 2 * angle - 1;
+		Debug.Log (angle);
+		float magnitude = Mathf.Clamp (new Vector2 (x, y).magnitude, 0, 1);
+
+		float pitchLeft = 0f;
+		float pitchRight = 0f;
+
+		if (x >= 0) {
+			//up right
+			if (y >= 0) {
+				pitchRight = -magnitude;
+				pitchLeft = -Mathf.Clamp (angle*magnitude, -1, 1);
+			}
+			//down right
+			else {
+				pitchRight = Mathf.Clamp (doubleAngle*magnitude, -1, 1);
+				pitchLeft = Mathf.Clamp (angle*magnitude, -1, 1);
+			}
+		} else {
+			//up left
+			if (y >= 0) {
+				pitchRight = -Mathf.Clamp (angle*magnitude, -1, 1);
+				pitchLeft = -magnitude;
+			}
+			//down left
+			else {
+				pitchRight = Mathf.Clamp (angle*magnitude, -1, 1);
+				pitchLeft = Mathf.Clamp (doubleAngle*magnitude, -1, 1);
+			}
+		}
+
+//		Debug.Log(angle+" "+doubleAngle+"\n"+pitchLeft+" "+pitchRight);
+
+		//apply lift
+		float liftPercent = 1f;// - Input.GetAxis ("Flap");
+		float angleOfAttackLeft;
+		if(pitchLeft >= 0)
+			angleOfAttackLeft = Mathf.Deg2Rad * (angleScale * pitchLeft + angleOffset);
+		else
+			angleOfAttackLeft = Mathf.Deg2Rad * (angleScale * pitchLeft - angleOffset);
+
+		float angleOfAttackRight;
+		if(pitchRight >= 0)
+			angleOfAttackRight = Mathf.Deg2Rad * (angleScale * pitchRight + angleOffset);
+		else
+			angleOfAttackRight = Mathf.Deg2Rad * (angleScale * pitchRight - angleOffset);
+
+		//		float angleOfAttackLeft = Mathf.Deg2Rad * (angleOffset + angleScale * pitchLeft);
+		//		float angleOfAttackRight = Mathf.Deg2Rad * (angleOffset + angleScale * pitchRight);
+
+		float liftLeft = 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * angleOfAttackLeft * liftPercent;
+		float liftRight = 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * angleOfAttackRight * liftPercent;
+
+		//		Debug.Log (angleOfAttackLeft + " " + angleOfAttackRight);
 
 		rigidBody.AddForceAtPosition (transform.up * liftLeft, transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, ForceMode.Force);
 		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, ForceMode.Force);
