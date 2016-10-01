@@ -4,11 +4,14 @@ using System.Collections;
 public class Glide : MonoBehaviour {
 	public float gravity;
 	public bool rotateTowardsMotion;
+	public bool stabilizeRotation;
+	public Vector3 stabilizingDrag = new Vector3(2.0f,1.0f,0.0f);
 
 	public float liftCoef;
 	public float lift;
 
 	public float dragCoef;
+	public float dragDistance;
 	public float drag;
 
 	public float flapUpCoef;
@@ -154,9 +157,18 @@ public class Glide : MonoBehaviour {
 			transform.rotation = Quaternion.Euler (rotation);
 		}
 
+		//
+		if (stabilizeRotation) {
+			//stabilization (to keep the plane facing into the direction it's moving)
+			Vector3 dragDirection = -rigidBody.velocity.normalized;
+			Vector3 stabilizationForces = -Vector3.Scale (dragDirection, stabilizingDrag) * rigidBody.velocity.magnitude;
+			rigidBody.AddForceAtPosition (transform.TransformDirection (stabilizationForces), transform.position - transform.forward * 10);
+			rigidBody.AddForceAtPosition (-transform.TransformDirection (stabilizationForces), transform.position + transform.forward * 10);
+		}
+
 		//apply lift
 //		if (!isFlapping){// || flapAnimationPlaying) {
-			WingLiftV2 ();
+			WingLiftOneStickV4 ();
 //		}
 
 		//apply gravity
@@ -208,14 +220,14 @@ public class Glide : MonoBehaviour {
 		drag = 0.5f * airDensity * speed * speed * dragCoef * wingDragSurfaceArea;
 		Vector3 dragForce = transform.forward * (-1) * drag;
 		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*wingForwardDistance);
-		Debug.DrawRay (transform.position - transform.forward*wingForwardDistance, dragForce, Color.red);
+		Debug.DrawRay (transform.position - transform.forward*dragDistance, dragForce, Color.red);
 	}
 
 	void AirDragV3(){
 		drag = 0.5f * airDensity * speed * speed * dragCoef * wingDragSurfaceArea;
 		Vector3 dragForce = rigidBody.velocity.normalized * (-1) * drag;
 		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*wingForwardDistance);
-		Debug.DrawRay (transform.position - transform.forward*wingForwardDistance, dragForce, Color.red);
+		Debug.DrawRay (transform.position - transform.forward*dragDistance, dragForce, Color.red);
 	}
 
 	void WingLiftV1(){
@@ -526,6 +538,34 @@ public class Glide : MonoBehaviour {
 
 		Debug.DrawRay (transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, transform.up * liftLeft, Color.green);
 		Debug.DrawRay (transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, transform.up * liftRight, Color.magenta);
+
+		//clamp to maxspeed
+		//		float brakePercent = 1f - Input.GetAxis ("Brake");
+		//		rigidBody.velocity = Vector3.ClampMagnitude (rigidBody.velocity, maxSpeed);
+
+		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
+	}
+
+	void WingLiftOneStickV4(){
+		float y = Input.GetAxis ("Vertical");
+		float x = Input.GetAxis ("Horizontal");
+
+		//		angleOfAttackLeft = Mathf.Deg2Rad * (angleOffset + angleScale * pitchLeft);
+		//		angleOfAttackRight = Mathf.Deg2Rad * (angleOffset + angleScale * pitchRight);
+
+		float liftLeft = 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * x;
+		float liftRight = -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * x;
+		float liftForward = -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * y;
+
+		//		Debug.Log (angleOfAttackLeft + " " + angleOfAttackRight);
+
+		rigidBody.AddForceAtPosition (transform.up * liftLeft, transform.position - wingOutDistance*transform.right, ForceMode.Force);
+		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right, ForceMode.Force);
+		rigidBody.AddForceAtPosition (transform.up * liftForward, transform.position + wingForwardDistance*transform.forward, ForceMode.Force);
+
+		Debug.DrawRay (transform.position - wingOutDistance*transform.right, transform.up * liftLeft, Color.green);
+		Debug.DrawRay (transform.position + wingOutDistance*transform.right, transform.up * liftRight, Color.magenta);
+		Debug.DrawRay (transform.position + wingForwardDistance*transform.forward, transform.up * liftRight, Color.yellow);
 
 		//clamp to maxspeed
 		//		float brakePercent = 1f - Input.GetAxis ("Brake");
