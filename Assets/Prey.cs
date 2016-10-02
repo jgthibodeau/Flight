@@ -6,6 +6,9 @@ public class Prey : MonoBehaviour {
 	public float minDistance;
 	public float speed;
 
+	public float reactionTime;
+	public float remainingReactionTime;
+
 	private CharacterController characterController;
 
 	// Use this for initialization
@@ -16,9 +19,16 @@ public class Prey : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if (Vector3.Distance (transform.position, player.position) <= minDistance) {
-			Vector3 direction = transform.position - player.position;
-			direction = direction.normalized * speed;
-			characterController.SimpleMove (direction);
+			if (remainingReactionTime <= 0) {
+				Vector3 direction = transform.position - player.position;
+				direction.y = 0;
+				direction = direction.normalized * speed;
+				characterController.SimpleMove (direction);
+			} else {
+				remainingReactionTime -= Time.deltaTime;
+			}
+		} else {
+			remainingReactionTime = reactionTime;
 		}
 	}
 }
