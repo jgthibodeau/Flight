@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class TerrainGenerator : MonoBehaviour {
+public class MyTerrainGenerator : MonoBehaviour {
 	public int numberMountains;
 	public float maxMountainDistance;
 	public GameObject[] mountains;
