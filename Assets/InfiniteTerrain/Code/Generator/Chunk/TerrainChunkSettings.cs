@@ -16,9 +16,16 @@ namespace TerrainGenerator
 
         public Texture2D SteepTexture { get; private set; }
 
-        public Material TerrainMaterial { get; private set; }
+		public Material TerrainMaterial { get; private set; }
 
-        public TerrainChunkSettings(int heightmapResolution, int alphamapResolution, int length, int height, Texture2D flatTexture, Texture2D steepTexture, Material terrainMaterial)
+		public int NumberTrees { get; private set; }
+
+		public int BillboardStart { get; private set; }
+
+		public GameObject[] Trees { get; private set; }
+
+        public TerrainChunkSettings(int heightmapResolution, int alphamapResolution, int length, int height,
+			Texture2D flatTexture, Texture2D steepTexture, Material terrainMaterial, int numberTrees, int billboardStart, GameObject[] trees)
         {
             HeightmapResolution = heightmapResolution;
             AlphamapResolution = alphamapResolution;
@@ -27,6 +34,9 @@ namespace TerrainGenerator
             FlatTexture = flatTexture;
             SteepTexture = steepTexture;
             TerrainMaterial = terrainMaterial;
+			NumberTrees = numberTrees;
+			BillboardStart = billboardStart;
+			Trees = trees;
         }
     }
 }

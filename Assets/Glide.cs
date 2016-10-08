@@ -3,6 +3,8 @@ using System.Collections;
 
 public class Glide : MonoBehaviour {
 	public float gravity;
+	public float gravityDistance;
+
 	public bool rotateTowardsMotion;
 	public bool stabilizeRotation;
 	public Vector3 stabilizingDrag = new Vector3(2.0f,1.0f,0.0f);
@@ -14,6 +16,9 @@ public class Glide : MonoBehaviour {
 	public float dragDistance;
 	public float drag;
 
+	public float flapY;
+	public float flapAnimationScale;
+	public float flapScale;
 	public float flapUpCoef;
 	public float flapForwardCoef;
 
@@ -85,39 +90,18 @@ public class Glide : MonoBehaviour {
 		terminalSpeed = Mathf.Sqrt (2*gravity/(airDensity*wingDragSurfaceArea*dragCoef));
 
 		//flap wings
-		bool flapAnimationPlaying = animator.GetCurrentAnimatorStateInfo(0).IsName (flapClip.name) && !animator.IsInTransition(0);
-		if (Input.GetButton ("Jump") || Input.GetAxisRaw ("Flap") != 0) {
-			if (!isFlapping){// && !flapAnimationPlaying) {
-				Debug.Log ("Flap");
-				flap = true;
-				isFlapping = true;
-				animator.Play (flapClip.name);
-
-				rigidBody.AddForceAtPosition (transform.up*flapUpCoef*airDensity, transform.position + wingForwardDistance*transform.forward, ForceMode.Impulse);
-				rigidBody.AddForceAtPosition (transform.forward*flapForwardCoef*airDensity, transform.position + wingForwardDistance*transform.forward, ForceMode.Impulse);
-
-//				WaitForAnimation (animator);
-			}
+		float flapAmount = Input.GetAxis ("Flap");
+		if (flapAmount != 0) {
+			isFlapping = true;
+			animator.SetBool ("flap", true);
+			animator.speed = 1f + flapAnimationScale * flapAmount;
 		} else {
+			animator.SetBool ("flap", false);
 			isFlapping = false;
+			animator.speed = 1f;
 		}
 
-		if (Input.GetButton ("Brake") || Input.GetAxisRaw ("Brake") != 0) {
-			if (!isBraking && !flapAnimationPlaying) {
-				Debug.Log ("Brake");
-				brake = true;
-				isBraking = true;
-				animator.Play (flapClip.name);
-
-//				rigidBody.AddForceAtPosition (transform.up*flapUpCoef*airDensity, transform.position + wingForwardDistance*transform.forward, ForceMode.Impulse);
-				Vector3 brakeForce = Vector3.ClampMagnitude (-transform.forward * flapForwardCoef * airDensity, speed);
-				rigidBody.AddForceAtPosition (brakeForce, transform.position + wingForwardDistance*transform.forward, ForceMode.Impulse);
-
-				//				WaitForAnimation (animator);
-			}
-		} else {
-			isBraking = false;
-		}
+		flapY = Input.GetAxis ("Vertical Right");
 
 		//audio based on speed
 		audioSource.pitch = drag * pitchScale;
@@ -143,11 +127,8 @@ public class Glide : MonoBehaviour {
 
 	void UpdateRendering(){
 		//rotate wings
-		//TODO if not playing a flap animation
-		leftWing.localRotation = Quaternion.Euler (leftWingInitialRotation + new Vector3((angleOfAttackLeft-2*angleOffset)*-200000,0,0));
-		rightWing.localRotation = Quaternion.Euler (rightWingInitialRotation + new Vector3((angleOfAttackRight-2*angleOffset)*-200000,0,0));
-
-		//TODO rotate more if braking
+		leftWing.localRotation = Quaternion.Euler (leftWingInitialRotation + new Vector3((flapY)*15,0,0));
+		rightWing.localRotation = Quaternion.Euler (rightWingInitialRotation + new Vector3((flapY)*15,0,0));
 	}
 
 	void FixedUpdate () {
@@ -166,13 +147,21 @@ public class Glide : MonoBehaviour {
 			rigidBody.AddForceAtPosition (-transform.TransformDirection (stabilizationForces), transform.position + transform.forward * 10);
 		}
 
+		if (isFlapping) {
+			FlapV3 ();
+		}
+
 		//apply lift
 //		if (!isFlapping){// || flapAnimationPlaying) {
-			WingLiftOneStickV4 ();
+		WingLiftOneStickV4 ();
 //		}
 
 		//apply gravity
-		GravityV2();
+		if (!isGrounded ()) {
+			GravityV1 ();
+		} else {
+			GravityV3 ();
+		}
 
 		//apply drag
 		AirDragV3 ();
@@ -193,20 +182,55 @@ public class Glide : MonoBehaviour {
 			Vector3.Dot (v1, v2)) * Mathf.Rad2Deg;
 	}
 
+	void FlapV1(){
+		float flapSpeed = Input.GetAxis ("Flap");
+
+		Vector3 flapAngle = (flapY * transform.forward + (1f - Mathf.Abs (flapY)) * transform.up).normalized;
+		Vector3 flapForce = flapAngle * flapForwardCoef * flapScale * flapSpeed;
+
+		rigidBody.AddForceAtPosition (flapForce, transform.position);
+
+		Debug.DrawRay (transform.position, flapForce);
+	}
+
+	void FlapV2(){
+		float flapSpeed = Input.GetAxis ("Flap");
+
+		Vector3 flapAngle = (flapY * transform.forward + (1f - Mathf.Abs (flapY)) * transform.up).normalized;
+		Vector3 flapForce = flapAngle * flapForwardCoef * flapScale * flapSpeed;
+
+		rigidBody.AddForceAtPosition (flapForce, transform.position + transform.forward*wingForwardDistance);
+
+		Debug.DrawRay (transform.position + transform.forward*wingForwardDistance, flapForce);
+	}
+
+	void FlapV3(){
+		float flapSpeed = Input.GetAxis ("Flap");
+
+		Vector3 flapAngle = (flapY * transform.forward + (1f - Mathf.Abs (flapY)) * transform.up).normalized;
+		Vector3 flapForce = flapAngle * flapForwardCoef * flapScale * flapSpeed;
+
+		rigidBody.AddForceAtPosition (flapForce, transform.position + transform.forward*wingForwardDistance*flapY);
+
+		Debug.DrawRay (transform.position + transform.forward*wingForwardDistance*flapY, flapForce);
+	}
+
 	void GravityV1(){
-		if (!isGrounded ()) {
-			Vector3 gravityForce = Vector3.down * gravity;
-			rigidBody.AddForce (gravityForce, ForceMode.Force);
-			Debug.DrawRay (transform.position+rigidBody.centerOfMass, gravityForce, Color.blue);
-		}
+		Vector3 gravityForce = Vector3.down * gravity;
+		rigidBody.AddForceAtPosition (gravityForce, transform.position, ForceMode.Force);
+		Debug.DrawRay (transform.position, gravityForce, Color.blue);
 	}
 
 	void GravityV2(){
-		if (!isGrounded ()) {
-			Vector3 gravityForce = Vector3.down * gravity;
-			rigidBody.AddForceAtPosition (gravityForce, transform.position + transform.forward * wingForwardDistance, ForceMode.Force);
-			Debug.DrawRay (transform.position + transform.forward * wingForwardDistance, gravityForce, Color.blue);
-		}
+		Vector3 gravityForce = Vector3.down * gravity;
+		rigidBody.AddForceAtPosition (gravityForce, transform.position + transform.forward * wingForwardDistance, ForceMode.Force);
+		Debug.DrawRay (transform.position + transform.forward * wingForwardDistance, gravityForce, Color.blue);
+	}
+
+	void GravityV3(){
+		Vector3 gravityForce = Vector3.down * gravity;
+		rigidBody.AddForceAtPosition (gravityForce, transform.position-transform.up*gravityDistance, ForceMode.Force);
+		Debug.DrawRay (transform.position-transform.up*gravityDistance, gravityForce, Color.blue);
 	}
 
 	void AirDragV1(){
@@ -226,7 +250,7 @@ public class Glide : MonoBehaviour {
 	void AirDragV3(){
 		drag = 0.5f * airDensity * speed * speed * dragCoef * wingDragSurfaceArea;
 		Vector3 dragForce = rigidBody.velocity.normalized * (-1) * drag;
-		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*wingForwardDistance);
+		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*dragDistance);
 		Debug.DrawRay (transform.position - transform.forward*dragDistance, dragForce, Color.red);
 	}
 
@@ -565,7 +589,7 @@ public class Glide : MonoBehaviour {
 
 		Debug.DrawRay (transform.position - wingOutDistance*transform.right, transform.up * liftLeft, Color.green);
 		Debug.DrawRay (transform.position + wingOutDistance*transform.right, transform.up * liftRight, Color.magenta);
-		Debug.DrawRay (transform.position + wingForwardDistance*transform.forward, transform.up * liftRight, Color.yellow);
+		Debug.DrawRay (transform.position + wingForwardDistance*transform.forward, transform.up * liftForward, Color.yellow);
 
 		//clamp to maxspeed
 		//		float brakePercent = 1f - Input.GetAxis ("Brake");
@@ -607,7 +631,7 @@ public class Glide : MonoBehaviour {
 		Debug.DrawLine (characterCollider.bounds.center, new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y-0.1f, characterCollider.bounds.center.z), Color.red);
 		return Physics.CheckCapsule (
 			characterCollider.bounds.center,
-			new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y-0.1f, characterCollider.bounds.center.z),
+			new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y-1f, characterCollider.bounds.center.z),
 			0.18f,
 			layerMaskForGround.value
 		);

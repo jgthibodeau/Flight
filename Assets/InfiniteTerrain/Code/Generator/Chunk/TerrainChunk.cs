@@ -13,7 +13,7 @@ namespace TerrainGenerator
 
         private TerrainChunkSettings Settings { get; set; }
 
-        private NoiseProvider NoiseProvider { get; set; }
+        private NoiseProvider[] NoiseProviders { get; set; }
 
         private TerrainChunkNeighborhood Neighborhood { get; set; }
 
@@ -21,12 +21,12 @@ namespace TerrainGenerator
 
         private object HeightmapThreadLockObject { get; set; }
 
-        public TerrainChunk(TerrainChunkSettings settings, NoiseProvider noiseProvider, int x, int z)
+        public TerrainChunk(TerrainChunkSettings settings, NoiseProvider[] noiseProviders, int x, int z)
         {
             HeightmapThreadLockObject = new object();
 
             Settings = settings;
-            NoiseProvider = noiseProvider;
+            NoiseProviders = noiseProviders;
             Neighborhood = new TerrainChunkNeighborhood();
 
             Position = new Vector2i(x, z);
@@ -53,7 +53,10 @@ namespace TerrainGenerator
                         var xCoordinate = Position.X + (float)xRes / (Settings.HeightmapResolution - 1);
                         var zCoordinate = Position.Z + (float)zRes / (Settings.HeightmapResolution - 1);
 
-                        heightmap[zRes, xRes] = NoiseProvider.GetValue(xCoordinate, zCoordinate);
+						heightmap [zRes, xRes] = 1;
+						for (int i = 0; i < NoiseProviders.Length; i++) {
+							heightmap [zRes, xRes] *= NoiseProviders[i].GetValue (xCoordinate, zCoordinate);
+						}
                     }
                 }
 
@@ -81,7 +84,8 @@ namespace TerrainGenerator
             Data.heightmapResolution = Settings.HeightmapResolution;
             Data.alphamapResolution = Settings.AlphamapResolution;
             Data.SetHeights(0, 0, Heightmap);
-            ApplyTextures(Data);
+            ApplyTextures (Data);
+			CreateTrees (Data);
 
             Data.size = new Vector3(Settings.Length, Settings.Height, Settings.Length);
             var newTerrainGameObject = Terrain.CreateTerrainGameObject(Data);
@@ -92,8 +96,34 @@ namespace TerrainGenerator
             Terrain.materialType = UnityEngine.Terrain.MaterialType.Custom;
             Terrain.materialTemplate = Settings.TerrainMaterial;
             Terrain.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.Off;
+			Terrain.treeBillboardDistance = Settings.BillboardStart;
+
             Terrain.Flush();
         }
+
+		private void CreateTrees(TerrainData terrainData){
+			TreePrototype[] prototypes = new TreePrototype[Settings.Trees.Length];
+			for (int i = 0; i < Settings.Trees.Length; i++) {
+				TreePrototype tree = new TreePrototype();
+				tree.prefab = Settings.Trees [i];
+				prototypes [i] = tree;
+			}
+			terrainData.treePrototypes = prototypes;
+
+			TreeInstance[] instances = new TreeInstance[Settings.NumberTrees];
+			for (int i = 0; i < Settings.NumberTrees; i++) {
+				TreeInstance tree = new TreeInstance();
+				tree.heightScale = 1;
+				tree.widthScale = 1;
+				tree.prototypeIndex = 0;
+				float x = Random.Range (0f, 1f);
+				float z = Random.Range (0f, 1f);
+				float y = terrainData.GetHeight ((int)(x*terrainData.heightmapResolution), (int)(z*terrainData.heightmapResolution));
+				tree.position = new Vector3 (x, y, z);
+				instances [i] = tree;
+			}
+			terrainData.treeInstances = instances;
+		}
 
         private void ApplyTextures(TerrainData terrainData)
         {

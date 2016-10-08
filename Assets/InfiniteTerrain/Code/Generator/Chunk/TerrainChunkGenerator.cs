@@ -12,16 +12,31 @@ namespace TerrainGenerator
         public Texture2D FlatTexture;
         public Texture2D SteepTexture;
 
+		public int numberTrees = 5000;
+		public int billboardStart = 500;
+		public GameObject[] trees;
+
         private TerrainChunkSettings Settings;
 
-        private NoiseProvider NoiseProvider;
+//		public int numberNoiseProviders = 1;
+		private NoiseProvider[] NoiseProvider;
+		public double[] frequency; //4.0
+		public double[] lacunarity; //2.0
+		public int[] seed;
+		public bool randomSeed;
 
         private ChunkCache Cache;
 
         private void Awake()
         {
-            Settings = new TerrainChunkSettings(257, 257, 8*200, 4*40, FlatTexture, SteepTexture, TerrainMaterial);
-            NoiseProvider = new NoiseProvider();
+			Settings = new TerrainChunkSettings(257, 257, 8*200, 20*40, FlatTexture, SteepTexture, TerrainMaterial, numberTrees, billboardStart, trees);
+			NoiseProvider = new NoiseProvider[frequency.Length];
+			for (int i = 0; i < NoiseProvider.Length; i++) {
+				if (randomSeed)
+					NoiseProvider[i] = new NoiseProvider (frequency[i], lacunarity[i]);
+				else
+					NoiseProvider[i] = new NoiseProvider (frequency[i], lacunarity[i], seed[i]);
+			}
 
             Cache = new ChunkCache();
         }
