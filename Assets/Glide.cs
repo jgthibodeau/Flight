@@ -79,6 +79,8 @@ public class Glide : MonoBehaviour {
 
 		leftWingInitialRotation = leftWing.localRotation.eulerAngles;
 		rightWingInitialRotation = rightWing.localRotation.eulerAngles;
+
+		airDensity = 1.2238f;
 	}
 	
 	// Update is called once per frame
@@ -86,7 +88,7 @@ public class Glide : MonoBehaviour {
 		grounded = isGrounded ();
 
 		//set air density based on height
-		airDensity = 1.2238f * Mathf.Pow(1f - (0.0000226f * transform.position.y), 5.26f);
+//		airDensity = 1.2238f * Mathf.Pow(1f - (0.0000226f * transform.position.y), 5.26f);
 
 		//get current speed
 		speed = rigidBody.velocity.magnitude;//.z;
@@ -571,6 +573,9 @@ public class Glide : MonoBehaviour {
 		float liftLeft = rollScale * 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * x;
 		float liftRight = rollScale * -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * x;
 		float liftForward = -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * y;
+
+		Debug.Log ("A) " + airDensity + " " + speed + " " + x);
+		Debug.Log ("B) " + liftLeft + " " + liftRight + " " + liftForward);
 
 		rigidBody.AddForceAtPosition (transform.up * liftLeft, transform.position - wingOutDistance*transform.right, ForceMode.Force);
 		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right, ForceMode.Force);
