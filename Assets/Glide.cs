@@ -2,18 +2,19 @@
 using System.Collections;
 
 public class Glide : MonoBehaviour {
+	public bool grounded;
 	public float gravity;
-	public float gravityDistance;
+	public float gravityForwardDistance;
+	public float gravityDownDistance;
 
 	public bool rotateTowardsMotion;
-	public bool stabilizeRotation;
-	public Vector3 stabilizingDrag = new Vector3(2.0f,1.0f,0.0f);
 
 	public float liftCoef;
 	public float lift;
+	public float rollScale;
 
 	public float dragCoef;
-	public float dragDistance;
+	public float dragForwardDistance;
 	public float drag;
 
 	public float flapY;
@@ -82,6 +83,8 @@ public class Glide : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update() {
+		grounded = isGrounded ();
+
 		//set air density based on height
 		airDensity = 1.2238f * Mathf.Pow(1f - (0.0000226f * transform.position.y), 5.26f);
 
@@ -138,15 +141,6 @@ public class Glide : MonoBehaviour {
 			transform.rotation = Quaternion.Euler (rotation);
 		}
 
-		//
-		if (stabilizeRotation) {
-			//stabilization (to keep the plane facing into the direction it's moving)
-			Vector3 dragDirection = -rigidBody.velocity.normalized;
-			Vector3 stabilizationForces = -Vector3.Scale (dragDirection, stabilizingDrag) * rigidBody.velocity.magnitude;
-			rigidBody.AddForceAtPosition (transform.TransformDirection (stabilizationForces), transform.position - transform.forward * 10);
-			rigidBody.AddForceAtPosition (-transform.TransformDirection (stabilizationForces), transform.position + transform.forward * 10);
-		}
-
 		if (isFlapping) {
 			FlapV3 ();
 		}
@@ -157,7 +151,7 @@ public class Glide : MonoBehaviour {
 //		}
 
 		//apply gravity
-		if (!isGrounded ()) {
+		if (!grounded) {
 			GravityV1 ();
 		} else {
 			GravityV3 ();
@@ -217,8 +211,8 @@ public class Glide : MonoBehaviour {
 
 	void GravityV1(){
 		Vector3 gravityForce = Vector3.down * gravity;
-		rigidBody.AddForceAtPosition (gravityForce, transform.position, ForceMode.Force);
-		Debug.DrawRay (transform.position, gravityForce, Color.blue);
+		rigidBody.AddForceAtPosition (gravityForce, transform.position + transform.forward * gravityForwardDistance, ForceMode.Force);
+		Debug.DrawRay (transform.position + transform.forward * gravityForwardDistance, gravityForce, Color.blue);
 	}
 
 	void GravityV2(){
@@ -229,8 +223,8 @@ public class Glide : MonoBehaviour {
 
 	void GravityV3(){
 		Vector3 gravityForce = Vector3.down * gravity;
-		rigidBody.AddForceAtPosition (gravityForce, transform.position-transform.up*gravityDistance, ForceMode.Force);
-		Debug.DrawRay (transform.position-transform.up*gravityDistance, gravityForce, Color.blue);
+		rigidBody.AddForceAtPosition (gravityForce, transform.position - transform.up * gravityDownDistance + transform.forward * gravityForwardDistance, ForceMode.Force);
+		Debug.DrawRay (transform.position - transform.up * gravityDownDistance + transform.forward * gravityForwardDistance, gravityForce, Color.gray);
 	}
 
 	void AirDragV1(){
@@ -244,14 +238,14 @@ public class Glide : MonoBehaviour {
 		drag = 0.5f * airDensity * speed * speed * dragCoef * wingDragSurfaceArea;
 		Vector3 dragForce = transform.forward * (-1) * drag;
 		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*wingForwardDistance);
-		Debug.DrawRay (transform.position - transform.forward*dragDistance, dragForce, Color.red);
+		Debug.DrawRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.red);
 	}
 
 	void AirDragV3(){
 		drag = 0.5f * airDensity * speed * speed * dragCoef * wingDragSurfaceArea;
 		Vector3 dragForce = rigidBody.velocity.normalized * (-1) * drag;
-		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*dragDistance);
-		Debug.DrawRay (transform.position - transform.forward*dragDistance, dragForce, Color.red);
+		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*dragForwardDistance);
+		Debug.DrawRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.red);
 	}
 
 	void WingLiftV1(){
@@ -574,14 +568,9 @@ public class Glide : MonoBehaviour {
 		float y = Input.GetAxis ("Vertical");
 		float x = Input.GetAxis ("Horizontal");
 
-		//		angleOfAttackLeft = Mathf.Deg2Rad * (angleOffset + angleScale * pitchLeft);
-		//		angleOfAttackRight = Mathf.Deg2Rad * (angleOffset + angleScale * pitchRight);
-
-		float liftLeft = 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * x;
-		float liftRight = -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * x;
+		float liftLeft = rollScale * 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * x;
+		float liftRight = rollScale * -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * x;
 		float liftForward = -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * y;
-
-		//		Debug.Log (angleOfAttackLeft + " " + angleOfAttackRight);
 
 		rigidBody.AddForceAtPosition (transform.up * liftLeft, transform.position - wingOutDistance*transform.right, ForceMode.Force);
 		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right, ForceMode.Force);
@@ -591,9 +580,26 @@ public class Glide : MonoBehaviour {
 		Debug.DrawRay (transform.position + wingOutDistance*transform.right, transform.up * liftRight, Color.magenta);
 		Debug.DrawRay (transform.position + wingForwardDistance*transform.forward, transform.up * liftForward, Color.yellow);
 
-		//clamp to maxspeed
-		//		float brakePercent = 1f - Input.GetAxis ("Brake");
-		//		rigidBody.velocity = Vector3.ClampMagnitude (rigidBody.velocity, maxSpeed);
+		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
+	}
+
+	void WingLiftOneStickV5(){
+		float y = Input.GetAxis ("Vertical");
+		float x = Input.GetAxis ("Horizontal");
+
+		float liftLeft = rollScale * 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * x;
+		float liftRight = rollScale * -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * x;
+		float liftForward = -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * y;
+
+		Vector3 liftDirection = Vector3.Cross (rigidBody.velocity.normalized, transform.right);
+
+		rigidBody.AddForceAtPosition (liftDirection * liftLeft, transform.position - wingOutDistance*transform.right, ForceMode.Force);
+		rigidBody.AddForceAtPosition (liftDirection * liftRight, transform.position + wingOutDistance*transform.right, ForceMode.Force);
+		rigidBody.AddForceAtPosition (liftDirection * liftForward, transform.position + wingForwardDistance*transform.forward, ForceMode.Force);
+
+		Debug.DrawRay (transform.position - wingOutDistance*transform.right, liftDirection * liftLeft, Color.green);
+		Debug.DrawRay (transform.position + wingOutDistance*transform.right, liftDirection * liftRight, Color.magenta);
+		Debug.DrawRay (transform.position + wingForwardDistance*transform.forward, liftDirection * liftForward, Color.yellow);
 
 		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
 	}
@@ -631,7 +637,7 @@ public class Glide : MonoBehaviour {
 		Debug.DrawLine (characterCollider.bounds.center, new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y-0.1f, characterCollider.bounds.center.z), Color.red);
 		return Physics.CheckCapsule (
 			characterCollider.bounds.center,
-			new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y-1f, characterCollider.bounds.center.z),
+			new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y-0.1f, characterCollider.bounds.center.z),
 			0.18f,
 			layerMaskForGround.value
 		);
