@@ -27,13 +27,12 @@ public class Glide : MonoBehaviour {
 	public float wingDragSurfaceArea;
 	public float airDensity;
 
+	public float walkSpeed;
+	public float walkTurnSpeed;
+
 	public float speed;
 	public float maxSpeed;
 	public float terminalSpeed;
-
-	public float pitchScale = 1.5f;
-	public float volumeScale = 0.7f;
-	public float trailScale = 0.3f;
 
 	private Rigidbody rigidBody;
 	private Animator animator;
@@ -50,9 +49,17 @@ public class Glide : MonoBehaviour {
 	public float angleOffset = 0.015f;
 	public float angleScale = 0.05f;
 
-	private AudioSource audioSource;
-	private AudioEchoFilter echoFilter;
-	public AudioClip airClip;
+	public AudioSource airAudioSource;
+	public AudioSource flapAudioSource;
+	private bool playingFlapSound = false;
+	public float flapSoundRate;
+	public float minFlapRate;
+	public float flapMinPitch;
+	public float flapMaxPitch;
+
+	public float pitchScale = 1.5f;
+	public float volumeScale = 0.7f;
+	public float trailScale = 0.3f;
 
 	private Collider characterCollider;
 
@@ -72,8 +79,6 @@ public class Glide : MonoBehaviour {
 	void Start () {
 		rigidBody = transform.GetComponent<Rigidbody> ();
 		animator = transform.GetComponentInChildren<Animator> ();
-		audioSource = transform.GetComponent<AudioSource> ();
-		echoFilter = transform.GetComponent<AudioEchoFilter> ();
 		trails = transform.GetComponentsInChildren<TrailRenderer> ();
 		characterCollider = transform.GetComponent<Collider> ();
 
@@ -100,6 +105,12 @@ public class Glide : MonoBehaviour {
 			isFlapping = true;
 			animator.SetBool ("flap", true);
 			animator.speed = 1f + flapAnimationScale * flapAmount;
+
+			if(!playingFlapSound){
+				StartCoroutine(PlayFlapSound(flapSoundRate*(1-flapAmount) + minFlapRate));
+				playingFlapSound = true;
+				flapAudioSource.pitch = Random.Range (flapMinPitch, flapMaxPitch);
+			}
 		} else {
 			animator.SetBool ("flap", false);
 			isFlapping = false;
@@ -109,8 +120,9 @@ public class Glide : MonoBehaviour {
 		flapY = Input.GetAxis ("Vertical Right");
 
 		//audio based on speed
-		audioSource.pitch = drag * pitchScale;
-		audioSource.volume = drag * volumeScale;
+		airAudioSource.pitch = drag * pitchScale;
+		airAudioSource.volume = drag * volumeScale;
+		Debug.Log(drag+" "+" "+airAudioSource+" "+airAudioSource.pitch+" "+airAudioSource.volume);
 
 		foreach(TrailRenderer trail in trails){
 			trail.endWidth = drag * trailScale;
@@ -121,19 +133,25 @@ public class Glide : MonoBehaviour {
 		//rotate wings based on forces and movement
 		UpdateRendering();
 
-//		transform.rotation *= Quaternion.Euler (new Vector3 (pitch, 0, -roll));
+	}
 
-		//d = r * t
-		//t = d / r
-//		Quaternion targetRotation = Quaternion.LookRotation (rigidBody.velocity);
-//		float rotatePercent = Quaternion.Angle (transform.rotation, targetRotation);
-//		transform.rotation = Quaternion.Slerp (transform.rotation, targetRotation, Time.deltaTime*rotatePercent/10);
+	IEnumerator PlayFlapSound(float wait){
+		flapAudioSource.Play();
+		yield return new WaitForSeconds(wait);
+		playingFlapSound = false;
 	}
 
 	void UpdateRendering(){
 		//rotate wings
-		leftWing.localRotation = Quaternion.Euler (leftWingInitialRotation + new Vector3((flapY)*15,0,0));
-		rightWing.localRotation = Quaternion.Euler (rightWingInitialRotation + new Vector3((flapY)*15,0,0));
+		if (!grounded) {
+			leftWing.localRotation = Quaternion.Euler (leftWingInitialRotation + new Vector3 ((flapY) * 15, -(flapY) * 20, 0));
+			rightWing.localRotation = Quaternion.Euler (rightWingInitialRotation + new Vector3 ((flapY) * 15, (flapY) * 20, 0));
+		} else {
+			leftWing.localRotation = Quaternion.Euler (leftWingInitialRotation);
+			rightWing.localRotation = Quaternion.Euler (rightWingInitialRotation);
+		}
+
+		animator.SetBool ("wingsClosed", grounded);
 	}
 
 	void FixedUpdate () {
@@ -157,10 +175,18 @@ public class Glide : MonoBehaviour {
 			GravityV1 ();
 		} else {
 			GravityV3 ();
+			Walk ();
 		}
 
 		//apply drag
 		AirDragV3 ();
+	}
+
+	void Walk(){
+		float forward = Input.GetAxis ("Vertical");
+		float turn = Input.GetAxis ("Horizontal");
+		rigidBody.AddForceAtPosition (transform.forward*forward*walkSpeed, transform.position+transform.forward);
+		rigidBody.AddForceAtPosition (transform.right*turn*walkTurnSpeed, transform.position+transform.forward);
 	}
 
 	void OnTriggerEnter(Collider collisionInfo) {
@@ -245,6 +271,14 @@ public class Glide : MonoBehaviour {
 
 	void AirDragV3(){
 		drag = 0.5f * airDensity * speed * speed * dragCoef * wingDragSurfaceArea;
+		Vector3 dragForce = rigidBody.velocity.normalized * (-1) * drag;
+		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*dragForwardDistance);
+		Debug.DrawRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.red);
+	}
+
+
+	void AirDragV4(){
+		drag = 0.5f * airDensity * speed * dragCoef * wingDragSurfaceArea;
 		Vector3 dragForce = rigidBody.velocity.normalized * (-1) * drag;
 		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*dragForwardDistance);
 		Debug.DrawRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.red);
@@ -573,9 +607,6 @@ public class Glide : MonoBehaviour {
 		float liftLeft = rollScale * 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * x;
 		float liftRight = rollScale * -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * x;
 		float liftForward = -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * y;
-
-		Debug.Log ("A) " + airDensity + " " + speed + " " + x);
-		Debug.Log ("B) " + liftLeft + " " + liftRight + " " + liftForward);
 
 		rigidBody.AddForceAtPosition (transform.up * liftLeft, transform.position - wingOutDistance*transform.right, ForceMode.Force);
 		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right, ForceMode.Force);
