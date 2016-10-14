@@ -122,7 +122,6 @@ public class Glide : MonoBehaviour {
 		//audio based on speed
 		airAudioSource.pitch = drag * pitchScale;
 		airAudioSource.volume = drag * volumeScale;
-		Debug.Log(drag+" "+" "+airAudioSource+" "+airAudioSource.pitch+" "+airAudioSource.volume);
 
 		foreach(TrailRenderer trail in trails){
 			trail.endWidth = drag * trailScale;
@@ -167,7 +166,8 @@ public class Glide : MonoBehaviour {
 
 		//apply lift
 //		if (!isFlapping){// || flapAnimationPlaying) {
-		WingLiftOneStickV4 ();
+//		WingLiftOneStickV4 ();
+		RealisticLift();
 //		}
 
 		//apply gravity
@@ -636,6 +636,38 @@ public class Glide : MonoBehaviour {
 		Debug.DrawRay (transform.position - wingOutDistance*transform.right, liftDirection * liftLeft, Color.green);
 		Debug.DrawRay (transform.position + wingOutDistance*transform.right, liftDirection * liftRight, Color.magenta);
 		Debug.DrawRay (transform.position + wingForwardDistance*transform.forward, liftDirection * liftForward, Color.yellow);
+
+		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
+	}
+
+	void RealisticLift(){
+		float y = Input.GetAxis ("Vertical");
+		float x = Input.GetAxis ("Horizontal");
+
+		float anglePolarity = Mathf.Sign (Vector3.Cross(transform.forward, rigidBody.velocity).x);
+		float angleOfAttack = Vector3.Angle (transform.forward, rigidBody.velocity)*anglePolarity + y*angleScale;
+
+		if (angleOfAttack > 180)
+			angleOfAttack -= 360;
+		if (angleOfAttack < -180)
+			angleOfAttack += 360;
+
+		float realLiftCoef = liftCoef * Mathf.Sin (angleOfAttack * Mathf.PI / 180f);
+		float liftForward = -0.5f * realLiftCoef * airDensity * wingLiftSurfaceArea * speed * speed;
+		rigidBody.AddForceAtPosition (transform.up * liftForward, transform.position + wingForwardDistance*transform.forward, ForceMode.Force);
+		Debug.DrawRay (transform.position + wingForwardDistance*transform.forward, transform.up * liftForward, Color.yellow);
+
+
+
+		float liftLeft = rollScale * 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * x;
+		float liftRight = rollScale * -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * x;
+
+		rigidBody.AddForceAtPosition (transform.up * liftLeft, transform.position - wingOutDistance*transform.right, ForceMode.Force);
+		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right, ForceMode.Force);
+
+		Debug.DrawRay (transform.position - wingOutDistance*transform.right, transform.up * liftLeft, Color.green);
+		Debug.DrawRay (transform.position + wingOutDistance*transform.right, transform.up * liftRight, Color.magenta);
+
 
 		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
 	}
