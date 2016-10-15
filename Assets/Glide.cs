@@ -3,6 +3,7 @@ using System.Collections;
 
 public class Glide : MonoBehaviour {
 	public bool grounded;
+	public bool landed;
 	public float gravity;
 	public float gravityForwardDistance;
 	public float gravityDownDistance;
@@ -163,19 +164,22 @@ public class Glide : MonoBehaviour {
 		if (isFlapping) {
 			FlapV3 ();
 		}
-
-		//apply lift
-//		if (!isFlapping){// || flapAnimationPlaying) {
-//		WingLiftOneStickV4 ();
-		RealisticLift();
-//		}
-
+			
 		//apply gravity
 		if (!grounded) {
+			landed = false;
 			GravityV1 ();
 		} else {
 			GravityV3 ();
+			if (rigidBody.velocity.magnitude <= 0.01f) {
+				landed = true;
+			}
+		}
+
+		if (landed) {
 			Walk ();
+		} else {
+			RealisticLift();
 		}
 	}
 
@@ -184,6 +188,15 @@ public class Glide : MonoBehaviour {
 		float turn = Input.GetAxis ("Horizontal");
 		rigidBody.AddForceAtPosition (transform.forward*forward*walkSpeed, transform.position+transform.forward);
 		rigidBody.AddForceAtPosition (transform.right*turn*walkTurnSpeed, transform.position+transform.forward);
+
+//		RaycastHit hit;
+//		if(Physics.Raycast(transform.position, -transform.up, out hit, 1.2f, layerMaskForGround))
+//		{
+//			transform.up = hit.normal;
+////			Quaternion targetRotation = transform.rotation;
+////			targetRotation = Quaternion.LookRotation(targetRotation.eulerAngles, hit.normal);
+////			transform.rotation = targetRotation;
+//		}
 	}
 
 	void OnTriggerEnter(Collider collisionInfo) {
@@ -195,10 +208,19 @@ public class Glide : MonoBehaviour {
 		//TODO handle crashing: close wings and tumble, slowing down if on ground
 	}
 
-	float AngleSigned(Vector3 v1, Vector3 v2, Vector3 normal){
-		return Mathf.Atan2 (
-			Vector3.Dot (normal, Vector3.Cross (v1, v2)),
-			Vector3.Dot (v1, v2)) * Mathf.Rad2Deg;
+	float SignedVectorAngle(Vector3 referenceVector, Vector3 otherVector, Vector3 normal)
+	{
+		Vector3 perpVector;
+		float angle;
+
+		//Use the geometry object normal and one of the input vectors to calculate the perpendicular vector
+		perpVector = Vector3.Cross(normal, referenceVector);
+
+		//Now calculate the dot product between the perpendicular vector (perpVector) and the other input vector
+		angle = Vector3.Angle(referenceVector, otherVector);
+		angle *= Mathf.Sign(Vector3.Dot(perpVector, otherVector));
+
+		return angle;
 	}
 
 	void FlapV1(){
@@ -256,8 +278,9 @@ public class Glide : MonoBehaviour {
 		float y = Input.GetAxis ("Vertical");
 		float x = Input.GetAxis ("Horizontal");
 
-		float anglePolarity = Mathf.Sign (Vector3.Cross(transform.forward, rigidBody.velocity).x);
-		float angleOfAttack = Vector3.Angle (transform.forward, rigidBody.velocity)*anglePolarity - y*angleScale;
+//		float anglePolarity = Mathf.Sign (Vector3.Cross(transform.forward, rigidBody.velocity).x);
+//		float angleOfAttack = Vector3.Angle (transform.forward, rigidBody.velocity)*anglePolarity - y*angleScale;
+		float angleOfAttack = SignedVectorAngle(transform.forward, rigidBody.velocity, transform.right) - y*angleScale;
 
 		if (angleOfAttack > 180)
 			angleOfAttack -= 360;
@@ -289,6 +312,7 @@ public class Glide : MonoBehaviour {
 
 		drag = realDragCoef * 0.5f * airDensity * speed * speed * wingDragSurfaceArea;
 		Vector3 dragForce = rigidBody.velocity.normalized * (-1) * drag;
+//		Vector3 dragForce = transform.forward * (-1) * drag;
 		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*dragForwardDistance);
 		Debug.DrawRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.red);
 
