@@ -177,9 +177,6 @@ public class Glide : MonoBehaviour {
 			GravityV3 ();
 			Walk ();
 		}
-
-		//apply drag
-		AirDragV3 ();
 	}
 
 	void Walk(){
@@ -255,397 +252,12 @@ public class Glide : MonoBehaviour {
 		Debug.DrawRay (transform.position - transform.up * gravityDownDistance + transform.forward * gravityForwardDistance, gravityForce, Color.gray);
 	}
 
-	void AirDragV1(){
-		drag = 0.5f * airDensity * speed * speed * dragCoef * wingDragSurfaceArea;
-		Vector3 dragForce = transform.forward * (-1) * drag;
-		rigidBody.AddForceAtPosition (dragForce, transform.position);
-		Debug.DrawRay (transform.position, dragForce, Color.red);
-	}
-
-	void AirDragV2(){
-		drag = 0.5f * airDensity * speed * speed * dragCoef * wingDragSurfaceArea;
-		Vector3 dragForce = transform.forward * (-1) * drag;
-		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*wingForwardDistance);
-		Debug.DrawRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.red);
-	}
-
-	void AirDragV3(){
-		drag = 0.5f * airDensity * speed * speed * dragCoef * wingDragSurfaceArea;
-		Vector3 dragForce = rigidBody.velocity.normalized * (-1) * drag;
-		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*dragForwardDistance);
-		Debug.DrawRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.red);
-	}
-
-
-	void AirDragV4(){
-		drag = 0.5f * airDensity * speed * dragCoef * wingDragSurfaceArea;
-		Vector3 dragForce = rigidBody.velocity.normalized * (-1) * drag;
-		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*dragForwardDistance);
-		Debug.DrawRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.red);
-	}
-
-	void WingLiftV1(){
-		float pitchLeft = -Input.GetAxis ("Vertical");
-		float pitchRight = -Input.GetAxis ("Vertical Right");
-
-		//apply lift
-		float liftPercent = 1f;// - Input.GetAxis ("Flap");
-		float angleBetweenForwardAndSpeed = 0;
-		angleOfAttackLeft = Mathf.Deg2Rad * (angleOffset + angleScale * pitchLeft + angleBetweenForwardAndSpeed);
-		angleOfAttackRight = Mathf.Deg2Rad * (angleOffset + angleScale * pitchRight + angleBetweenForwardAndSpeed);
-
-		float liftLeft = 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * angleOfAttackLeft * liftPercent;
-		float liftRight = 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * angleOfAttackRight * liftPercent;
-
-		Debug.Log (liftLeft + " " + liftRight);
-
-		rigidBody.AddForceAtPosition (transform.up * liftLeft, transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, ForceMode.Force);
-		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, ForceMode.Force);
-
-		Debug.DrawRay (transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, transform.up * liftLeft, Color.green);
-		Debug.DrawRay (transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, transform.up * liftRight, Color.magenta);
-
-		//clamp to maxspeed
-		float brakePercent = 1f - Input.GetAxis ("Brake");
-		rigidBody.velocity = Vector3.ClampMagnitude (rigidBody.velocity, maxSpeed);
-
-		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
-	}
-
-	void WingLiftV2(){
-		float pitchLeft = -Input.GetAxis ("Vertical");
-		float pitchRight = -Input.GetAxis ("Vertical Right");
-
-		//apply lift
-		float liftPercent = 1f;// - Input.GetAxis ("Flap");
-
-		if(staticAngleOffset || pitchLeft >= 0)
-			angleOfAttackLeft = Mathf.Deg2Rad * (angleScale * pitchLeft + angleOffset);
-		else
-			angleOfAttackLeft = Mathf.Deg2Rad * (angleScale * pitchLeft - angleOffset);
-		
-		if(staticAngleOffset || pitchRight >= 0)
-			angleOfAttackRight = Mathf.Deg2Rad * (angleScale * pitchRight + angleOffset);
-		else
-			angleOfAttackRight = Mathf.Deg2Rad * (angleScale * pitchRight - angleOffset);
-
-		float liftLeft = 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * angleOfAttackLeft * liftPercent;
-		float liftRight = 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * angleOfAttackRight * liftPercent;
-
-//		Debug.Log (angleOfAttackLeft + " " + angleOfAttackRight);
-
-		rigidBody.AddForceAtPosition (transform.up * liftLeft, transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, ForceMode.Force);
-		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, ForceMode.Force);
-
-		Debug.DrawRay (transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, transform.up * liftLeft, Color.green);
-		Debug.DrawRay (transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, transform.up * liftRight, Color.magenta);
-
-		//clamp to maxspeed
-//		float brakePercent = 1f - Input.GetAxis ("Brake");
-//		rigidBody.velocity = Vector3.ClampMagnitude (rigidBody.velocity, maxSpeed);
-
-		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
-	}
-
-	void WingLiftV3(){
-		float pitchLeft = -Input.GetAxis ("Vertical");
-		float pitchRight = -Input.GetAxis ("Vertical Right");
-
-		//apply lift
-		float liftPercent = 1f;// - Input.GetAxis ("Flap");
-
-		if(staticAngleOffset || pitchLeft >= 0)
-			angleOfAttackLeft = Mathf.Deg2Rad * (angleScale * pitchLeft + angleOffset);
-		else
-			angleOfAttackLeft = Mathf.Deg2Rad * (angleScale * pitchLeft - angleOffset);
-
-		if(staticAngleOffset || pitchRight >= 0)
-			angleOfAttackRight = Mathf.Deg2Rad * (angleScale * pitchRight + angleOffset);
-		else
-			angleOfAttackRight = Mathf.Deg2Rad * (angleScale * pitchRight - angleOffset);
-
-		float liftLeft = 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * angleOfAttackLeft * liftPercent;
-		float liftRight = 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * angleOfAttackRight * liftPercent;
-
-		//		Debug.Log (angleOfAttackLeft + " " + angleOfAttackRight);
-		Vector3 up = Vector3.Cross(rigidBody.velocity, transform.right).normalized;
-		rigidBody.AddForceAtPosition (up * liftLeft, transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, ForceMode.Force);
-		rigidBody.AddForceAtPosition (up * liftRight, transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, ForceMode.Force);
-
-		Debug.DrawRay (transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, up * liftLeft, Color.green);
-		Debug.DrawRay (transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, up * liftRight, Color.magenta);
-
-		//clamp to maxspeed
-		//		float brakePercent = 1f - Input.GetAxis ("Brake");
-		//		rigidBody.velocity = Vector3.ClampMagnitude (rigidBody.velocity, maxSpeed);
-
-		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
-
-		Debug.DrawRay (transform.position, transform.right*10, Color.cyan);
-	}
-
-	void WingLiftOneStickV1(){
-		float y = Input.GetAxis ("Vertical");
-		float x = Input.GetAxis ("Horizontal");
-
-		float angle = (4 * Mathf.Abs (Mathf.Atan2 (Mathf.Abs (y), Mathf.Abs (x)) / Mathf.PI) - 1);
-		float magnitude = Mathf.Clamp (new Vector2 (x, y).magnitude, 0, 1);
-
-		float pitchLeft = 0f;
-		float pitchRight = 0f;
-
-		if (x >= 0) {
-			//up right
-			if (y >= 0) {
-				pitchRight = -magnitude;
-				pitchLeft = -Mathf.Clamp (angle*magnitude, -1, 1);
-			}
-			//down right
-			else {
-				pitchRight = Mathf.Clamp (angle*magnitude, -1, 1);
-				pitchLeft = magnitude;
-			}
-		} else {
-			//up left
-			if (y >= 0) {
-				pitchRight = -Mathf.Clamp (angle*magnitude, -1, 1);
-				pitchLeft = -magnitude;
-			}
-			//down left
-			else {
-				pitchRight = magnitude;
-				pitchLeft = Mathf.Clamp (angle*magnitude, -1, 1);
-			}
-		}
-
-		Debug.Log(pitchLeft+" "+pitchRight);
-
-//		float pitchLeft = -Input.GetAxis ("Vertical");
-//		float pitchRight = -Input.GetAxis ("Vertical Right");
-
-		//apply lift
-		float liftPercent = 1f;// - Input.GetAxis ("Flap");
-		if(pitchLeft >= 0)
-			angleOfAttackLeft = Mathf.Deg2Rad * (angleScale * pitchLeft + angleOffset);
-		else
-			angleOfAttackLeft = Mathf.Deg2Rad * (angleScale * pitchLeft - angleOffset);
-
-		if(pitchRight >= 0)
-			angleOfAttackRight = Mathf.Deg2Rad * (angleScale * pitchRight + angleOffset);
-		else
-			angleOfAttackRight = Mathf.Deg2Rad * (angleScale * pitchRight - angleOffset);
-
-		//		angleOfAttackLeft = Mathf.Deg2Rad * (angleOffset + angleScale * pitchLeft);
-		//		angleOfAttackRight = Mathf.Deg2Rad * (angleOffset + angleScale * pitchRight);
-
-		float liftLeft = 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * angleOfAttackLeft * liftPercent;
-		float liftRight = 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * angleOfAttackRight * liftPercent;
-
-		Debug.Log (angleOfAttackLeft + " " + angleOfAttackRight);
-
-		rigidBody.AddForceAtPosition (transform.up * liftLeft, transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, ForceMode.Force);
-		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, ForceMode.Force);
-
-		Debug.DrawRay (transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, transform.up * liftLeft, Color.green);
-		Debug.DrawRay (transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, transform.up * liftRight, Color.magenta);
-
-		//clamp to maxspeed
-		//		float brakePercent = 1f - Input.GetAxis ("Brake");
-		//		rigidBody.velocity = Vector3.ClampMagnitude (rigidBody.velocity, maxSpeed);
-
-		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
-	}
-
-	void WingLiftOneStickV2(){
-		float y = Input.GetAxis ("Vertical");
-		float x = Input.GetAxis ("Horizontal");
-
-		float angle = (2 * Mathf.Abs (Mathf.Atan2 (Mathf.Abs (y), Mathf.Abs (x)) / Mathf.PI));
-		Debug.Log (angle);
-		float magnitude = Mathf.Clamp (new Vector2 (x, y).magnitude, 0, 1);
-
-		float pitchLeft = 0f;
-		float pitchRight = 0f;
-
-		if (x >= 0) {
-			//up right
-			if (y >= 0) {
-				pitchRight = -magnitude;
-				pitchLeft = -Mathf.Clamp (angle*magnitude, -1, 1);
-			}
-			//down right
-			else {
-				pitchRight = Mathf.Clamp (angle*magnitude, -1, 1);
-				pitchLeft = magnitude;
-			}
-		} else {
-			//up left
-			if (y >= 0) {
-				pitchRight = -Mathf.Clamp (angle*magnitude, -1, 1);
-				pitchLeft = -magnitude;
-			}
-			//down left
-			else {
-				pitchRight = magnitude;
-				pitchLeft = Mathf.Clamp (angle*magnitude, -1, 1);
-			}
-		}
-
-//		Debug.Log(pitchLeft+" "+pitchRight);
-
-		//		float pitchLeft = -Input.GetAxis ("Vertical");
-		//		float pitchRight = -Input.GetAxis ("Vertical Right");
-
-		//apply lift
-		float liftPercent = 1f;// - Input.GetAxis ("Flap");
-		if(pitchLeft >= 0)
-			angleOfAttackLeft = Mathf.Deg2Rad * (angleScale * pitchLeft + angleOffset);
-		else
-			angleOfAttackLeft = Mathf.Deg2Rad * (angleScale * pitchLeft - angleOffset);
-
-		if(pitchRight >= 0)
-			angleOfAttackRight = Mathf.Deg2Rad * (angleScale * pitchRight + angleOffset);
-		else
-			angleOfAttackRight = Mathf.Deg2Rad * (angleScale * pitchRight - angleOffset);
-
-		//		angleOfAttackLeft = Mathf.Deg2Rad * (angleOffset + angleScale * pitchLeft);
-		//		angleOfAttackRight = Mathf.Deg2Rad * (angleOffset + angleScale * pitchRight);
-
-		float liftLeft = 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * angleOfAttackLeft * liftPercent;
-		float liftRight = 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * angleOfAttackRight * liftPercent;
-
-//		Debug.Log (angleOfAttackLeft + " " + angleOfAttackRight);
-
-		rigidBody.AddForceAtPosition (transform.up * liftLeft, transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, ForceMode.Force);
-		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, ForceMode.Force);
-
-		Debug.DrawRay (transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, transform.up * liftLeft, Color.green);
-		Debug.DrawRay (transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, transform.up * liftRight, Color.magenta);
-
-		//clamp to maxspeed
-		//		float brakePercent = 1f - Input.GetAxis ("Brake");
-		//		rigidBody.velocity = Vector3.ClampMagnitude (rigidBody.velocity, maxSpeed);
-
-		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
-	}
-
-	void WingLiftOneStickV3(){
-		float y = Input.GetAxis ("Vertical");
-		float x = Input.GetAxis ("Horizontal");
-
-		float angle = (2 * Mathf.Abs (Mathf.Atan2 (Mathf.Abs (y), Mathf.Abs (x)) / Mathf.PI));
-		float doubleAngle = 2 * angle - 1;
-		Debug.Log (angle);
-		float magnitude = Mathf.Clamp (new Vector2 (x, y).magnitude, 0, 1);
-
-		float pitchLeft = 0f;
-		float pitchRight = 0f;
-
-		if (x >= 0) {
-			//up right
-			if (y >= 0) {
-				pitchRight = -magnitude;
-				pitchLeft = -Mathf.Clamp (angle*magnitude, -1, 1);
-			}
-			//down right
-			else {
-				pitchRight = Mathf.Clamp (doubleAngle*magnitude, -1, 1);
-				pitchLeft = Mathf.Clamp (angle*magnitude, -1, 1);
-			}
-		} else {
-			//up left
-			if (y >= 0) {
-				pitchRight = -Mathf.Clamp (angle*magnitude, -1, 1);
-				pitchLeft = -magnitude;
-			}
-			//down left
-			else {
-				pitchRight = Mathf.Clamp (angle*magnitude, -1, 1);
-				pitchLeft = Mathf.Clamp (doubleAngle*magnitude, -1, 1);
-			}
-		}
-
-//		Debug.Log(angle+" "+doubleAngle+"\n"+pitchLeft+" "+pitchRight);
-
-		//apply lift
-		float liftPercent = 1f;// - Input.GetAxis ("Flap");
-		if(pitchLeft >= 0)
-			angleOfAttackLeft = Mathf.Deg2Rad * (angleScale * pitchLeft + angleOffset);
-		else
-			angleOfAttackLeft = Mathf.Deg2Rad * (angleScale * pitchLeft - angleOffset);
-
-		if(pitchRight >= 0)
-			angleOfAttackRight = Mathf.Deg2Rad * (angleScale * pitchRight + angleOffset);
-		else
-			angleOfAttackRight = Mathf.Deg2Rad * (angleScale * pitchRight - angleOffset);
-
-		//		angleOfAttackLeft = Mathf.Deg2Rad * (angleOffset + angleScale * pitchLeft);
-		//		angleOfAttackRight = Mathf.Deg2Rad * (angleOffset + angleScale * pitchRight);
-
-		float liftLeft = 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * angleOfAttackLeft * liftPercent;
-		float liftRight = 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * angleOfAttackRight * liftPercent;
-
-		//		Debug.Log (angleOfAttackLeft + " " + angleOfAttackRight);
-
-		rigidBody.AddForceAtPosition (transform.up * liftLeft, transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, ForceMode.Force);
-		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, ForceMode.Force);
-
-		Debug.DrawRay (transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, transform.up * liftLeft, Color.green);
-		Debug.DrawRay (transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, transform.up * liftRight, Color.magenta);
-
-		//clamp to maxspeed
-		//		float brakePercent = 1f - Input.GetAxis ("Brake");
-		//		rigidBody.velocity = Vector3.ClampMagnitude (rigidBody.velocity, maxSpeed);
-
-		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
-	}
-
-	void WingLiftOneStickV4(){
-		float y = Input.GetAxis ("Vertical");
-		float x = Input.GetAxis ("Horizontal");
-
-		float liftLeft = rollScale * 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * x;
-		float liftRight = rollScale * -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * x;
-		float liftForward = -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * y;
-
-		rigidBody.AddForceAtPosition (transform.up * liftLeft, transform.position - wingOutDistance*transform.right, ForceMode.Force);
-		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right, ForceMode.Force);
-		rigidBody.AddForceAtPosition (transform.up * liftForward, transform.position + wingForwardDistance*transform.forward, ForceMode.Force);
-
-		Debug.DrawRay (transform.position - wingOutDistance*transform.right, transform.up * liftLeft, Color.green);
-		Debug.DrawRay (transform.position + wingOutDistance*transform.right, transform.up * liftRight, Color.magenta);
-		Debug.DrawRay (transform.position + wingForwardDistance*transform.forward, transform.up * liftForward, Color.yellow);
-
-		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
-	}
-
-	void WingLiftOneStickV5(){
-		float y = Input.GetAxis ("Vertical");
-		float x = Input.GetAxis ("Horizontal");
-
-		float liftLeft = rollScale * 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * x;
-		float liftRight = rollScale * -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * x;
-		float liftForward = -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * y;
-
-		Vector3 liftDirection = Vector3.Cross (rigidBody.velocity.normalized, transform.right);
-
-		rigidBody.AddForceAtPosition (liftDirection * liftLeft, transform.position - wingOutDistance*transform.right, ForceMode.Force);
-		rigidBody.AddForceAtPosition (liftDirection * liftRight, transform.position + wingOutDistance*transform.right, ForceMode.Force);
-		rigidBody.AddForceAtPosition (liftDirection * liftForward, transform.position + wingForwardDistance*transform.forward, ForceMode.Force);
-
-		Debug.DrawRay (transform.position - wingOutDistance*transform.right, liftDirection * liftLeft, Color.green);
-		Debug.DrawRay (transform.position + wingOutDistance*transform.right, liftDirection * liftRight, Color.magenta);
-		Debug.DrawRay (transform.position + wingForwardDistance*transform.forward, liftDirection * liftForward, Color.yellow);
-
-		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
-	}
-
 	void RealisticLift(){
 		float y = Input.GetAxis ("Vertical");
 		float x = Input.GetAxis ("Horizontal");
 
 		float anglePolarity = Mathf.Sign (Vector3.Cross(transform.forward, rigidBody.velocity).x);
-		float angleOfAttack = Vector3.Angle (transform.forward, rigidBody.velocity)*anglePolarity + y*angleScale;
+		float angleOfAttack = Vector3.Angle (transform.forward, rigidBody.velocity)*anglePolarity - y*angleScale;
 
 		if (angleOfAttack > 180)
 			angleOfAttack -= 360;
@@ -653,12 +265,13 @@ public class Glide : MonoBehaviour {
 			angleOfAttack += 360;
 
 		float realLiftCoef = liftCoef * Mathf.Sin (angleOfAttack * Mathf.PI / 180f);
-		float liftForward = -0.5f * realLiftCoef * airDensity * wingLiftSurfaceArea * speed * speed;
+
+		float liftForward = 0.5f * realLiftCoef * airDensity * wingLiftSurfaceArea * speed * speed;
 		rigidBody.AddForceAtPosition (transform.up * liftForward, transform.position + wingForwardDistance*transform.forward, ForceMode.Force);
 		Debug.DrawRay (transform.position + wingForwardDistance*transform.forward, transform.up * liftForward, Color.yellow);
 
 
-
+		//roll lift
 		float liftLeft = rollScale * 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * x;
 		float liftRight = rollScale * -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * x;
 
@@ -669,36 +282,19 @@ public class Glide : MonoBehaviour {
 		Debug.DrawRay (transform.position + wingOutDistance*transform.right, transform.up * liftRight, Color.magenta);
 
 
+		//induced drag
+		float aspectRatio = 1f/wingLiftSurfaceArea;
+		float inducedDragCoef = realLiftCoef * realLiftCoef * wingLiftSurfaceArea / Mathf.PI;
+		float realDragCoef = dragCoef + inducedDragCoef;
+
+		drag = realDragCoef * 0.5f * airDensity * speed * speed * wingDragSurfaceArea;
+		Vector3 dragForce = rigidBody.velocity.normalized * (-1) * drag;
+		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*dragForwardDistance);
+		Debug.DrawRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.red);
+
+
+		//velocity
 		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
-	}
-
-	void OriginalLift (){
-		float roll = Input.GetAxis ("Horizontal");
-		float pitch = Input.GetAxis ("Vertical");
-
-		//apply gravity
-		rigidBody.AddForce (Vector3.down*gravity, ForceMode.Force);
-
-		speed = rigidBody.velocity.magnitude;//.z;
-
-		//apply lift
-		if (!Input.GetButton ("Jump")) {
-			float angleOfAttack = 0.05f + -0.5f * pitch;
-			lift = (0.5f) * liftCoef * 1.29f * wingLiftSurfaceArea * speed * speed * Mathf.Deg2Rad * angleOfAttack;
-			rigidBody.AddForce (transform.up * lift, ForceMode.Force);
-		}
-
-		rigidBody.velocity = Vector3.ClampMagnitude (rigidBody.velocity, maxSpeed);
-
-		var lookPos = rigidBody.velocity;
-		//		lookPos.x = 0;
-		var rotation = Quaternion.LookRotation(lookPos).eulerAngles;
-		if (rotation.x < 270 && rotation.x > 230)
-			rotation.x = 275;
-		if (rotation.x > 80 && rotation.x < 120)
-			rotation.x = 80;
-		rotation.z -= roll;// * rollSpeed;
-		transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler (rotation), Time.deltaTime * 8);
 	}
 
 	private bool isGrounded(){
