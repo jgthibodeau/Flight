@@ -54,12 +54,14 @@ public class EnemyBird : MonoBehaviour {
 
 	void FlyTowardsTarget(){
 		//horizontal alignment to target
+		//roll till target in line with forward-up plane
 		Vector3 desiredDirection = target.position - transform.position;
 		if (Vector3.Angle (desiredDirection, transform.forward) > minLookAngle) {
 			//roll and pitch enough to turn towards target
 		}
 
 		//vertical alignment to target
+		//pitch till target in forward-right plane
 		float desiredPitch = (transform.position.y - target.position.y) * pitchScale;
 		glideScript.pitch = Mathf.Clamp (desiredPitch , -1f, 1f);
 
