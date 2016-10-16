@@ -18,7 +18,6 @@ public class Glide : MonoBehaviour {
 	public float dragForwardDistance;
 	public float drag;
 
-	public float flapY;
 	public float flapAnimationScale;
 	public float flapScale;
 	public float flapUpCoef;
@@ -76,6 +75,13 @@ public class Glide : MonoBehaviour {
 	public Transform rightWing;
 	private Vector3 rightWingInitialRotation;
 
+	public float roll;
+	public float pitch;
+	public float forward;
+	public float turn;
+	public float flapSpeed;
+	public float flapDirection;
+
 	// Use this for initialization
 	void Start () {
 		rigidBody = transform.GetComponent<Rigidbody> ();
@@ -101,14 +107,13 @@ public class Glide : MonoBehaviour {
 		terminalSpeed = Mathf.Sqrt (2*gravity/(airDensity*wingDragSurfaceArea*dragCoef));
 
 		//flap wings
-		float flapAmount = Input.GetAxis ("Flap");
-		if (flapAmount != 0) {
+		if (flapSpeed != 0) {
 			isFlapping = true;
 			animator.SetBool ("flap", true);
-			animator.speed = 1f + flapAnimationScale * flapAmount;
+			animator.speed = 1f + flapAnimationScale * flapSpeed;
 
 			if(!playingFlapSound){
-				StartCoroutine(PlayFlapSound(flapSoundRate*(1-flapAmount) + minFlapRate));
+				StartCoroutine(PlayFlapSound(flapSoundRate*(1-flapSpeed) + minFlapRate));
 				playingFlapSound = true;
 				flapAudioSource.pitch = Random.Range (flapMinPitch, flapMaxPitch);
 			}
@@ -117,8 +122,6 @@ public class Glide : MonoBehaviour {
 			isFlapping = false;
 			animator.speed = 1f;
 		}
-
-		flapY = Input.GetAxis ("Vertical Right");
 
 		//audio based on speed
 		airAudioSource.pitch = drag * pitchScale;
@@ -132,7 +135,6 @@ public class Glide : MonoBehaviour {
 
 		//rotate wings based on forces and movement
 		UpdateRendering();
-
 	}
 
 	IEnumerator PlayFlapSound(float wait){
@@ -144,8 +146,8 @@ public class Glide : MonoBehaviour {
 	void UpdateRendering(){
 		//rotate wings
 		if (!grounded) {
-			leftWing.localRotation = Quaternion.Euler (leftWingInitialRotation + new Vector3 ((flapY) * 15, -(flapY) * 20, 0));
-			rightWing.localRotation = Quaternion.Euler (rightWingInitialRotation + new Vector3 ((flapY) * 15, (flapY) * 20, 0));
+			leftWing.localRotation = Quaternion.Euler (leftWingInitialRotation + new Vector3 ((flapDirection) * 15, -(flapDirection) * 20, 0));
+			rightWing.localRotation = Quaternion.Euler (rightWingInitialRotation + new Vector3 ((flapDirection) * 15, (flapDirection) * 20, 0));
 		} else {
 			leftWing.localRotation = Quaternion.Euler (leftWingInitialRotation);
 			rightWing.localRotation = Quaternion.Euler (rightWingInitialRotation);
@@ -162,7 +164,7 @@ public class Glide : MonoBehaviour {
 		}
 
 		if (isFlapping) {
-			FlapV3 ();
+			Flap ();
 		}
 			
 		//apply gravity
@@ -184,8 +186,6 @@ public class Glide : MonoBehaviour {
 	}
 
 	void Walk(){
-		float forward = Input.GetAxis ("Vertical");
-		float turn = Input.GetAxis ("Horizontal");
 		rigidBody.AddForceAtPosition (transform.forward*forward*walkSpeed, transform.position+transform.forward);
 		rigidBody.AddForceAtPosition (transform.right*turn*walkTurnSpeed, transform.position+transform.forward);
 
@@ -223,37 +223,13 @@ public class Glide : MonoBehaviour {
 		return angle;
 	}
 
-	void FlapV1(){
-		float flapSpeed = Input.GetAxis ("Flap");
-
-		Vector3 flapAngle = (flapY * transform.forward + (1f - Mathf.Abs (flapY)) * transform.up).normalized;
+	void Flap(){
+		Vector3 flapAngle = (flapDirection * transform.forward + (1f - Mathf.Abs (flapDirection)) * transform.up).normalized;
 		Vector3 flapForce = flapAngle * flapForwardCoef * flapScale * flapSpeed;
 
-		rigidBody.AddForceAtPosition (flapForce, transform.position);
+		rigidBody.AddForceAtPosition (flapForce, transform.position + transform.forward*wingForwardDistance*flapDirection);
 
-		Debug.DrawRay (transform.position, flapForce);
-	}
-
-	void FlapV2(){
-		float flapSpeed = Input.GetAxis ("Flap");
-
-		Vector3 flapAngle = (flapY * transform.forward + (1f - Mathf.Abs (flapY)) * transform.up).normalized;
-		Vector3 flapForce = flapAngle * flapForwardCoef * flapScale * flapSpeed;
-
-		rigidBody.AddForceAtPosition (flapForce, transform.position + transform.forward*wingForwardDistance);
-
-		Debug.DrawRay (transform.position + transform.forward*wingForwardDistance, flapForce);
-	}
-
-	void FlapV3(){
-		float flapSpeed = Input.GetAxis ("Flap");
-
-		Vector3 flapAngle = (flapY * transform.forward + (1f - Mathf.Abs (flapY)) * transform.up).normalized;
-		Vector3 flapForce = flapAngle * flapForwardCoef * flapScale * flapSpeed;
-
-		rigidBody.AddForceAtPosition (flapForce, transform.position + transform.forward*wingForwardDistance*flapY);
-
-		Debug.DrawRay (transform.position + transform.forward*wingForwardDistance*flapY, flapForce);
+		Debug.DrawRay (transform.position + transform.forward*wingForwardDistance*flapDirection, flapForce);
 	}
 
 	void GravityV1(){
@@ -275,12 +251,7 @@ public class Glide : MonoBehaviour {
 	}
 
 	void RealisticLift(){
-		float y = Input.GetAxis ("Vertical");
-		float x = Input.GetAxis ("Horizontal");
-
-//		float anglePolarity = Mathf.Sign (Vector3.Cross(transform.forward, rigidBody.velocity).x);
-//		float angleOfAttack = Vector3.Angle (transform.forward, rigidBody.velocity)*anglePolarity - y*angleScale;
-		float angleOfAttack = SignedVectorAngle(transform.forward, rigidBody.velocity, transform.right) - y*angleScale;
+		float angleOfAttack = SignedVectorAngle(transform.forward, rigidBody.velocity, transform.right) - pitch*angleScale;
 
 		if (angleOfAttack > 180)
 			angleOfAttack -= 360;
@@ -295,8 +266,8 @@ public class Glide : MonoBehaviour {
 
 
 		//roll lift
-		float liftLeft = rollScale * 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * x;
-		float liftRight = rollScale * -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * x;
+		float liftLeft = rollScale * 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * roll;
+		float liftRight = rollScale * -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * roll;
 
 		rigidBody.AddForceAtPosition (transform.up * liftLeft, transform.position - wingOutDistance*transform.right, ForceMode.Force);
 		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right, ForceMode.Force);
