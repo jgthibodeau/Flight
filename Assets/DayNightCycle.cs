@@ -6,6 +6,8 @@ public class DayNightCycle : MonoBehaviour {
 	public Color twilightColor; //FFB2B2FF;
 	public Color nightColor; //0A2C65FF;
 
+	public float dayBrightness, nightBrightness;
+
 	public Material dayBox;
 	public Material nightBox;
 	public Material transitionBox;
@@ -42,12 +44,15 @@ public class DayNightCycle : MonoBehaviour {
 		currentTime += Time.deltaTime;
 		if (currentTime > dayTime)
 			currentTime -= dayTime;
-
-		UpdateColor ();
-
+//
+		UpdateLight ();
+//
 		RotateLight ();
-
+//
 		UpdateSkybox ();
+
+//		transform.RotateAround (Vector3.zero, Vector3.right, 40f * Time.deltaTime);
+//		transform.LookAt (Vector3.zero);
 	}
 
 	void UpdateSkybox(){
@@ -69,40 +74,54 @@ public class DayNightCycle : MonoBehaviour {
 	}
 
 	void RotateLight(){
-		rotation.x = 360f * 1.1f * (currentTime / dayTime);
-		if (rotation.x > 200f) {
-			rotation.x += 160f;
-//		if (rotation.x > 180) {
-//			rotation.x -= 180;
+		rotation.x = 360f * (currentTime / dayTime);
+//		if (rotation.x > 200f) {
+//			rotation.x += 160f;
+		if (rotation.x > 180) {
+			rotation.x -= 180;
 //			rotation.x *= -1;
 //			rotation.x = 270;
 		}
 		transform.rotation = Quaternion.Euler (rotation);
 	}
 
-	void UpdateColor(){
-		if(currentTime <= sunriseEnd){
+	void UpdateLight(){
+		if (currentTime > sunriseEnd && currentTime < sunsetStart) {
+			light.color = dayColor;
+			light.intensity = dayBrightness;
+		}
+
+		else if (currentTime > sunsetEnd && currentTime < sunriseStart) {
+			light.color = nightColor;
+			light.intensity = nightBrightness;
+		}
+
+		else if(currentTime <= sunriseEnd){
 			float colorAmount = currentTime / transitionAmount;
 			light.color = Color.Lerp (twilightColor, dayColor, colorAmount);
 			time = "sunrise ending";
+			light.intensity = colorAmount * dayBrightness;
 		}
 
 		else if(currentTime >= sunsetStart && currentTime <= sunsetMid){
 			float colorAmount = (currentTime - sunsetStart) / transitionAmount;
 			light.color = Color.Lerp (dayColor, twilightColor, colorAmount);
 			time = "sunset starting";
+			light.intensity = (1f-colorAmount) * dayBrightness;
 		}
 
 		else if(currentTime >= sunsetMid && currentTime <= sunsetEnd){
 			float colorAmount = (currentTime - sunsetMid) / transitionAmount;
 			light.color = Color.Lerp (twilightColor, nightColor, colorAmount);
 			time = "sunset ending";
+			light.intensity = colorAmount * nightBrightness;
 		}
 
 		else if(currentTime >= sunriseStart && currentTime <= sunriseMid){
 			float colorAmount = (currentTime - sunriseStart) / transitionAmount;
 			light.color = Color.Lerp (nightColor, twilightColor, colorAmount);
 			time = "sunrise starting";
+			light.intensity = (1f-colorAmount) * nightBrightness;
 		}
 	}
 }
