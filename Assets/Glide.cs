@@ -7,6 +7,7 @@ public class Glide : MonoBehaviour {
 	public float gravity;
 	public float gravityForwardDistance;
 	public float gravityDownDistance;
+	public bool keepUprightAlways;
 
 	public bool rotateTowardsMotion;
 
@@ -170,7 +171,11 @@ public class Glide : MonoBehaviour {
 		//apply gravity
 		if (!grounded) {
 			landed = false;
-			GravityV1 ();
+			if (keepUprightAlways) {
+				GravityV3 ();
+			} else {
+				GravityV1 ();
+			}
 		} else {
 			GravityV3 ();
 			if (rigidBody.velocity.magnitude <= 0.01f) {

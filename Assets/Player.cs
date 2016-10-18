@@ -11,8 +11,8 @@ public class Player : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		glideScript.roll = Input.GetAxis ("Vertical");
-		glideScript.pitch = Input.GetAxis ("Horizontal");
+		glideScript.pitch = Input.GetAxis ("Vertical");
+		glideScript.roll = Input.GetAxis ("Horizontal");
 		glideScript.forward = Input.GetAxis ("Vertical");
 		glideScript.turn = Input.GetAxis ("Horizontal");
 		glideScript.flapSpeed = Input.GetAxis ("Flap");
