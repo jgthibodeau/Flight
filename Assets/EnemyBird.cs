@@ -50,6 +50,7 @@ public class EnemyBird : MonoBehaviour {
 
 	void FlyTowardsTarget(){
 		Vector3 desiredDirection = target.position - transform.position;
+		bool pointedAtTarget = true;
 
 		//horizontal alignment to target
 		//roll till target in line with forward-up plane
@@ -58,8 +59,9 @@ public class EnemyBird : MonoBehaviour {
 
 		if (Mathf.Abs (horizontalDistance) > minRollAlignment) {
 			glideScript.roll = Mathf.Clamp (horizontalDistance * rollScale, -1, 1);
+			pointedAtTarget = false;
 		} 
-		//otherwise, roll to be perpendicular to the ground
+		//TODO otherwise, roll to be perpendicular to the ground
 		else {
 			
 		}
@@ -78,16 +80,22 @@ public class EnemyBird : MonoBehaviour {
 			} else {
 				glideScript.pitch = -1f;
 			}
+			pointedAtTarget = false;
 		}
 		//pitch till target in forward-right plane 
 		else if (Mathf.Abs (verticalDistance) > minPitchAlignment) {
 			glideScript.pitch = Mathf.Clamp (-verticalDistance * pitchScale, -1, 1);
+			pointedAtTarget = false;
 		}
 
 		//adjust flap angle to stay moving forward
 		//flap more forward as velocity aproaches transform.forward
 		//flap more upward as velocity goes away from transform.forward
-		glideScript.flapDirection = .5f;
+		if (pointedAtTarget) {
+			glideScript.flapDirection = 1f;
+		} else {
+			glideScript.flapDirection = .5f;
+		}
 		glideScript.flapSpeed = 1f;
 	}
 }
