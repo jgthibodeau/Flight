@@ -17,5 +17,6 @@ public class Player : MonoBehaviour {
 		glideScript.turn = Input.GetAxis ("Horizontal");
 		glideScript.flapSpeed = Input.GetAxis ("Flap");
 		glideScript.flapDirection = Input.GetAxis ("Vertical Right");
+		glideScript.flapHorizontalDirection = Input.GetAxis ("Horizontal Right");
 	}
 }
