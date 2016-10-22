@@ -82,6 +82,7 @@ public class Glide : MonoBehaviour {
 	public float turn;
 	public float flapSpeed;
 	public float flapDirection;
+	public float flapHorizontalDirection;
 
 	// Use this for initialization
 	void Start () {
@@ -229,7 +230,7 @@ public class Glide : MonoBehaviour {
 	}
 
 	void Flap(){
-		Vector3 flapAngle = (flapDirection * transform.forward + (1f - Mathf.Abs (flapDirection)) * transform.up).normalized;
+		Vector3 flapAngle = (flapHorizontalDirection * transform.right * 0.5f + flapDirection * transform.forward + (1f - Mathf.Abs (flapDirection)) * transform.up).normalized;
 		Vector3 flapForce = flapAngle * flapForwardCoef * flapScale * flapSpeed;
 
 		rigidBody.AddForceAtPosition (flapForce, transform.position + transform.forward*wingForwardDistance*flapDirection);
