@@ -2,12 +2,14 @@
 using System.Collections;
 
 public class Glide : MonoBehaviour {
-	public bool grounded;
+	public bool isGrounded;
 	public bool landed;
 	public float gravity;
 	public float gravityForwardDistance;
 	public float gravityDownDistance;
 	public bool keepUprightAlways;
+
+	private Vector3 groundNormal;
 
 	public bool rotateTowardsMotion;
 
@@ -99,7 +101,7 @@ public class Glide : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update() {
-		grounded = isGrounded ();
+		CheckGround ();
 
 		//set air density based on height
 //		airDensity = 1.2238f * Mathf.Pow(1f - (0.0000226f * transform.position.y), 5.26f);
@@ -147,7 +149,7 @@ public class Glide : MonoBehaviour {
 
 	void UpdateRendering(){
 		//rotate wings
-		if (!grounded) {
+		if (!isGrounded) {
 			leftWing.localRotation = Quaternion.Euler (leftWingInitialRotation + new Vector3 ((flapDirection) * 15, -(flapDirection) * 20, 0));
 			rightWing.localRotation = Quaternion.Euler (rightWingInitialRotation + new Vector3 ((flapDirection) * 15, (flapDirection) * 20, 0));
 		} else {
@@ -155,7 +157,7 @@ public class Glide : MonoBehaviour {
 			rightWing.localRotation = Quaternion.Euler (rightWingInitialRotation);
 		}
 
-		animator.SetBool ("wingsClosed", grounded);
+		animator.SetBool ("wingsClosed", isGrounded);
 	}
 
 	void FixedUpdate () {
@@ -170,7 +172,7 @@ public class Glide : MonoBehaviour {
 		}
 			
 		//apply gravity
-		if (!grounded) {
+		if (!isGrounded) {
 			landed = false;
 			if (keepUprightAlways) {
 				GravityV3 ();
@@ -178,7 +180,7 @@ public class Glide : MonoBehaviour {
 				GravityV1 ();
 			}
 		} else {
-			GravityV3 ();
+			GravityV4 ();
 			if (rigidBody.velocity.magnitude <= 0.01f) {
 				landed = true;
 			}
@@ -193,16 +195,10 @@ public class Glide : MonoBehaviour {
 
 	void Walk(){
 		rigidBody.AddForceAtPosition (transform.forward*forward*walkSpeed, transform.position+transform.forward);
-		rigidBody.AddForceAtPosition (transform.right*turn*walkTurnSpeed, transform.position+transform.forward);
+		rigidBody.AddTorque (transform.up*turn*walkTurnSpeed);
 
-//		RaycastHit hit;
-//		if(Physics.Raycast(transform.position, -transform.up, out hit, 1.2f, layerMaskForGround))
-//		{
-//			transform.up = hit.normal;
-////			Quaternion targetRotation = transform.rotation;
-////			targetRotation = Quaternion.LookRotation(targetRotation.eulerAngles, hit.normal);
-////			transform.rotation = targetRotation;
-//		}
+		Vector3 desiredRotation = Vector3.Cross (transform.right, groundNormal);
+		transform.rotation = Quaternion.Slerp (transform.rotation, Quaternion.LookRotation (desiredRotation, groundNormal), 0.2f);
 	}
 
 	void OnTriggerEnter(Collider collisionInfo) {
@@ -256,6 +252,12 @@ public class Glide : MonoBehaviour {
 		Debug.DrawRay (transform.position - transform.up * gravityDownDistance + transform.forward * gravityForwardDistance, gravityForce, Color.gray);
 	}
 
+	void GravityV4(){
+		Vector3 gravityForce = -groundNormal * gravity;
+		rigidBody.AddForceAtPosition (gravityForce, transform.position - transform.up * gravityDownDistance + transform.forward * gravityForwardDistance, ForceMode.Force);
+		Debug.DrawRay (transform.position - transform.up * gravityDownDistance + transform.forward * gravityForwardDistance, gravityForce, Color.gray);
+	}
+
 	void RealisticLift(){
 		float angleOfAttack = SignedVectorAngle(transform.forward, rigidBody.velocity, transform.right) - pitch*angleScale;
 
@@ -298,14 +300,21 @@ public class Glide : MonoBehaviour {
 		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
 	}
 
-	private bool isGrounded(){
+	void CheckGround(){
 		Debug.DrawLine (characterCollider.bounds.center, new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y-0.1f, characterCollider.bounds.center.z), Color.red);
-		return Physics.CheckCapsule (
+
+		isGrounded = Physics.CheckCapsule (
 			characterCollider.bounds.center,
 			new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y-0.1f, characterCollider.bounds.center.z),
 			0.18f,
 			layerMaskForGround.value
 		);
+		if (isGrounded) {
+			RaycastHit hit;
+			if (Physics.Raycast (transform.position, -transform.up, out hit, 1.2f, layerMaskForGround)) {
+				groundNormal = hit.normal;
+			}
+		}
 	}
 
 	private IEnumerable WaitForAnimation(Animation animation){
