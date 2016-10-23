@@ -37,7 +37,7 @@ public class Glide : MonoBehaviour {
 	public float maxSpeed;
 	public float terminalSpeed;
 
-	private Rigidbody rigidBody;
+	public Rigidbody rigidBody;
 	private Animator animator;
 	public AnimationClip flapClip;
 
@@ -81,6 +81,7 @@ public class Glide : MonoBehaviour {
 	public float roll;
 	public float pitch;
 	public float forward;
+	public float right;
 	public float turn;
 	public float flapSpeed;
 	public float flapDirection;
@@ -97,6 +98,8 @@ public class Glide : MonoBehaviour {
 		rightWingInitialRotation = rightWing.localRotation.eulerAngles;
 
 		airDensity = 1.2238f;
+
+		rigidBody.centerOfMass = Vector3.zero;
 	}
 	
 	// Update is called once per frame
@@ -179,6 +182,8 @@ public class Glide : MonoBehaviour {
 			} else {
 				GravityV1 ();
 			}
+		} else if (flapSpeed != 0) {
+			GravityV3 ();
 		} else {
 			GravityV4 ();
 			if (rigidBody.velocity.magnitude <= 0.01f) {
@@ -187,18 +192,26 @@ public class Glide : MonoBehaviour {
 		}
 
 		if (landed) {
+//			rigidBody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
 			Walk ();
 		} else {
+//			rigidBody.constraints = RigidbodyConstraints.None;
 			RealisticLift();
 		}
 	}
 
 	void Walk(){
-		rigidBody.AddForceAtPosition (transform.forward*forward*walkSpeed, transform.position+transform.forward);
+//		Vector3 walkDirection = Vector3.ClampMagnitude (transform.forward * forward + transform.right * right, 1);
+//		rigidBody.AddForceAtPosition (walkDirection * walkSpeed, transform.position);
+
+		rigidBody.AddForceAtPosition (transform.forward*forward*walkSpeed, transform.position + transform.forward);
+		rigidBody.AddForceAtPosition (transform.right*right*walkSpeed, transform.position + transform.right * Mathf.Sign (walkSpeed));
 		rigidBody.AddTorque (transform.up*turn*walkTurnSpeed);
 
-		Vector3 desiredRotation = Vector3.Cross (transform.right, groundNormal);
-		transform.rotation = Quaternion.Slerp (transform.rotation, Quaternion.LookRotation (desiredRotation, groundNormal), 0.2f);
+		transform.up = Vector3.Slerp (transform.up, groundNormal, Time.deltaTime);
+
+//		Vector3 desiredRotation = Vector3.Cross (transform.right, groundNormal);
+//		transform.rotation = Quaternion.Slerp (transform.rotation, Quaternion.LookRotation (desiredRotation, groundNormal), 0.2f);
 	}
 
 	void OnTriggerEnter(Collider collisionInfo) {
