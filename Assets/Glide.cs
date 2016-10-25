@@ -96,6 +96,9 @@ public class Glide : MonoBehaviour {
 		trails = transform.GetComponentsInChildren<TrailRenderer> ();
 		characterCollider = transform.GetComponent<Collider> ();
 
+		leftWing = transform.Find ("bird2/1/Bird_rig_3/1_2/Backbones_null_3/Wing_3");
+		rightWing = transform.Find ("bird2/1/Bird_rig_3/1_2/Backbones_null_3/Wing_1_3");
+
 		leftWingInitialRotation = leftWing.localRotation.eulerAngles;
 		rightWingInitialRotation = rightWing.localRotation.eulerAngles;
 
