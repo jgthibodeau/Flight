@@ -251,6 +251,7 @@ public class Glide : MonoBehaviour {
 	}
 
 	void Flap(){
+		flapDirection = flapDirection * 0.75f + 0.25f;
 		Vector3 flapAngle = (flapHorizontalDirection * transform.right * 0.5f + flapDirection * transform.forward + (1f - Mathf.Abs (flapDirection)) * transform.up).normalized;
 		Vector3 flapForce = flapAngle * flapForwardCoef * flapScale * flapSpeed;
 
