@@ -31,7 +31,9 @@ public class Perch : MonoBehaviour {
 			bool correctPosition = false;
 
 			//rotate towards perchNormal
-			transform.up = Vector3.Slerp (transform.up, perchNormal, Time.deltaTime * rotateSpeed);
+//			transform.up = Vector3.Slerp (transform.up, perchNormal, Time.deltaTime * rotateSpeed);
+			Quaternion desiredRotation = Quaternion.LookRotation(Vector3.Exclude(perchNormal, transform.forward), perchNormal);
+			transform.rotation = Quaternion.Slerp (transform.rotation, desiredRotation, Time.deltaTime * rotateSpeed);
 
 			if (Vector3.Angle (transform.up, perchNormal) <= angleMargin) {
 				transform.up = perchNormal;

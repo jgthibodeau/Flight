@@ -3,6 +3,8 @@ using System.Collections;
 
 public class Glide : MonoBehaviour {
 	public bool isGrounded;
+	public Vector3 centerOfGravity;
+	private Vector3 center;
 	public bool landed;
 	public float gravity;
 	public float gravityForwardDistance;
@@ -164,6 +166,8 @@ public class Glide : MonoBehaviour {
 	}
 
 	void FixedUpdate () {
+		center = transform.position + centerOfGravity.x * transform.right + centerOfGravity.y * transform.up + centerOfGravity.z * transform.forward;
+
 		//rotate towards motion
 		if (rotateTowardsMotion) {
 			Vector3 rotation = Quaternion.LookRotation (rigidBody.velocity, transform.up).eulerAngles;
@@ -172,6 +176,7 @@ public class Glide : MonoBehaviour {
 
 		if (isFlapping) {
 			Flap ();
+//			FlapCentered ();
 		}
 			
 		//apply gravity
@@ -179,11 +184,13 @@ public class Glide : MonoBehaviour {
 			landed = false;
 			if (keepUprightAlways) {
 				GravityV3 ();
+//				GravityCentered ();
 			} else {
 				GravityV1 ();
 			}
 		} else if (flapSpeed != 0) {
 			GravityV3 ();
+//			GravityCentered ();
 		} else {
 			GravityV4 ();
 			if (rigidBody.velocity.magnitude <= 0.01f) {
@@ -193,10 +200,14 @@ public class Glide : MonoBehaviour {
 
 		if (landed) {
 //			rigidBody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+			rigidBody.constraints = RigidbodyConstraints.FreezeRotation;
+			rigidBody.drag = 1;
 			Walk ();
 		} else {
-//			rigidBody.constraints = RigidbodyConstraints.None;
+			rigidBody.constraints = RigidbodyConstraints.None;
+			rigidBody.drag = 0;
 			RealisticLift();
+//			LiftCentered ();
 		}
 	}
 
@@ -204,14 +215,15 @@ public class Glide : MonoBehaviour {
 //		Vector3 walkDirection = Vector3.ClampMagnitude (transform.forward * forward + transform.right * right, 1);
 //		rigidBody.AddForceAtPosition (walkDirection * walkSpeed, transform.position);
 
-		rigidBody.AddForceAtPosition (transform.forward*forward*walkSpeed, transform.position + transform.forward);
-		rigidBody.AddForceAtPosition (transform.right*right*walkSpeed, transform.position + transform.right * Mathf.Sign (walkSpeed));
-		rigidBody.AddTorque (transform.up*turn*walkTurnSpeed);
+		rigidBody.AddForceAtPosition (transform.forward*forward*walkSpeed, transform.position);
+		rigidBody.AddForceAtPosition (transform.right*right*walkSpeed, transform.position);
+//		rigidBody.AddTorque (transform.up*turn*walkTurnSpeed);
 
-		transform.up = Vector3.Slerp (transform.up, groundNormal, Time.deltaTime);
-
-//		Vector3 desiredRotation = Vector3.Cross (transform.right, groundNormal);
-//		transform.rotation = Quaternion.Slerp (transform.rotation, Quaternion.LookRotation (desiredRotation, groundNormal), 0.2f);
+//		Quaternion desiredNormal = Quaternion.LookRotation(Vector3.Exclude(groundNormal, transform.forward), groundNormal);
+//		Vector3 forwardVector = rigidBody.velocity.magnitude > 0f ? rigidBody.velocity : transform.forward;
+		Vector3 forwardVector = transform.forward + transform.right*turn*walkTurnSpeed;
+		Quaternion desiredNormal = Quaternion.LookRotation(Vector3.Exclude(groundNormal, forwardVector), groundNormal);
+		transform.rotation = Quaternion.Slerp (transform.rotation, desiredNormal, Time.fixedDeltaTime);
 	}
 
 	void OnTriggerEnter(Collider collisionInfo) {
@@ -247,6 +259,15 @@ public class Glide : MonoBehaviour {
 		Debug.DrawRay (transform.position + transform.forward*wingForwardDistance*flapDirection, flapForce);
 	}
 
+	void FlapCentered(){
+		Vector3 flapAngle = (flapHorizontalDirection * transform.right * 0.5f + flapDirection * transform.forward + (1f - Mathf.Abs (flapDirection)) * transform.up).normalized;
+		Vector3 flapForce = flapAngle * flapForwardCoef * flapScale * flapSpeed;
+
+		rigidBody.AddForceAtPosition (flapForce, center);
+
+		Debug.DrawRay (center, flapForce);
+	}
+
 	void GravityV1(){
 		Vector3 gravityForce = Vector3.down * gravity;
 		rigidBody.AddForceAtPosition (gravityForce, transform.position + transform.forward * gravityForwardDistance, ForceMode.Force);
@@ -267,8 +288,17 @@ public class Glide : MonoBehaviour {
 
 	void GravityV4(){
 		Vector3 gravityForce = -groundNormal * gravity;
-		rigidBody.AddForceAtPosition (gravityForce, transform.position - transform.up * gravityDownDistance + transform.forward * gravityForwardDistance, ForceMode.Force);
+//		rigidBody.AddForceAtPosition (gravityForce, transform.position - transform.up * 1 + transform.forward * gravityForwardDistance, ForceMode.Force);
+		rigidBody.AddForceAtPosition (gravityForce, transform.position - transform.up * 1 + transform.forward, ForceMode.Force);
+		rigidBody.AddForceAtPosition (gravityForce, transform.position - transform.up * 1 - transform.forward, ForceMode.Force);
+
 		Debug.DrawRay (transform.position - transform.up * gravityDownDistance + transform.forward * gravityForwardDistance, gravityForce, Color.gray);
+	}
+
+	void GravityCentered(){
+		Vector3 gravityForce = -groundNormal * gravity;
+		rigidBody.AddForceAtPosition (gravityForce, center, ForceMode.Force);
+		Debug.DrawRay (center, gravityForce, Color.gray);
 	}
 
 	void RealisticLift(){
@@ -287,14 +317,14 @@ public class Glide : MonoBehaviour {
 
 
 		//roll lift
-		float liftLeft = rollScale * 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * roll;
-		float liftRight = rollScale * -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * roll;
+		float liftRoll = Mathf.Abs (rollScale * 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * roll);
+//		float liftRight = rollScale * -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * roll;
 
-		rigidBody.AddForceAtPosition (transform.up * liftLeft, transform.position - wingOutDistance*transform.right, ForceMode.Force);
-		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right, ForceMode.Force);
+		rigidBody.AddForceAtPosition (transform.up * liftRoll, transform.position - wingOutDistance*transform.right * Mathf.Sign (roll), ForceMode.Force);
+//		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right, ForceMode.Force);
 
-		Debug.DrawRay (transform.position - wingOutDistance*transform.right, transform.up * liftLeft, Color.green);
-		Debug.DrawRay (transform.position + wingOutDistance*transform.right, transform.up * liftRight, Color.magenta);
+		Debug.DrawRay (transform.position + wingOutDistance*transform.right * Mathf.Sign (roll), transform.up * liftRoll, Color.magenta);
+//		Debug.DrawRay (transform.position + wingOutDistance*transform.right, transform.up * liftRight, Color.magenta);
 
 
 		//induced drag
@@ -305,6 +335,48 @@ public class Glide : MonoBehaviour {
 		drag = realDragCoef * 0.5f * airDensity * speed * speed * wingDragSurfaceArea;
 		Vector3 dragForce = rigidBody.velocity.normalized * (-1) * drag;
 //		Vector3 dragForce = transform.forward * (-1) * drag;
+		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*dragForwardDistance);
+		Debug.DrawRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.red);
+
+
+		//velocity
+		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
+	}
+
+	void LiftCentered(){
+		float angleOfAttack = SignedVectorAngle(transform.forward, rigidBody.velocity, transform.right) - pitch*angleScale;
+
+		if (angleOfAttack > 180)
+			angleOfAttack -= 360;
+		if (angleOfAttack < -180)
+			angleOfAttack += 360;
+
+		float realLiftCoef = liftCoef * Mathf.Sin (angleOfAttack * Mathf.PI / 180f);
+
+		float liftForward = 0.5f * realLiftCoef * airDensity * wingLiftSurfaceArea * speed * speed;
+		rigidBody.AddForceAtPosition (transform.up * liftForward, center, ForceMode.Force);
+		Debug.DrawRay (center, transform.up * liftForward, Color.yellow);
+
+
+		//roll lift
+		float liftRoll = Mathf.Abs (rollScale * 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * roll);
+		//		float liftRight = rollScale * -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * roll;
+
+		rigidBody.AddForceAtPosition (transform.up * liftRoll, center - wingOutDistance*transform.right * Mathf.Sign (roll), ForceMode.Force);
+		//		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right, ForceMode.Force);
+
+		Debug.DrawRay (center + wingOutDistance*transform.right * Mathf.Sign (roll), transform.up * liftRoll, Color.magenta);
+		//		Debug.DrawRay (transform.position + wingOutDistance*transform.right, transform.up * liftRight, Color.magenta);
+
+
+		//induced drag
+		float aspectRatio = 1f/wingLiftSurfaceArea;
+		float inducedDragCoef = realLiftCoef * realLiftCoef * wingLiftSurfaceArea / Mathf.PI;
+		float realDragCoef = dragCoef + inducedDragCoef;
+
+		drag = realDragCoef * 0.5f * airDensity * speed * speed * wingDragSurfaceArea;
+		Vector3 dragForce = rigidBody.velocity.normalized * (-1) * drag;
+		//		Vector3 dragForce = transform.forward * (-1) * drag;
 		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*dragForwardDistance);
 		Debug.DrawRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.red);
 
