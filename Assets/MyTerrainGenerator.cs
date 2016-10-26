@@ -33,6 +33,7 @@ public class MyTerrainGenerator : MonoBehaviour {
 			newTree.transform.parent = this.transform;
 			newTree.transform.localPosition = new Vector3 (Random.Range (-maxTreeDistance, maxTreeDistance), 0, Random.Range (-maxTreeDistance, maxTreeDistance));
 			newTree.transform.Rotate (new Vector3(0, Random.Range (0, 360), 0));
+			newTree.isStatic = true;
 		}
 	}
 
