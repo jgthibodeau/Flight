@@ -2,11 +2,11 @@
 using System.Collections;
 
 public class CloudGenerator : MonoBehaviour {
-	public GameObject cloud;
-	public GameObject cloudSphere;
+//	public GameObject cloud;
+//	public GameObject cloudSphere;
 
 	public int numberClouds;
-	public float maxDistance;
+	public float maxDistance,minHeight,maxHeight;
 	public int minCount;
 	public int maxCount;
 	public float minRadius;
@@ -21,17 +21,17 @@ public class CloudGenerator : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		int cloudLayer = LayerMask.NameToLayer ("Cloud");
-		originalEmmiter = cloudSphere.GetComponent<MeshParticleEmitter> ();
-		originalAnimator = cloudSphere.GetComponent<ParticleAnimator> ();
-		originalRenderer = cloudSphere.GetComponent<ParticleRenderer> ();
+//		originalEmmiter = cloudSphere.GetComponent<MeshParticleEmitter> ();
+//		originalAnimator = cloudSphere.GetComponent<ParticleAnimator> ();
+//		originalRenderer = cloudSphere.GetComponent<ParticleRenderer> ();
 
 		int cloudTypes = clouds.Length - 1;
 		for(int j = 0; j<numberClouds; j++){
 			GameObject newCloud = Instantiate (clouds [Random.Range (0, cloudTypes)]);
 			SetLayerRecursively (newCloud, cloudLayer);
 			newCloud.transform.parent = this.transform;
-			newCloud.transform.localPosition = new Vector3 (Random.Range (-maxDistance, maxDistance), Random.Range (-maxDistance, maxDistance), Random.Range (-maxDistance, maxDistance));
-
+			newCloud.transform.localPosition = new Vector3 (Random.Range (-maxDistance, maxDistance), Random.Range (minHeight, maxHeight), Random.Range (-maxDistance, maxDistance));
+			newCloud.transform.localScale = Vector3.one;
 //			SetParticles (newCloud);
 
 //			GameObject newCloud = Instantiate (cloud);
