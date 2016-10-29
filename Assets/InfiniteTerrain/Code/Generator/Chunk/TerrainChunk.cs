@@ -129,13 +129,19 @@ namespace TerrainGenerator
 				tree.widthScale = 1;
 				tree.prototypeIndex = currentTreeType;
 				float x, y, z;
-//				do{
+				int maxAttempts = 10;
+				int attempts = 0;
+				do{
 					x = Random.Range (0f, 1f);
 					z = Random.Range (0f, 1f);
 					y = terrainData.GetHeight ((int)(x*terrainData.heightmapResolution), (int)(z*terrainData.heightmapResolution));
-//				} while(y<=Settings.SeaLevel);
-				tree.position = new Vector3 (x, y, z);
-				instances [i] = tree;
+					Debug.Log("tree height: "+y*terrainData.heightmapHeight);
+				} while(y*terrainData.heightmapHeight <= Settings.SeaLevel && attempts++ < maxAttempts);
+
+				if (attempts < maxAttempts) {
+					tree.position = new Vector3 (x, y, z);
+					instances [i] = tree;
+				}
 
 				//decrease number of trees left to place of this type
 				numberTreesOfEachType [currentTreeType]--;

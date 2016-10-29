@@ -16,7 +16,7 @@ namespace TerrainGenerator
 		public int terrainAlphamapResolution = 257;
 		public int terrainLength = 1000;
 		public int terrainHeight = 800;
-		public int seaLevel = 164;
+		public float seaLevel = 0.1f;
 
 		public int numberTrees = 5000;
 		public int billboardStart = 500;

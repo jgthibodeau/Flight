@@ -12,7 +12,7 @@ namespace TerrainGenerator
 
         public int Height { get; private set; }
 
-		public int SeaLevel { get; private set; }
+		public float SeaLevel { get; private set; }
 
         public Texture2D FlatTexture { get; private set; }
 
@@ -30,7 +30,7 @@ namespace TerrainGenerator
 
 		public float[] TreePercents { get; private set; }
 
-		public TerrainChunkSettings(int heightmapResolution, int alphamapResolution, int length, int height, int seaLevel,
+		public TerrainChunkSettings(int heightmapResolution, int alphamapResolution, int length, int height, float seaLevel,
 			Texture2D flatTexture, Texture2D steepTexture, Material terrainMaterial, int numberTrees, int billboardStart,
 			int maxFullLODTrees, GameObject[] trees, float[] treePercents)
         {
