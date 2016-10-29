@@ -32,6 +32,7 @@ public class CloudGenerator : MonoBehaviour {
 			newCloud.transform.parent = this.transform;
 			newCloud.transform.localPosition = new Vector3 (Random.Range (-maxDistance, maxDistance), Random.Range (minHeight, maxHeight), Random.Range (-maxDistance, maxDistance));
 			newCloud.transform.localScale = Vector3.one;
+			newCloud.GetComponent<Collider> ().enabled = false;
 //			SetParticles (newCloud);
 
 //			GameObject newCloud = Instantiate (cloud);

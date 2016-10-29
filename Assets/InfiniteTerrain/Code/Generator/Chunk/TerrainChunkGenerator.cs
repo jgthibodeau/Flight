@@ -12,9 +12,17 @@ namespace TerrainGenerator
         public Texture2D FlatTexture;
         public Texture2D SteepTexture;
 
+		public int terrainHeightmapResolution = 257;
+		public int terrainAlphamapResolution = 257;
+		public int terrainLength = 1000;
+		public int terrainHeight = 800;
+		public int seaLevel = 164;
+
 		public int numberTrees = 5000;
 		public int billboardStart = 500;
+		public int maxFullLODTrees = 16;
 		public GameObject[] trees;
+		public float[] treePercents;
 
         private TerrainChunkSettings Settings;
 
@@ -29,7 +37,9 @@ namespace TerrainGenerator
 
         private void Awake()
         {
-			Settings = new TerrainChunkSettings(257, 257, 8*200, 20*40, FlatTexture, SteepTexture, TerrainMaterial, numberTrees, billboardStart, trees);
+			Settings = new TerrainChunkSettings(terrainHeightmapResolution, terrainAlphamapResolution, terrainLength, terrainHeight, seaLevel,
+				FlatTexture, SteepTexture, TerrainMaterial, numberTrees, billboardStart,
+				maxFullLODTrees, trees, treePercents);
 			NoiseProvider = new NoiseProvider[frequency.Length];
 			for (int i = 0; i < NoiseProvider.Length; i++) {
 				if (randomSeed)
@@ -43,10 +53,6 @@ namespace TerrainGenerator
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.A))
-            {
-            }
-
             Cache.Update();
         }
 

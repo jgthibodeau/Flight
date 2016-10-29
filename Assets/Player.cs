@@ -67,6 +67,13 @@ public class Player : MonoBehaviour {
 
 			grabScript.grab = (Input.GetAxis ("Grab") != 0);
 
+
+			if (glideScript.flapSpeed == 0) {
+				glideScript.wingsOut = Input.GetButtonDown ("Close Wings") ^ glideScript.wingsOut;
+			} else {
+				glideScript.wingsOut = true;
+			}
+
 			glideScript.rigidBody.constraints = RigidbodyConstraints.None;
 		}
 	}

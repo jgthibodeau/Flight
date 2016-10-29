@@ -97,30 +97,48 @@ namespace TerrainGenerator
             Terrain.materialTemplate = Settings.TerrainMaterial;
             Terrain.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.Off;
 			Terrain.treeBillboardDistance = Settings.BillboardStart;
+			Terrain.treeMaximumFullLODCount = Settings.MaxFullLODTrees;
 
             Terrain.Flush();
         }
 
 		private void CreateTrees(TerrainData terrainData){
 			TreePrototype[] prototypes = new TreePrototype[Settings.Trees.Length];
+			int[] numberTreesOfEachType = new int[Settings.Trees.Length];
+
 			for (int i = 0; i < Settings.Trees.Length; i++) {
 				TreePrototype tree = new TreePrototype();
 				tree.prefab = Settings.Trees [i];
 				prototypes [i] = tree;
+
+				numberTreesOfEachType [i] = Mathf.CeilToInt (Settings.TreePercents [i] * Settings.NumberTrees);
+				Debug.Log (numberTreesOfEachType [i]);
 			}
 			terrainData.treePrototypes = prototypes;
 
 			TreeInstance[] instances = new TreeInstance[Settings.NumberTrees];
+			int currentTreeType = 0;
 			for (int i = 0; i < Settings.NumberTrees; i++) {
+				//if placed all trees of this type, go to next type
+				while (numberTreesOfEachType [currentTreeType] <= 0 && currentTreeType < numberTreesOfEachType.Length) {
+					currentTreeType++;
+				}
+
 				TreeInstance tree = new TreeInstance();
 				tree.heightScale = 1;
 				tree.widthScale = 1;
-				tree.prototypeIndex = 0;
-				float x = Random.Range (0f, 1f);
-				float z = Random.Range (0f, 1f);
-				float y = terrainData.GetHeight ((int)(x*terrainData.heightmapResolution), (int)(z*terrainData.heightmapResolution));
+				tree.prototypeIndex = currentTreeType;
+				float x, y, z;
+//				do{
+					x = Random.Range (0f, 1f);
+					z = Random.Range (0f, 1f);
+					y = terrainData.GetHeight ((int)(x*terrainData.heightmapResolution), (int)(z*terrainData.heightmapResolution));
+//				} while(y<=Settings.SeaLevel);
 				tree.position = new Vector3 (x, y, z);
 				instances [i] = tree;
+
+				//decrease number of trees left to place of this type
+				numberTreesOfEachType [currentTreeType]--;
 			}
 			terrainData.treeInstances = instances;
 		}

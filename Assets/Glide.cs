@@ -15,11 +15,13 @@ public class Glide : MonoBehaviour {
 
 	public bool rotateTowardsMotion;
 
+	public bool wingsOut;
 	public float liftCoef;
 	public float lift;
 	public float rollScale;
 
 	public float dragCoef;
+	public float liftDragCoef;
 	public float dragForwardDistance;
 	public float drag;
 
@@ -316,31 +318,44 @@ public class Glide : MonoBehaviour {
 		float realLiftCoef = liftCoef * Mathf.Sin (angleOfAttack * Mathf.PI / 180f);
 
 		float liftForward = 0.5f * realLiftCoef * airDensity * wingLiftSurfaceArea * speed * speed;
-		rigidBody.AddForceAtPosition (transform.up * liftForward, transform.position + wingForwardDistance*transform.forward, ForceMode.Force);
-		Debug.DrawRay (transform.position + wingForwardDistance*transform.forward, transform.up * liftForward, Color.yellow);
+//		rigidBody.AddForceAtPosition (transform.up * liftForward, transform.position + wingForwardDistance*transform.forward, ForceMode.Force);
+//		Debug.DrawRay (transform.position + wingForwardDistance*transform.forward, transform.up * liftForward, Color.yellow);
 
+		if (wingsOut) {
+			rigidBody.AddForceAtPosition (transform.up * liftForward, transform.position + wingForwardDistance * transform.forward - wingOutDistance * transform.right * roll, ForceMode.Force);
+		}
+		Debug.DrawRay (transform.position + wingForwardDistance * transform.forward + wingOutDistance * transform.right * roll, transform.up * liftForward, Color.yellow);
 
 		//roll lift
-		float liftRoll = Mathf.Abs (rollScale * 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * roll);
-//		float liftRight = rollScale * -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * roll;
+//		float liftRoll = Mathf.Abs (rollScale * 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * roll);
 
-		rigidBody.AddForceAtPosition (transform.up * liftRoll, transform.position - wingOutDistance*transform.right * Mathf.Sign (roll), ForceMode.Force);
-//		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right, ForceMode.Force);
+//		rigidBody.AddForceAtPosition (transform.up * liftRoll, transform.position - wingOutDistance*transform.right * Mathf.Sign (roll), ForceMode.Force);
 
-		Debug.DrawRay (transform.position + wingOutDistance*transform.right * Mathf.Sign (roll), transform.up * liftRoll, Color.magenta);
-//		Debug.DrawRay (transform.position + wingOutDistance*transform.right, transform.up * liftRight, Color.magenta);
+//		Debug.DrawRay (transform.position + wingOutDistance*transform.right * Mathf.Sign (roll), transform.up * liftRoll, Color.magenta);
 
 
 		//induced drag
 		float aspectRatio = 1f/wingLiftSurfaceArea;
-		float inducedDragCoef = realLiftCoef * realLiftCoef * wingLiftSurfaceArea / Mathf.PI;
+		float inducedDragCoef = liftDragCoef * realLiftCoef * realLiftCoef * wingLiftSurfaceArea / Mathf.PI;
 		float realDragCoef = dragCoef + inducedDragCoef;
 
+
 		drag = realDragCoef * 0.5f * airDensity * speed * speed * wingDragSurfaceArea;
-		Vector3 dragForce = rigidBody.velocity.normalized * (-1) * drag;
-//		Vector3 dragForce = transform.forward * (-1) * drag;
+		Vector3 dragForce =rigidBody.velocity.normalized * (-1) * drag;
 		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*dragForwardDistance);
 		Debug.DrawRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.red);
+
+//		float inducedDrag = inducedDragCoef * 0.5f * airDensity * speed * speed * wingDragSurfaceArea;
+//		float normalDrag = dragCoef * 0.5f * airDensity * speed * speed * wingDragSurfaceArea;
+
+//		Vector3 normalDragForce = rigidBody.velocity.normalized * (-1) * normalDrag;
+//		rigidBody.AddForceAtPosition (normalDragForce, transform.position - transform.forward*dragForwardDistance);
+//		Debug.DrawRay (transform.position - transform.forward*dragForwardDistance, normalDragForce, Color.red);
+
+
+//		Vector3 inducedDragForce = transform.up * (-1) * Mathf.Sign (liftForward) * inducedDrag;
+//		rigidBody.AddForceAtPosition (inducedDragForce, transform.position - transform.forward*dragForwardDistance);
+//		Debug.DrawRay (transform.position - transform.forward*dragForwardDistance, inducedDragForce, Color.red);
 
 
 		//velocity
