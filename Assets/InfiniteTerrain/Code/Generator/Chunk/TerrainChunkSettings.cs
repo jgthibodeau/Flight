@@ -14,6 +14,8 @@ namespace TerrainGenerator
 
 		public float SeaLevel { get; private set; }
 
+		public float MaxTreeSteepness { get; private set; }
+
         public Texture2D FlatTexture { get; private set; }
 
         public Texture2D SteepTexture { get; private set; }
@@ -30,7 +32,7 @@ namespace TerrainGenerator
 
 		public float[] TreePercents { get; private set; }
 
-		public TerrainChunkSettings(int heightmapResolution, int alphamapResolution, int length, int height, float seaLevel,
+		public TerrainChunkSettings(int heightmapResolution, int alphamapResolution, int length, int height, float seaLevel, float maxTreeSteepness,
 			Texture2D flatTexture, Texture2D steepTexture, Material terrainMaterial, int numberTrees, int billboardStart,
 			int maxFullLODTrees, GameObject[] trees, float[] treePercents)
         {
@@ -39,6 +41,7 @@ namespace TerrainGenerator
             Length = length;
             Height = height;
 			SeaLevel = seaLevel;
+			MaxTreeSteepness = maxTreeSteepness;
             FlatTexture = flatTexture;
             SteepTexture = steepTexture;
             TerrainMaterial = terrainMaterial;

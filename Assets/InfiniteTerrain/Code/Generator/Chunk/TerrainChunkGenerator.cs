@@ -17,6 +17,7 @@ namespace TerrainGenerator
 		public int terrainLength = 1000;
 		public int terrainHeight = 800;
 		public float seaLevel = 0.1f;
+		public float maxTreeSteepness = 0.25f;
 
 		public int numberTrees = 5000;
 		public int billboardStart = 500;
@@ -37,7 +38,7 @@ namespace TerrainGenerator
 
         private void Awake()
         {
-			Settings = new TerrainChunkSettings(terrainHeightmapResolution, terrainAlphamapResolution, terrainLength, terrainHeight, seaLevel,
+			Settings = new TerrainChunkSettings(terrainHeightmapResolution, terrainAlphamapResolution, terrainLength, terrainHeight, seaLevel, maxTreeSteepness,
 				FlatTexture, SteepTexture, TerrainMaterial, numberTrees, billboardStart,
 				maxFullLODTrees, trees, treePercents);
 			NoiseProvider = new NoiseProvider[frequency.Length];
