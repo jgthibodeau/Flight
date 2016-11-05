@@ -22,6 +22,8 @@ public class Glide : MonoBehaviour {
 
 	public float dragCoef;
 	public float liftDragCoef;
+	public float wingsClosedDragPercent;
+	public float wingsOpenDragPercent;
 	public float dragForwardDistance;
 	public float drag;
 
@@ -321,18 +323,24 @@ public class Glide : MonoBehaviour {
 //		rigidBody.AddForceAtPosition (transform.up * liftForward, transform.position + wingForwardDistance*transform.forward, ForceMode.Force);
 //		Debug.DrawRay (transform.position + wingForwardDistance*transform.forward, transform.up * liftForward, Color.yellow);
 
+		float dragPercent = 0;
+
 		if (wingsOut) {
-			rigidBody.AddForceAtPosition (transform.up * liftForward, transform.position + wingForwardDistance * transform.forward - wingOutDistance * transform.right * roll, ForceMode.Force);
+			rigidBody.AddForceAtPosition (transform.up * liftForward, transform.position + wingForwardDistance * transform.forward, ForceMode.Force);
+			Debug.DrawRay (transform.position + wingForwardDistance * transform.forward, transform.up * liftForward, Color.yellow);
+//			rigidBody.AddForceAtPosition (transform.up * liftForward, transform.position + wingForwardDistance * transform.forward - wingOutDistance * transform.right * roll * Mathf.Sign(liftForward), ForceMode.Force);
+//			Debug.DrawRay (transform.position + wingForwardDistance * transform.forward + wingOutDistance * transform.right * roll, transform.up * liftForward, Color.yellow);
+		
+
+			//roll lift
+			float liftRoll = Mathf.Abs (rollScale * 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * roll);
+			rigidBody.AddForceAtPosition (transform.up * liftRoll, transform.position - wingOutDistance * transform.right * Mathf.Sign (roll), ForceMode.Force);
+			Debug.DrawRay (transform.position + wingOutDistance * transform.right * Mathf.Sign (roll), transform.up * liftRoll, Color.magenta);
+
+			dragPercent = 1 - flapDirection*wingsOpenDragPercent;
+		} else {
+			dragPercent = wingsClosedDragPercent;
 		}
-		Debug.DrawRay (transform.position + wingForwardDistance * transform.forward + wingOutDistance * transform.right * roll, transform.up * liftForward, Color.yellow);
-
-		//roll lift
-//		float liftRoll = Mathf.Abs (rollScale * 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * roll);
-
-//		rigidBody.AddForceAtPosition (transform.up * liftRoll, transform.position - wingOutDistance*transform.right * Mathf.Sign (roll), ForceMode.Force);
-
-//		Debug.DrawRay (transform.position + wingOutDistance*transform.right * Mathf.Sign (roll), transform.up * liftRoll, Color.magenta);
-
 
 		//induced drag
 		float aspectRatio = 1f/wingLiftSurfaceArea;
@@ -341,7 +349,7 @@ public class Glide : MonoBehaviour {
 
 
 		drag = realDragCoef * 0.5f * airDensity * speed * speed * wingDragSurfaceArea;
-		Vector3 dragForce =rigidBody.velocity.normalized * (-1) * drag;
+		Vector3 dragForce = rigidBody.velocity.normalized * (-1) * drag * dragPercent;
 		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*dragForwardDistance);
 		Debug.DrawRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.red);
 

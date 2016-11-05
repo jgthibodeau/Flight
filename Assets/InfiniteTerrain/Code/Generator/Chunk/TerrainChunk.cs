@@ -45,11 +45,10 @@ namespace TerrainGenerator
             lock (HeightmapThreadLockObject)
             {
                 var heightmap = new float[Settings.HeightmapResolution, Settings.HeightmapResolution];
-
                 for (var zRes = 0; zRes < Settings.HeightmapResolution; zRes++)
-                {
+				{
                     for (var xRes = 0; xRes < Settings.HeightmapResolution; xRes++)
-                    {
+					{
                         var xCoordinate = Position.X + (float)xRes / (Settings.HeightmapResolution - 1);
                         var zCoordinate = Position.Z + (float)zRes / (Settings.HeightmapResolution - 1);
 
