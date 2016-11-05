@@ -12,6 +12,9 @@ public class CloudGenerator : MonoBehaviour {
 	public float minRadius;
 	public float maxRadius;
 
+	public float minScale;
+	public float maxScale;
+
 	public GameObject[] clouds;
 
 	MeshParticleEmitter originalEmmiter;
@@ -31,8 +34,12 @@ public class CloudGenerator : MonoBehaviour {
 			SetLayerRecursively (newCloud, cloudLayer);
 			newCloud.transform.parent = this.transform;
 			newCloud.transform.localPosition = new Vector3 (Random.Range (-maxDistance, maxDistance), Random.Range (minHeight, maxHeight), Random.Range (-maxDistance, maxDistance));
-			newCloud.transform.localScale = Vector3.one;
-			newCloud.GetComponent<Collider> ().enabled = false;
+			Vector3 scale = Vector3.one * Random.Range (minScale, maxScale);
+			foreach(Transform child in newCloud.transform){
+				child.localScale = scale;
+			}
+			if(newCloud.GetComponent<Collider> () != null)
+				newCloud.GetComponent<Collider> ().enabled = false;
 //			SetParticles (newCloud);
 
 //			GameObject newCloud = Instantiate (cloud);
