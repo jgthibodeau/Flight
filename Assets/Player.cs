@@ -3,6 +3,7 @@ using System.Collections;
 
 public class Player : MonoBehaviour {
 	private Glide glideScript;
+	private GlideV2 glideV2Script;
 	private Grab grabScript;
 	private Perch perchScript;
 
@@ -17,6 +18,7 @@ public class Player : MonoBehaviour {
 		PreyLayer = LayerMask.NameToLayer ("Prey");
 
 		glideScript = transform.GetComponent<Glide> ();
+		glideV2Script = transform.GetComponent<GlideV2> ();
 		grabScript = transform.GetComponent<Grab> ();
 		perchScript = transform.GetComponent<Perch> ();
 	}
@@ -45,10 +47,23 @@ public class Player : MonoBehaviour {
 			glideScript.flapDirection = 0;
 			glideScript.flapHorizontalDirection = 0;
 
-			grabScript.grab = false;
-
 			glideScript.rigidBody.velocity = Vector3.zero;
 			glideScript.rigidBody.constraints = RigidbodyConstraints.FreezePosition;
+
+
+			glideV2Script.pitch = 0;
+			glideV2Script.roll = 0;
+			glideV2Script.forward = 0;
+			glideV2Script.turn = 0;
+			glideV2Script.flapSpeed = 0;
+			glideV2Script.flapDirection = 0;
+			glideV2Script.flapHorizontalDirection = 0;
+
+			glideV2Script.rigidBody.velocity = Vector3.zero;
+			glideV2Script.rigidBody.constraints = RigidbodyConstraints.FreezePosition;
+
+
+			grabScript.grab = false;
 
 //			if ((!perchScript.isPerching && Input.GetAxis ("Flap") != 0)) {
 //				perchScript.ResetPerch ();
@@ -65,9 +80,6 @@ public class Player : MonoBehaviour {
 			glideScript.flapDirection = Input.GetAxis ("Vertical");
 			glideScript.flapHorizontalDirection = Input.GetAxis ("Horizontal");
 
-			grabScript.grab = (Input.GetAxis ("Grab") != 0);
-
-
 			if (glideScript.flapSpeed == 0) {
 				glideScript.wingsOut = Input.GetButtonDown ("Close Wings") ^ glideScript.wingsOut;
 			} else {
@@ -75,6 +87,28 @@ public class Player : MonoBehaviour {
 			}
 
 			glideScript.rigidBody.constraints = RigidbodyConstraints.None;
+
+
+
+			glideV2Script.pitch = Input.GetAxis ("Vertical Right");
+			glideV2Script.roll = Input.GetAxis ("Horizontal Right");
+			glideV2Script.forward = Input.GetAxis ("Vertical");
+			glideV2Script.right = Input.GetAxis ("Horizontal");
+			glideV2Script.turn = Input.GetAxis ("Horizontal Right");
+			glideV2Script.flapSpeed = Input.GetAxis ("Flap");
+			glideV2Script.flapDirection = Input.GetAxis ("Vertical");
+			glideV2Script.flapHorizontalDirection = Input.GetAxis ("Horizontal");
+
+//			if (glideV2Script.flapSpeed == 0) {
+//				glideV2Script.wingsOut = Input.GetButtonDown ("Close Wings") ^ glideScript.wingsOut;
+//			} else {
+//				glideV2Script.wingsOut = true;
+//			}
+
+			glideV2Script.rigidBody.constraints = RigidbodyConstraints.None;
+
+
+			grabScript.grab = (Input.GetAxis ("Grab") != 0);
 		}
 	}
 }
