@@ -2,6 +2,7 @@
 using System.Collections;
 
 public class GlideV2 : MonoBehaviour {
+	public BirdAnimator birdAnimator;
 	public bool isGrounded;
 	public Vector3 centerOfGravity;
 	private Vector3 center;
@@ -122,7 +123,8 @@ public class GlideV2 : MonoBehaviour {
 		if (flapSpeed != 0) {
 			isFlapping = true;
 //			animator.SetBool ("Flapping", true);
-//			animator.speed = 1f + flapAnimationScale * flapSpeed;
+			birdAnimator.FlapSpeed = 1f + flapAnimationScale * flapSpeed;
+			birdAnimator.Flapping = true;
 
 			if(!playingFlapSound){
 				StartCoroutine(PlayFlapSound(flapSoundRate*(1-flapSpeed) + minFlapRate));
@@ -132,6 +134,7 @@ public class GlideV2 : MonoBehaviour {
 		} else {
 //			animator.SetBool ("Flapping", false);
 			isFlapping = false;
+			birdAnimator.Flapping = false;
 //			animator.speed = 1f;
 		}
 
@@ -166,6 +169,7 @@ public class GlideV2 : MonoBehaviour {
 		}
 
 //		animator.SetBool ("wingsClosed", isGrounded);
+		birdAnimator.Grounded = isGrounded && !isFlapping;
 	}
 
 	void FixedUpdate () {
@@ -221,6 +225,8 @@ public class GlideV2 : MonoBehaviour {
 		rigidBody.AddForceAtPosition (transform.forward*forward*walkSpeed, transform.position);
 		rigidBody.AddForceAtPosition (transform.right*right*walkSpeed, transform.position);
 		//		rigidBody.AddTorque (transform.up*turn*walkTurnSpeed);
+
+		birdAnimator.Walking = (forward != 0 || right != 0);
 
 		//		Quaternion desiredNormal = Quaternion.LookRotation(Vector3.Exclude(groundNormal, transform.forward), groundNormal);
 		//		Vector3 forwardVector = rigidBody.velocity.magnitude > 0f ? rigidBody.velocity : transform.forward;

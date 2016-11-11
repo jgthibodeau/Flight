@@ -2,7 +2,9 @@
 using System.Collections;
 
 public class BirdAnimator : MonoBehaviour {
+	public float FadeLength;
 	public bool Flapping, Grounded, WingsClosed, Walking, Hopping;
+	public float FlapSpeed;
 	private string idle = "idle1";
 	private Animation Animation;
 
@@ -16,11 +18,11 @@ public class BirdAnimator : MonoBehaviour {
 		if (Grounded) {
 			if (Walking) {
 				if (!Animation.IsPlaying ("walk")) {
-					Animation.CrossFade ("walk");
+					Animation.CrossFade ("walk", FadeLength, PlayMode.StopAll);
 				}
 			} else if (Hopping) {
 				if (!Animation.IsPlaying ("hop")) {
-					Animation.CrossFade ("hop");
+					Animation.CrossFade ("hop", FadeLength, PlayMode.StopAll);
 				}
 			} else {
 				if (!Animation.IsPlaying (idle)) {
@@ -30,12 +32,17 @@ public class BirdAnimator : MonoBehaviour {
 			}
 		} else {
 			if (WingsClosed) {
-				Animation.CrossFade ("falling");
+				Animation.CrossFade ("falling", FadeLength, PlayMode.StopAll);
 			} else {
+				//if just start to flap
+//				if (just start to flap) {
+//					Animation.CrossFade ("goToFly", FadeLength, PlayMode.StopAll);
+//				}
 				if (Flapping) {
-					Animation.CrossFade ("fly");
+					Animation ["fly"].speed = FlapSpeed;
+					Animation.CrossFade ("fly", FadeLength, PlayMode.StopAll);
 				} else {
-					Animation.CrossFade ("glide");
+					Animation.CrossFade ("glide", FadeLength, PlayMode.StopAll);
 				}
 			}
 		}
