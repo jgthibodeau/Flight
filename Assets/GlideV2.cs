@@ -96,11 +96,11 @@ public class GlideV2 : MonoBehaviour {
 		trails = transform.GetComponentsInChildren<TrailRenderer> ();
 		characterCollider = transform.GetComponent<Collider> ();
 
-		leftWing = transform.Find ("bird2/1/Bird_rig_3/1_2/Backbones_null_3/Wing_3");
-		rightWing = transform.Find ("bird2/1/Bird_rig_3/1_2/Backbones_null_3/Wing_1_3");
+//		leftWing = transform.Find ("bird2/1/Bird_rig_3/1_2/Backbones_null_3/Wing_3");
+//		rightWing = transform.Find ("bird2/1/Bird_rig_3/1_2/Backbones_null_3/Wing_1_3");
 
-		leftWingInitialRotation = leftWing.localRotation.eulerAngles;
-		rightWingInitialRotation = rightWing.localRotation.eulerAngles;
+//		leftWingInitialRotation = leftWing.localRotation.eulerAngles;
+//		rightWingInitialRotation = rightWing.localRotation.eulerAngles;
 
 		airDensity = 1.2238f;
 
@@ -121,8 +121,8 @@ public class GlideV2 : MonoBehaviour {
 		//flap wings
 		if (flapSpeed != 0) {
 			isFlapping = true;
-			animator.SetBool ("flap", true);
-			animator.speed = 1f + flapAnimationScale * flapSpeed;
+//			animator.SetBool ("Flapping", true);
+//			animator.speed = 1f + flapAnimationScale * flapSpeed;
 
 			if(!playingFlapSound){
 				StartCoroutine(PlayFlapSound(flapSoundRate*(1-flapSpeed) + minFlapRate));
@@ -130,9 +130,9 @@ public class GlideV2 : MonoBehaviour {
 				flapAudioSource.pitch = Random.Range (flapMinPitch, flapMaxPitch);
 			}
 		} else {
-			animator.SetBool ("flap", false);
+//			animator.SetBool ("Flapping", false);
 			isFlapping = false;
-			animator.speed = 1f;
+//			animator.speed = 1f;
 		}
 
 		//audio based on speed
@@ -158,14 +158,14 @@ public class GlideV2 : MonoBehaviour {
 	void UpdateRendering(){
 		//rotate wings
 		if (!isGrounded) {
-			leftWing.localRotation = Quaternion.Euler (leftWingInitialRotation + new Vector3 ((flapDirection) * 15, -(flapDirection) * 20, 0));
-			rightWing.localRotation = Quaternion.Euler (rightWingInitialRotation + new Vector3 ((flapDirection) * 15, (flapDirection) * 20, 0));
+//			leftWing.localRotation = Quaternion.Euler (leftWingInitialRotation + new Vector3 ((flapDirection) * 15, -(flapDirection) * 20, 0));
+//			rightWing.localRotation = Quaternion.Euler (rightWingInitialRotation + new Vector3 ((flapDirection) * 15, (flapDirection) * 20, 0));
 		} else {
-			leftWing.localRotation = Quaternion.Euler (leftWingInitialRotation);
-			rightWing.localRotation = Quaternion.Euler (rightWingInitialRotation);
+//			leftWing.localRotation = Quaternion.Euler (leftWingInitialRotation);
+//			rightWing.localRotation = Quaternion.Euler (rightWingInitialRotation);
 		}
 
-		animator.SetBool ("wingsClosed", isGrounded);
+//		animator.SetBool ("wingsClosed", isGrounded);
 	}
 
 	void FixedUpdate () {
