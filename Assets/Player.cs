@@ -99,11 +99,11 @@ public class Player : MonoBehaviour {
 			glideV2Script.flapDirection = Input.GetAxis ("Vertical");
 			glideV2Script.flapHorizontalDirection = Input.GetAxis ("Horizontal");
 
-//			if (glideV2Script.flapSpeed == 0) {
-//				glideV2Script.wingsOut = Input.GetButtonDown ("Close Wings") ^ glideScript.wingsOut;
-//			} else {
-//				glideV2Script.wingsOut = true;
-//			}
+			if (glideV2Script.flapSpeed == 0) {
+				glideV2Script.wingsOut = Input.GetButtonDown ("Close Wings") ^ glideScript.wingsOut;
+			} else {
+				glideV2Script.wingsOut = true;
+			}
 
 			glideV2Script.rigidBody.constraints = RigidbodyConstraints.None;
 
