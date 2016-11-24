@@ -10,12 +10,11 @@ public class ChunkManager : MonoBehaviour {
 	public int chunksX, chunksZ;
 	public Vector3 chunksCenter;
 	public Vector2 zeroChunk;
+
 	public TerrainComposer2.Int2 currentChunk = new TerrainComposer2.Int2(0, 0);
-
-	public List<List<Chunk>> chunks = new List<List<Chunk>>();
-
-	private List<Chunk> loadedChunks = new List<Chunk>();
-	private List<Chunk> unloadableChunks = new List<Chunk> ();
+	public List<List<Chunk>> chunks;
+	private List<Chunk> loadedChunks;
+	private List<Chunk> unloadableChunks;
 
 	public GameObject defaultChunk;
 	public int chunkRadius;
@@ -24,15 +23,37 @@ public class ChunkManager : MonoBehaviour {
 
 	public Transform player;
 
+	public bool replaceWater;
+	public GameObject water;
+
 	// Use this for initialization
 	void Start () {
 		terrainArea = GetComponent<TerrainComposer2.TC_TerrainArea> ();
+
+		currentChunk = new TerrainComposer2.Int2(0, 0);
+		chunks = new List<List<Chunk>>();
+		loadedChunks = new List<Chunk>();
+		unloadableChunks = new List<Chunk> ();
+
 		//convert terrain's into an indexable array
 		int currentRow = 0;
 		List<Chunk> currentList = new List<Chunk>();
 		chunks.Add (currentList);
 		Debug.Log (terrainArea.terrains.ToArray ().Length + " terrain tiles");
 		foreach(TerrainComposer2.TCUnityTerrain terrain in terrainArea.terrains){
+			
+			foreach (Transform t in terrain.terrain.transform) {
+				if (t.name == water.transform.name + "(Clone)") {
+					GameObject.DestroyImmediate (t.gameObject);
+				}
+			}
+			if (replaceWater) {
+				GameObject newWater = GameObject.Instantiate (water);
+				newWater.transform.SetParent (terrain.terrain.transform);
+				newWater.transform.localPosition = new Vector3 (0, newWater.transform.localPosition.y, 0);
+				newWater.SetActive (true);
+			}
+
 			if (terrain.tileZ != currentRow) {
 				currentRow = terrain.tileZ;
 				currentList = new List<Chunk>();
@@ -48,10 +69,7 @@ public class ChunkManager : MonoBehaviour {
 		chunksZ = terrainArea.tiles.x;
 		chunkSize = terrainArea.terrainSize.x;
 		chunksCenter = terrainArea.center;
-
 		zeroChunk = new Vector2 (chunksCenter.x - chunkSize/2f - (chunksX/2 * chunkSize), chunksCenter.z - chunkSize/2f - (chunksZ/2 * chunkSize));
-
-		currentChunk = new TerrainComposer2.Int2 (0, 0);
 	}
 	
 	// Update is called once per frame
