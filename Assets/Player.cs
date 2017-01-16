@@ -91,15 +91,19 @@ public class Player : MonoBehaviour {
 
 
 
-			glideV2Script.pitch = (-1)*Input.GetAxis ("Vertical Right");
-			glideV2Script.yaw = Input.GetAxis ("Horizontal Right");
+			glideV2Script.pitch = Input.GetAxis ("Vertical");
 			glideV2Script.roll = Input.GetAxis ("Horizontal");
+
+			glideV2Script.yaw = Input.GetAxis ("Horizontal Right");
+//			glideV2Script.tailPitch = (-1)*Input.GetAxis ("Vertical Right");
+
 			glideV2Script.forward = Input.GetAxis ("Vertical");
 			glideV2Script.right = Input.GetAxis ("Horizontal");
 			glideV2Script.turn = Input.GetAxis ("Horizontal Right");
+
 			glideV2Script.flapSpeed = Input.GetAxis ("Flap");
-			glideV2Script.flapDirection = Input.GetAxis ("Vertical");
-			glideV2Script.flapHorizontalDirection = Input.GetAxis ("Horizontal");
+			glideV2Script.flapDirection = Input.GetAxis ("Vertical Right");
+//			glideV2Script.flapHorizontalDirection = Input.GetAxis ("Horizontal Right");
 
 			if (glideV2Script.flapSpeed == 0) {
 				glideV2Script.wingsOut = Input.GetButtonDown ("Close Wings") ^ glideScript.wingsOut;

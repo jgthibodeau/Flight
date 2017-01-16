@@ -91,6 +91,7 @@ public class GlideV2 : MonoBehaviour {
 
 	public float roll;
 	public float pitch;
+	public float tailPitch;
 	public float yaw;
 	public float forward;
 	public float right;
@@ -481,8 +482,8 @@ public class GlideV2 : MonoBehaviour {
 		float realLiftCoef = 0f;
 
 		if(wingsOut){
-			float angleOfAttack = SignedVectorAngle (transform.forward, rigidBody.velocity, transform.right);// - pitch*angleScale;
-
+			float angleOfAttack = SignedVectorAngle (transform.forward, rigidBody.velocity, transform.right) - pitch*angleScale;
+			Debug.Log (angleOfAttack);
 			if (angleOfAttack > 180)
 				angleOfAttack -= 360;
 			if (angleOfAttack < -180)
@@ -490,11 +491,13 @@ public class GlideV2 : MonoBehaviour {
 
 			realLiftCoef = liftCoef * Mathf.Sin (angleOfAttack * Mathf.PI / 180f);
 
+			realLiftCoef *= (1f - 1f*flapDirection);
+
 			float liftForward = 0.5f * realLiftCoef * airDensity * wingLiftSurfaceArea * speed * speed;
 			liftForward = Mathf.Clamp (liftForward, -maxLift, maxLift);
 			Vector3 liftForce = transform.up * liftForward;
-			rigidBody.AddForceAtPosition (liftForce, transform.position + wingForwardDistance*transform.forward, ForceMode.Force);
-			DrawTransformRay (transform.position + wingForwardDistance*transform.forward, liftForce, Color.yellow);
+			rigidBody.AddForceAtPosition (liftForce, transform.position, ForceMode.Force);
+			DrawTransformRay (transform.position, liftForce, Color.yellow);
 
 
 			//roll lift
@@ -515,20 +518,25 @@ public class GlideV2 : MonoBehaviour {
 		float realDragCoef = dragCoef + inducedDragCoef;
 
 		//drag based on wingspan
-		realDragCoef *= (1f - 0.7f*flapDirection);
+		realDragCoef *= (1f - 0.5f*flapDirection);
+
+//		drag = realDragCoef * 0.5f * airDensity * speed * speed * wingDragSurfaceArea;
+//		Vector3 dragForce = rigidBody.velocity.normalized * (-1) * drag;
+//		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*dragForwardDistance);
+//		DrawTransformRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.green);
 
 		drag = realDragCoef * 0.5f * airDensity * speed * speed * wingDragSurfaceArea;
 		Vector3 dragForce = rigidBody.velocity.normalized * (-1) * drag;
 		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*dragForwardDistance);
 		DrawTransformRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.green);
 
-		//tail drag
-		float realTailDragCoef = tailDragCoef * 0.5f * airDensity * speed * speed;
-		Vector3 tailDragAngle = (pitch * transform.up  + yaw * transform.right).normalized;
-		Vector3 tailDrag = realTailDragCoef * new Vector2 (pitch, yaw).magnitude * tailDragAngle;
-		tailDrag = Vector3.ClampMagnitude (tailDrag, maxTailDrag);
-		rigidBody.AddForceAtPosition (tailDrag, transform.position);
-		DrawTransformRay (transform.position, tailDrag, Color.magenta);
+//		//tail drag
+//		float realTailDragCoef = tailDragCoef * 0.5f * airDensity * speed * speed;
+//		Vector3 tailDragAngle = (tailPitch * transform.up  + yaw * transform.right).normalized;
+//		Vector3 tailDrag = realTailDragCoef * new Vector2 (pitch, yaw).magnitude * tailDragAngle;
+//		tailDrag = Vector3.ClampMagnitude (tailDrag, maxTailDrag);
+//		rigidBody.AddForceAtPosition (tailDrag, transform.position);
+//		DrawTransformRay (transform.position, tailDrag, Color.magenta);
 
 
 		//velocity
