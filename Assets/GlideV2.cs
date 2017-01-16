@@ -22,8 +22,10 @@ public class GlideV2 : MonoBehaviour {
 	public float maxLift;
 	public float rollScale;
 	public float maxRoll;
+	public float maxTailDrag;
 
 	public float dragCoef;
+	public float tailDragCoef;
 	public float dragForwardDistance;
 	public float drag;
 
@@ -34,6 +36,7 @@ public class GlideV2 : MonoBehaviour {
 
 	public float wingLiftSurfaceArea;
 	public float wingDragSurfaceArea;
+	public float wingSpan;
 	public float airDensity;
 
 	public float walkSpeed;
@@ -88,6 +91,7 @@ public class GlideV2 : MonoBehaviour {
 
 	public float roll;
 	public float pitch;
+	public float yaw;
 	public float forward;
 	public float right;
 	public float turn;
@@ -212,7 +216,8 @@ public class GlideV2 : MonoBehaviour {
 //			FlapUpOnly ();
 //		}
 		if (impulseFlapping) {
-			FlapImpulse ();
+//			FlapImpulse ();
+			SteadyFlap ();
 		}
 
 		//apply gravity
@@ -244,7 +249,8 @@ public class GlideV2 : MonoBehaviour {
 			rigidBody.drag = 0;
 //			RealisticLiftDirectionalDrag();
 
-			RealisticLift();
+//			RealisticLift();
+			AngledDragLift();
 //			RealisticIndividualWingLift();
 
 			//			LiftCentered ();
@@ -299,7 +305,7 @@ public class GlideV2 : MonoBehaviour {
 
 		rigidBody.AddForceAtPosition (flapForce, transform.position + transform.forward*wingForwardDistance*flapDirection);
 
-		Debug.DrawRay (transform.position + transform.forward*wingForwardDistance*flapDirection, flapForce);
+		DrawTransformRay (transform.position + transform.forward*wingForwardDistance*flapDirection, flapForce);
 	}
 
 	void FlapLessBackward(){
@@ -309,7 +315,7 @@ public class GlideV2 : MonoBehaviour {
 
 		rigidBody.AddForceAtPosition (flapForce, transform.position + transform.forward*wingForwardDistance*flapDirection);
 
-		Debug.DrawRay (transform.position + transform.forward*wingForwardDistance*flapDirection, flapForce);
+		DrawTransformRay (transform.position + transform.forward*wingForwardDistance*flapDirection, flapForce);
 	}
 
 	void FlapUpOnly(){
@@ -317,7 +323,7 @@ public class GlideV2 : MonoBehaviour {
 
 		rigidBody.AddForceAtPosition (flapForce, transform.position + transform.forward*wingForwardDistance*flapDirection);
 
-		Debug.DrawRay (transform.position + transform.forward*wingForwardDistance*flapDirection, flapForce);
+		DrawTransformRay (transform.position + transform.forward*wingForwardDistance*flapDirection, flapForce);
 	}
 
 	void FlapImpulse(){
@@ -325,7 +331,15 @@ public class GlideV2 : MonoBehaviour {
 
 		rigidBody.AddForceAtPosition (flapForce, transform.position + transform.forward*wingForwardDistance*flapDirection);
 
-		Debug.DrawRay (transform.position + transform.forward*wingForwardDistance*flapDirection, flapForce);
+		DrawTransformRay (transform.position + transform.forward*wingForwardDistance*flapDirection, flapForce);
+	}
+
+	void SteadyFlap(){
+		Vector3 flapForce = (transform.forward + transform.up).normalized * flapForwardCoef * flapScale * flapSpeed;
+
+		rigidBody.AddForceAtPosition (flapForce, transform.position);
+
+		DrawTransformRay (transform.position, flapForce);
 	}
 
 	void FlapCentered(){
@@ -334,25 +348,25 @@ public class GlideV2 : MonoBehaviour {
 
 		rigidBody.AddForceAtPosition (flapForce, center);
 
-		Debug.DrawRay (center, flapForce);
+		DrawTransformRay (center, flapForce);
 	}
 
 	void GravityV1(){
 		Vector3 gravityForce = Vector3.down * gravity;
 		rigidBody.AddForceAtPosition (gravityForce, transform.position + transform.forward * gravityForwardDistance, ForceMode.Force);
-		Debug.DrawRay (transform.position + transform.forward * gravityForwardDistance, gravityForce, Color.blue);
+		DrawTransformRay (transform.position + transform.forward * gravityForwardDistance, gravityForce, Color.blue);
 	}
 
 	void GravityV2(){
 		Vector3 gravityForce = Vector3.down * gravity;
 		rigidBody.AddForceAtPosition (gravityForce, transform.position + transform.forward * wingForwardDistance, ForceMode.Force);
-		Debug.DrawRay (transform.position + transform.forward * wingForwardDistance, gravityForce, Color.blue);
+		DrawTransformRay (transform.position + transform.forward * wingForwardDistance, gravityForce, Color.blue);
 	}
 
 	void GravityV3(){
 		Vector3 gravityForce = Vector3.down * gravity;
 		rigidBody.AddForceAtPosition (gravityForce, transform.position - transform.up * gravityDownDistance + transform.forward * gravityForwardDistance, ForceMode.Force);
-		Debug.DrawRay (transform.position - transform.up * gravityDownDistance + transform.forward * gravityForwardDistance, gravityForce, Color.gray);
+		DrawTransformRay (transform.position - transform.up * gravityDownDistance + transform.forward * gravityForwardDistance, gravityForce, Color.gray);
 	}
 
 	void GravityV4(){
@@ -361,13 +375,13 @@ public class GlideV2 : MonoBehaviour {
 		rigidBody.AddForceAtPosition (gravityForce, transform.position - transform.up * 1 + transform.forward, ForceMode.Force);
 		rigidBody.AddForceAtPosition (gravityForce, transform.position - transform.up * 1 - transform.forward, ForceMode.Force);
 
-		Debug.DrawRay (transform.position - transform.up * gravityDownDistance + transform.forward * gravityForwardDistance, gravityForce, Color.gray);
+		DrawTransformRay (transform.position - transform.up * gravityDownDistance + transform.forward * gravityForwardDistance, gravityForce, Color.gray);
 	}
 
 	void GravityCentered(){
 		Vector3 gravityForce = -groundNormal * gravity;
 		rigidBody.AddForceAtPosition (gravityForce, center, ForceMode.Force);
-		Debug.DrawRay (center, gravityForce, Color.gray);
+		DrawTransformRay (center, gravityForce, Color.gray);
 	}
 		
 	void RealisticLiftDirectionalDrag(){
@@ -384,7 +398,7 @@ public class GlideV2 : MonoBehaviour {
 		liftForward = Mathf.Clamp (liftForward, -maxLift, maxLift);
 		Vector3 liftForce = (transform.up * (1f - liftForwardAmount) + transform.forward * liftForwardAmount * Mathf.Sign (liftForward)).normalized * liftForward;
 		rigidBody.AddForceAtPosition (liftForce, transform.position + wingForwardDistance*transform.forward, ForceMode.Force);
-		Debug.DrawRay (transform.position + wingForwardDistance*transform.forward, liftForce, Color.yellow);
+		DrawTransformRay (transform.position + wingForwardDistance*transform.forward, liftForce, Color.yellow);
 
 
 		//roll lift
@@ -395,8 +409,8 @@ public class GlideV2 : MonoBehaviour {
 		rigidBody.AddForceAtPosition (transform.up * liftRoll, transform.position - wingOutDistance*transform.right * Mathf.Sign (roll), ForceMode.Force);
 		//		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right, ForceMode.Force);
 
-		Debug.DrawRay (transform.position + wingOutDistance*transform.right * Mathf.Sign (roll), transform.up * liftRoll, Color.magenta);
-		//		Debug.DrawRay (transform.position + wingOutDistance*transform.right, transform.up * liftRight, Color.magenta);
+		DrawTransformRay (transform.position + wingOutDistance*transform.right * Mathf.Sign (roll), transform.up * liftRoll, Color.magenta);
+		//		DrawTransformRay (transform.position + wingOutDistance*transform.right, transform.up * liftRight, Color.magenta);
 
 
 		//induced drag
@@ -409,11 +423,11 @@ public class GlideV2 : MonoBehaviour {
 		Vector3 dragForce = (rigidBody.velocity.normalized * (-1) + transform.right * flapHorizontalDirection * 0.5f).normalized * drag;
 		//		Vector3 dragForce = transform.forward * (-1) * drag;
 		rigidBody.AddForceAtPosition (dragForce, transform.position + (transform.right * flapHorizontalDirection * 0.5f - transform.forward).normalized*dragForwardDistance);
-		Debug.DrawRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.red);
+		DrawTransformRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.red);
 
 
 		//velocity
-		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
+		DrawTransformRay (transform.position, rigidBody.velocity, Color.cyan);
 	}
 
 	void RealisticLift(){
@@ -432,7 +446,7 @@ public class GlideV2 : MonoBehaviour {
 			liftForward = Mathf.Clamp (liftForward, -maxLift, maxLift);
 			Vector3 liftForce = (transform.up * (1f - liftForwardAmount) + transform.forward * liftForwardAmount * Mathf.Sign (liftForward)).normalized * liftForward;
 			rigidBody.AddForceAtPosition (liftForce, transform.position + wingForwardDistance*transform.forward, ForceMode.Force);
-			Debug.DrawRay (transform.position + wingForwardDistance*transform.forward, liftForce, Color.yellow);
+			DrawTransformRay (transform.position + wingForwardDistance*transform.forward, liftForce, Color.yellow);
 
 
 			//roll lift
@@ -443,8 +457,8 @@ public class GlideV2 : MonoBehaviour {
 			rigidBody.AddForceAtPosition (transform.up * liftRoll, transform.position - wingOutDistance*transform.right * Mathf.Sign (roll), ForceMode.Force);
 			//		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right, ForceMode.Force);
 
-			Debug.DrawRay (transform.position + wingOutDistance*transform.right * Mathf.Sign (roll), transform.up * liftRoll, Color.magenta);
-			//		Debug.DrawRay (transform.position + wingOutDistance*transform.right, transform.up * liftRight, Color.magenta);
+			DrawTransformRay (transform.position + wingOutDistance*transform.right * Mathf.Sign (roll), transform.up * liftRoll, Color.magenta);
+			//		DrawTransformRay (transform.position + wingOutDistance*transform.right, transform.up * liftRight, Color.magenta);
 		}
 
 		//induced drag
@@ -456,11 +470,77 @@ public class GlideV2 : MonoBehaviour {
 		Vector3 dragForce = rigidBody.velocity.normalized * (-1) * drag;
 		//		Vector3 dragForce = transform.forward * (-1) * drag;
 		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*dragForwardDistance);
-		Debug.DrawRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.red);
+		DrawTransformRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.red);
 
 
 		//velocity
-		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
+		DrawTransformRay (transform.position, rigidBody.velocity, Color.cyan);
+	}
+
+	void AngledDragLift(){
+		float realLiftCoef = 0f;
+
+		if(wingsOut){
+			float angleOfAttack = SignedVectorAngle (transform.forward, rigidBody.velocity, transform.right);// - pitch*angleScale;
+
+			if (angleOfAttack > 180)
+				angleOfAttack -= 360;
+			if (angleOfAttack < -180)
+				angleOfAttack += 360;
+
+			realLiftCoef = liftCoef * Mathf.Sin (angleOfAttack * Mathf.PI / 180f);
+
+			float liftForward = 0.5f * realLiftCoef * airDensity * wingLiftSurfaceArea * speed * speed;
+			liftForward = Mathf.Clamp (liftForward, -maxLift, maxLift);
+			Vector3 liftForce = transform.up * liftForward;
+			rigidBody.AddForceAtPosition (liftForce, transform.position + wingForwardDistance*transform.forward, ForceMode.Force);
+			DrawTransformRay (transform.position + wingForwardDistance*transform.forward, liftForce, Color.yellow);
+
+
+			//roll lift
+			float liftRoll = Mathf.Clamp (rollScale * 0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed, -maxRoll, maxRoll);
+			liftRoll *= Mathf.Abs (roll);
+			//		float liftRight = rollScale * -0.5f * liftCoef * airDensity * wingLiftSurfaceArea * speed * speed * roll;
+
+			rigidBody.AddForceAtPosition (transform.up * liftRoll, transform.position - wingOutDistance*transform.right * Mathf.Sign (roll), ForceMode.Force);
+			//		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right, ForceMode.Force);
+
+			DrawTransformRay (transform.position + wingOutDistance*transform.right * Mathf.Sign (roll), transform.up * liftRoll, Color.magenta);
+			//		DrawTransformRay (transform.position + wingOutDistance*transform.right, transform.up * liftRight, Color.magenta);
+		}
+
+		//induced drag
+		float aspectRatio = 1f/wingLiftSurfaceArea;
+		float inducedDragCoef = realLiftCoef * realLiftCoef * wingLiftSurfaceArea/ Mathf.PI;
+		float realDragCoef = dragCoef + inducedDragCoef;
+
+		//drag based on wingspan
+		realDragCoef *= (1f - 0.7f*flapDirection);
+
+		drag = realDragCoef * 0.5f * airDensity * speed * speed * wingDragSurfaceArea;
+		Vector3 dragForce = rigidBody.velocity.normalized * (-1) * drag;
+		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*dragForwardDistance);
+		DrawTransformRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.green);
+
+		//tail drag
+		float realTailDragCoef = tailDragCoef * 0.5f * airDensity * speed * speed;
+		Vector3 tailDragAngle = (pitch * transform.up  + yaw * transform.right).normalized;
+		Vector3 tailDrag = realTailDragCoef * new Vector2 (pitch, yaw).magnitude * tailDragAngle;
+		tailDrag = Vector3.ClampMagnitude (tailDrag, maxTailDrag);
+		rigidBody.AddForceAtPosition (tailDrag, transform.position);
+		DrawTransformRay (transform.position, tailDrag, Color.magenta);
+
+
+		//velocity
+		DrawTransformRay (transform.position, rigidBody.velocity, Color.cyan);
+	}
+
+	void DrawTransformRay(Vector3 v1, Vector3 v2){
+		Debug.DrawRay (v1 + rigidBody.velocity * Time.fixedDeltaTime, v2);
+	}
+
+	void DrawTransformRay(Vector3 v1, Vector3 v2, Color color){
+		Debug.DrawRay (v1 + rigidBody.velocity * Time.fixedDeltaTime, v2, color);
 	}
 
 	void IndividualWingLift(){
@@ -488,20 +568,20 @@ public class GlideV2 : MonoBehaviour {
 		rigidBody.AddForceAtPosition (transform.up * liftLeft, transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, ForceMode.Force);
 		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, ForceMode.Force);
 
-		Debug.DrawRay (transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, transform.up * liftLeft, Color.green);
-		Debug.DrawRay (transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, transform.up * liftRight, Color.magenta);
+		DrawTransformRay (transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, transform.up * liftLeft, Color.green);
+		DrawTransformRay (transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, transform.up * liftRight, Color.magenta);
 
 		//clamp to maxspeed
 		//		float brakePercent = 1f - Input.GetAxis ("Brake");
 		//		rigidBody.velocity = Vector3.ClampMagnitude (rigidBody.velocity, maxSpeed);
 
-		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
+		DrawTransformRay (transform.position, rigidBody.velocity, Color.cyan);
 
 
 		drag = 0.5f * airDensity * speed * speed * dragCoef * wingDragSurfaceArea;
 		Vector3 dragForce = rigidBody.velocity.normalized * (-1) * drag;
 		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*wingForwardDistance);
-		Debug.DrawRay (transform.position - transform.forward*wingForwardDistance, dragForce, Color.red);
+		DrawTransformRay (transform.position - transform.forward*wingForwardDistance, dragForce, Color.red);
 	}
 
 	void RealisticIndividualWingLift(){
@@ -529,8 +609,8 @@ public class GlideV2 : MonoBehaviour {
 		rigidBody.AddForceAtPosition (transform.up * liftLeft, transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, ForceMode.Force);
 		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, ForceMode.Force);
 
-		Debug.DrawRay (transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, transform.up * liftLeft, Color.green);
-		Debug.DrawRay (transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, transform.up * liftRight, Color.magenta);
+		DrawTransformRay (transform.position - wingOutDistance*transform.right + wingForwardDistance*transform.forward, transform.up * liftLeft, Color.green);
+		DrawTransformRay (transform.position + wingOutDistance*transform.right + wingForwardDistance*transform.forward, transform.up * liftRight, Color.magenta);
 
 		//induced drag
 		float aspectRatio = 1f/wingLiftSurfaceArea;
@@ -541,10 +621,10 @@ public class GlideV2 : MonoBehaviour {
 		drag = realDragCoef * 0.5f * airDensity * speed * speed * wingDragSurfaceArea;
 		Vector3 dragForce = rigidBody.velocity.normalized * (-1) * drag;
 		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*dragForwardDistance);
-		Debug.DrawRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.red);
+		DrawTransformRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.red);
 
 		//velocity
-		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
+		DrawTransformRay (transform.position, rigidBody.velocity, Color.cyan);
 	}
 
 	void LiftCentered(){
@@ -559,7 +639,7 @@ public class GlideV2 : MonoBehaviour {
 
 		float liftForward = 0.5f * realLiftCoef * airDensity * wingLiftSurfaceArea * speed * speed;
 		rigidBody.AddForceAtPosition (transform.up * liftForward, center, ForceMode.Force);
-		Debug.DrawRay (center, transform.up * liftForward, Color.yellow);
+		DrawTransformRay (center, transform.up * liftForward, Color.yellow);
 
 
 		//roll lift
@@ -569,8 +649,8 @@ public class GlideV2 : MonoBehaviour {
 		rigidBody.AddForceAtPosition (transform.up * liftRoll, center - wingOutDistance*transform.right * Mathf.Sign (roll), ForceMode.Force);
 		//		rigidBody.AddForceAtPosition (transform.up * liftRight, transform.position + wingOutDistance*transform.right, ForceMode.Force);
 
-		Debug.DrawRay (center + wingOutDistance*transform.right * Mathf.Sign (roll), transform.up * liftRoll, Color.magenta);
-		//		Debug.DrawRay (transform.position + wingOutDistance*transform.right, transform.up * liftRight, Color.magenta);
+		DrawTransformRay (center + wingOutDistance*transform.right * Mathf.Sign (roll), transform.up * liftRoll, Color.magenta);
+		//		DrawTransformRay (transform.position + wingOutDistance*transform.right, transform.up * liftRight, Color.magenta);
 
 
 		//induced drag
@@ -582,11 +662,11 @@ public class GlideV2 : MonoBehaviour {
 		Vector3 dragForce = rigidBody.velocity.normalized * (-1) * drag;
 		//		Vector3 dragForce = transform.forward * (-1) * drag;
 		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*dragForwardDistance);
-		Debug.DrawRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.red);
+		DrawTransformRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.red);
 
 
 		//velocity
-		Debug.DrawRay (transform.position, rigidBody.velocity, Color.cyan);
+		DrawTransformRay (transform.position, rigidBody.velocity, Color.cyan);
 	}
 
 	void CheckGround(){

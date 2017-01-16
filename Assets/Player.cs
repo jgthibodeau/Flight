@@ -52,6 +52,7 @@ public class Player : MonoBehaviour {
 
 
 			glideV2Script.pitch = 0;
+			glideV2Script.yaw = 0;
 			glideV2Script.roll = 0;
 			glideV2Script.forward = 0;
 			glideV2Script.turn = 0;
@@ -90,8 +91,9 @@ public class Player : MonoBehaviour {
 
 
 
-			glideV2Script.pitch = Input.GetAxis ("Vertical Right");
-			glideV2Script.roll = Input.GetAxis ("Horizontal Right");
+			glideV2Script.pitch = (-1)*Input.GetAxis ("Vertical Right");
+			glideV2Script.yaw = Input.GetAxis ("Horizontal Right");
+			glideV2Script.roll = Input.GetAxis ("Horizontal");
 			glideV2Script.forward = Input.GetAxis ("Vertical");
 			glideV2Script.right = Input.GetAxis ("Horizontal");
 			glideV2Script.turn = Input.GetAxis ("Horizontal Right");
