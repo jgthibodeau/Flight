@@ -530,13 +530,13 @@ public class GlideV2 : MonoBehaviour {
 		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*dragForwardDistance);
 		DrawTransformRay (transform.position - transform.forward*dragForwardDistance, dragForce, Color.green);
 
-//		//tail drag
-//		float realTailDragCoef = tailDragCoef * 0.5f * airDensity * speed * speed;
-//		Vector3 tailDragAngle = (tailPitch * transform.up  + yaw * transform.right).normalized;
-//		Vector3 tailDrag = realTailDragCoef * new Vector2 (pitch, yaw).magnitude * tailDragAngle;
-//		tailDrag = Vector3.ClampMagnitude (tailDrag, maxTailDrag);
-//		rigidBody.AddForceAtPosition (tailDrag, transform.position);
-//		DrawTransformRay (transform.position, tailDrag, Color.magenta);
+		//tail drag
+		float realTailDragCoef = tailDragCoef * 0.5f * airDensity * speed * speed;
+		Vector3 tailDragAngle = (tailPitch * transform.up  + yaw * transform.right).normalized;
+		Vector3 tailDrag = realTailDragCoef * new Vector2 (pitch, yaw).magnitude * tailDragAngle;
+		tailDrag = Vector3.ClampMagnitude (tailDrag, maxTailDrag);
+		rigidBody.AddForceAtPosition (tailDrag, transform.position);
+		DrawTransformRay (transform.position, tailDrag, Color.magenta);
 
 
 		//velocity
