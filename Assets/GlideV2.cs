@@ -40,6 +40,7 @@ public class GlideV2 : MonoBehaviour {
 	public float airDensity;
 
 	public float walkSpeed;
+	public float minWalkAmount;
 	public float walkTurnSpeed;
 
 	public float speed;
@@ -259,20 +260,41 @@ public class GlideV2 : MonoBehaviour {
 	}
 
 	void Walk(){
-		//		Vector3 walkDirection = Vector3.ClampMagnitude (transform.forward * forward + transform.right * right, 1);
-		//		rigidBody.AddForceAtPosition (walkDirection * walkSpeed, transform.position);
+		Vector3 inputVector = new Vector3 (right, 0, forward);
+		float speed = inputVector.magnitude;
+		bool walking = inputVector.magnitude > 0;
+		bool running = inputVector.magnitude > 0.5f;
 
-		rigidBody.AddForceAtPosition (transform.forward*forward*walkSpeed, transform.position);
-		rigidBody.AddForceAtPosition (transform.right*right*walkSpeed, transform.position);
-		//		rigidBody.AddTorque (transform.up*turn*walkTurnSpeed);
+		birdAnimator.Walking = walking && !running;
+		birdAnimator.Hopping = running;
 
-		birdAnimator.Walking = (forward != 0 || right != 0);
+		if (walking && speed >= minWalkAmount) {
+			Vector3 direction = rigidBody.velocity;
+			Vector3 surfaceParallel = direction - groundNormal * Vector3.Dot(direction, groundNormal);
+			Quaternion lookDirection = Quaternion.LookRotation (surfaceParallel, groundNormal);
+			transform.rotation = Quaternion.Lerp (transform.rotation, lookDirection, Time.fixedDeltaTime * walkTurnSpeed);
 
-		//		Quaternion desiredNormal = Quaternion.LookRotation(Vector3.Exclude(groundNormal, transform.forward), groundNormal);
-		//		Vector3 forwardVector = rigidBody.velocity.magnitude > 0f ? rigidBody.velocity : transform.forward;
-		Vector3 forwardVector = transform.forward + transform.right*turn*walkTurnSpeed;
-		Quaternion desiredNormal = Quaternion.LookRotation(Vector3.Exclude(groundNormal, forwardVector), groundNormal);
-		transform.rotation = Quaternion.Slerp (transform.rotation, desiredNormal, Time.fixedDeltaTime);
+			Vector3 velocityChange = CalculateVelocityChange (inputVector);
+			DrawTransformRay (transform.position, velocityChange, Color.cyan);
+
+			rigidBody.AddForce (velocityChange, ForceMode.VelocityChange);
+		}
+	}
+
+	private Vector3 CalculateVelocityChange(Vector3 inputVector)
+	{
+		// Calculate how fast we should be moving
+		Vector3 relativeVelocity = Camera.main.transform.TransformDirection(inputVector) * walkSpeed;
+
+		// Calcualte the delta velocity
+		Vector3 currRelativeVelocity = rigidBody.velocity;
+		Vector3 velocityChange = relativeVelocity - currRelativeVelocity;
+		float maxVelocityChange = 10.0f;
+		velocityChange.x = Mathf.Clamp(velocityChange.x, -maxVelocityChange, maxVelocityChange);
+		velocityChange.z = Mathf.Clamp(velocityChange.z, -maxVelocityChange, maxVelocityChange);
+		velocityChange.y = 0;
+
+		return velocityChange;
 	}
 
 	void OnTriggerEnter(Collider collisionInfo) {
