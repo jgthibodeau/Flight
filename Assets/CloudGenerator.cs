@@ -39,7 +39,7 @@ public class CloudGenerator : MonoBehaviour {
 				child.localScale = scale;
 			}
 			if(newCloud.GetComponent<Collider> () != null)
-				newCloud.GetComponent<Collider> ().enabled = false;
+				newCloud.GetComponent<Collider> ().isTrigger = true;
 //			SetParticles (newCloud);
 
 //			GameObject newCloud = Instantiate (cloud);
