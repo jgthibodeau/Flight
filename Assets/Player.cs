@@ -1,15 +1,38 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+//[RequireComponent(typeof(Rigidbody))]
+//[RequireComponent(typeof(GlideV2))]
+
 public class Player : MonoBehaviour {
-	private Glide glideScript;
 	private GlideV2 glideV2Script;
 	private Grab grabScript;
 	private Perch perchScript;
+	private Walk walkScript;
 
 	private int PerchableLayer;
 	private int EnemyLayer;
 	private int PreyLayer;
+
+	public LayerMask layerMaskForGround;
+	public bool isGrounded;
+	public bool isUpright;
+	public float uprightThreshold;
+	public float speed;
+	public float ragdollSpeed;
+	public Vector3 groundNormal;
+	public Vector3 up;
+	private Collider characterCollider;
+	public BirdAnimator birdAnimator;
+	private Rigidbody rigidBody;
+	private bool isFlapping;
+	public Vector3 centerOfGravity;
+	private Vector3 center;
+	private bool landed;
+	public float gravity;
+	public float gravityForwardDistance;
+	public float gravityDownDistance;
+	public bool keepUprightAlways;
 
 	// Use this for initialization
 	void Start () {
@@ -17,19 +40,162 @@ public class Player : MonoBehaviour {
 		EnemyLayer = LayerMask.NameToLayer ("Enemy");
 		PreyLayer = LayerMask.NameToLayer ("Prey");
 
-		glideScript = transform.GetComponent<Glide> ();
+		characterCollider = transform.GetComponent<Collider> ();
+		rigidBody = transform.GetComponent<Rigidbody> ();
+
 		glideV2Script = transform.GetComponent<GlideV2> ();
 		grabScript = transform.GetComponent<Grab> ();
 		perchScript = transform.GetComponent<Perch> ();
+		walkScript = transform.GetComponent<Walk> ();
+
+		glideV2Script.birdAnimator = birdAnimator;
+		walkScript.birdAnimator = birdAnimator;
+
+		glideV2Script.rigidBody = rigidBody;
+		walkScript.rigidBody = rigidBody;
+
+		glideV2Script.gravity = gravity;
+
+		rigidBody.centerOfMass = Vector3.zero;
+
+		//		leftWing = transform.Find ("bird2/1/Bird_rig_3/1_2/Backbones_null_3/Wing_3");
+		//		rightWing = transform.Find ("bird2/1/Bird_rig_3/1_2/Backbones_null_3/Wing_1_3");
+
+		//		leftWingInitialRotation = leftWing.localRotation.eulerAngles;
+		//		rightWingInitialRotation = rightWing.localRotation.eulerAngles;
 	}
-	
+
+	void FixedUpdate () {
+//		center = transform.position + centerOfGravity.x * transform.right + centerOfGravity.y * transform.up + centerOfGravity.z * transform.forward;
+
+		//assume not fully grounded
+		landed = false;
+		speed = rigidBody.velocity.magnitude;
+
+		//not on ground
+		if (!isGrounded) {
+//			if (keepUprightAlways) {
+			AirGravity ();
+//			}
+		}
+		//trying to get off ground
+		else if (glideV2Script.flapSpeed != 0) {
+			AirGravity ();
+		}
+		//TODO on ground, but moving fast
+		else if (speed > ragdollSpeed) {
+			RagdollGravity ();
+		}
+		//on ground and not upright
+		else if (!isUpright) {
+			GroundGravity ();
+		}
+		//on ground and upright
+		else {
+			GroundGravity ();
+//			if (rigidBody.velocity.magnitude <= 0.01f) {
+				landed = true;
+//			}
+		}
+
+		glideV2Script.isGrounded = landed;
+		walkScript.isGrounded = landed;
+	}
+
+
 	// Update is called once per frame
 	void Update () {
+		GetInput ();
+
+		CheckGround ();
+
+		UpdateRendering ();
+	}
+
+	void AirGravity(){
+		Vector3 gravityForce = Vector3.down * gravity;
+		rigidBody.AddForceAtPosition (gravityForce, transform.position - transform.up * gravityDownDistance + transform.forward * gravityForwardDistance, ForceMode.Force);
+		Util.DrawRigidbodyRay(rigidBody, transform.position - transform.up * gravityDownDistance + transform.forward * gravityForwardDistance, gravityForce, Color.gray);
+	}
+
+	void GroundGravity(){
+		Vector3 gravityForce = -groundNormal * gravity;
+		//		rigidBody.AddForceAtPosition (gravityForce, transform.position - transform.up * 1 + transform.forward * gravityForwardDistance, ForceMode.Force);
+		rigidBody.AddForceAtPosition (gravityForce/2, transform.position - transform.up * 1 + transform.forward, ForceMode.Force);
+		rigidBody.AddForceAtPosition (gravityForce/2, transform.position - transform.up * 1 - transform.forward, ForceMode.Force);
+
+		Util.DrawRigidbodyRay(rigidBody, transform.position - transform.up * gravityDownDistance + transform.forward * gravityForwardDistance, gravityForce, Color.gray);
+	}
+
+	void RagdollGravity(){
+		Vector3 gravityForce = Vector3.down * gravity;
+		rigidBody.AddForceAtPosition (gravityForce, transform.position, ForceMode.Force);
+		Util.DrawRigidbodyRay(rigidBody, transform.position, gravityForce, Color.gray);
+	}
+
+	void CheckGround(){
+		Debug.DrawLine (characterCollider.bounds.center, new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y-0.1f, characterCollider.bounds.center.z), Color.red);
+
+		isGrounded = Physics.CheckCapsule (
+			characterCollider.bounds.center,
+			new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y-0.1f, characterCollider.bounds.center.z),
+			0.18f,
+			layerMaskForGround.value
+		);
+		if (isGrounded) {
+			RaycastHit hit;
+			if (Physics.Raycast (transform.position, -transform.up, out hit, 1.2f, layerMaskForGround)) {
+				groundNormal = hit.normal;
+			}
+		}
+
+		float uprightAngle = Vector3.Angle (transform.up, groundNormal);
+		isUpright = uprightAngle < uprightThreshold;
+		up = transform.up;
+		Debug.Log (uprightAngle);
+
+		glideV2Script.groundNormal = groundNormal;
+		walkScript.groundNormal = groundNormal;
+	}
+
+	void UpdateRendering(){
+//		//flap wings
+//		if (glideV2Script.flapSpeed != 0) {
+//			isFlapping = true;
+//			birdAnimator.FlapSpeed = 2f;// + flapAnimationScale * flapSpeed;
+//			birdAnimator.Flapping = true;
+//
+//			//			if(!playingFlapSound){
+//			//				StartCoroutine(PlayFlapSound(flapSoundRate*(1-flapSpeed) + minFlapRate));
+//			//				playingFlapSound = true;
+//			//				flapAudioSource.pitch = Random.Range (flapMinPitch, flapMaxPitch);
+//			//			}
+//		} else {
+//			isFlapping = false;
+//			birdAnimator.Flapping = false;
+//		}
+
+
+		birdAnimator.WingsOut = glideV2Script.wingsOut;
+
+		//rotate wings
+		if (!isGrounded) {
+			//			leftWing.localRotation = Quaternion.Euler (leftWingInitialRotation + new Vector3 ((flapDirection) * 15, -(flapDirection) * 20, 0));
+			//			rightWing.localRotation = Quaternion.Euler (rightWingInitialRotation + new Vector3 ((flapDirection) * 15, (flapDirection) * 20, 0));
+		} else {
+			//			leftWing.localRotation = Quaternion.Euler (leftWingInitialRotation);
+			//			rightWing.localRotation = Quaternion.Euler (rightWingInitialRotation);
+		}
+
+		birdAnimator.Grounded = landed;//isGrounded && !isFlapping;
+	}
+
+	public void GetInput () {
 		//handle if have grabbed object
 		if (grabScript.hasObject) {
 			int grabbedLayer = grabScript.grabbedObject.gameObject.layer;
 			if (grabbedLayer == PerchableLayer) {
-				perchScript.SetPerch (grabScript.grabbedObject, grabScript.grabbedLocation, grabScript.grabbedNormal, glideScript.rigidBody.velocity.magnitude);
+				perchScript.SetPerch (grabScript.grabbedObject, grabScript.grabbedLocation, grabScript.grabbedNormal, rigidBody.velocity.magnitude);
 			} else if (grabbedLayer == EnemyLayer) {
 			} else if (grabbedLayer == PreyLayer) {
 			}
@@ -39,26 +205,16 @@ public class Player : MonoBehaviour {
 
 		//as long as we aren't perched, do normal controls
 		if (perchScript.isPerching) {
-			glideScript.pitch = 0;
-			glideScript.roll = 0;
-			glideScript.forward = 0;
-			glideScript.turn = 0;
-			glideScript.flapSpeed = 0;
-			glideScript.flapDirection = 0;
-			glideScript.flapHorizontalDirection = 0;
-
-			glideScript.rigidBody.velocity = Vector3.zero;
-			glideScript.rigidBody.constraints = RigidbodyConstraints.FreezePosition;
-
-
 			glideV2Script.pitch = 0;
 			glideV2Script.yaw = 0;
 			glideV2Script.roll = 0;
 			glideV2Script.forward = 0;
-			glideV2Script.turn = 0;
+			glideV2Script.right = 0;
 			glideV2Script.flapSpeed = 0;
 			glideV2Script.flapDirection = 0;
-			glideV2Script.flapHorizontalDirection = 0;
+
+			walkScript.forward = 0;
+			walkScript.right = 0;
 
 			glideV2Script.rigidBody.velocity = Vector3.zero;
 			glideV2Script.rigidBody.constraints = RigidbodyConstraints.FreezePosition;
@@ -72,41 +228,19 @@ public class Player : MonoBehaviour {
 		}
 
 		if(!perchScript.isPerching){
-			glideScript.pitch = Input.GetAxis ("Vertical Right");
-			glideScript.roll = Input.GetAxis ("Horizontal Right");
-			glideScript.forward = Input.GetAxis ("Vertical");
-			glideScript.right = Input.GetAxis ("Horizontal");
-			glideScript.turn = Input.GetAxis ("Horizontal Right");
-			glideScript.flapSpeed = Input.GetAxis ("Flap");
-			glideScript.flapDirection = Input.GetAxis ("Vertical");
-			glideScript.flapHorizontalDirection = Input.GetAxis ("Horizontal");
-
-			if (glideScript.flapSpeed == 0) {
-				glideScript.wingsOut = Input.GetButtonDown ("Close Wings") ^ glideScript.wingsOut;
-			} else {
-				glideScript.wingsOut = true;
-			}
-
-			glideScript.rigidBody.constraints = RigidbodyConstraints.None;
-
-
-
 			glideV2Script.pitch = Input.GetAxis ("Vertical");
 			glideV2Script.roll = Input.GetAxis ("Horizontal");
 
 			glideV2Script.yaw = Input.GetAxis ("Horizontal Right");
-//			glideV2Script.tailPitch = (-1)*Input.GetAxis ("Vertical Right");
 
-			glideV2Script.forward = Input.GetAxis ("Vertical");
-			glideV2Script.right = Input.GetAxis ("Horizontal");
-			glideV2Script.turn = Input.GetAxis ("Horizontal Right");
+			walkScript.forward = Input.GetAxis ("Vertical");
+			walkScript.right = Input.GetAxis ("Horizontal");
 
 			glideV2Script.flapSpeed = Input.GetAxis ("Flap");
 			glideV2Script.flapDirection = Input.GetAxis ("Vertical Right");
-//			glideV2Script.flapHorizontalDirection = Input.GetAxis ("Horizontal Right");
 
 			if (glideV2Script.flapSpeed == 0) {
-				glideV2Script.wingsOut = Input.GetButtonDown ("Close Wings") ^ glideScript.wingsOut;
+				glideV2Script.wingsOut = Input.GetButtonDown ("Close Wings") ^ glideV2Script.wingsOut;
 			} else {
 				glideV2Script.wingsOut = true;
 			}
@@ -117,4 +251,15 @@ public class Player : MonoBehaviour {
 			grabScript.grab = (Input.GetAxis ("Grab") != 0);
 		}
 	}
+
+
+	void OnTriggerEnter(Collider collisionInfo) {
+		Debug.Log (collisionInfo);
+		if (collisionInfo.gameObject.CompareTag ("Fish")) {
+			GameObject.Destroy (collisionInfo.gameObject);
+		}
+
+		//TODO handle crashing: close wings and tumble, slowing down if on ground
+	}
+
 }
