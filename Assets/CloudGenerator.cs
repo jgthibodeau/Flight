@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[ExecuteInEditMode]
 public class CloudGenerator : MonoBehaviour {
 //	public GameObject cloud;
 //	public GameObject cloudSphere;
@@ -16,6 +17,8 @@ public class CloudGenerator : MonoBehaviour {
 	public float maxScale;
 
 	public GameObject[] clouds;
+	public bool createClouds = false;
+	string cloudTag = "Cloud";
 
 	MeshParticleEmitter originalEmmiter;
 	ParticleAnimator originalAnimator;
@@ -23,14 +26,32 @@ public class CloudGenerator : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		
+	}
+	
+	// Update is called once per frame
+	void Update () {
+		if (createClouds) {
+			GameObject[] oldClouds = GameObject.FindGameObjectsWithTag (cloudTag);
+			foreach (GameObject cloud in oldClouds) {
+				GameObject.DestroyImmediate (cloud);
+			}
+
+			createClouds = false;
+			CreateClouds ();
+		}
+	}
+
+	void CreateClouds() {
 		int cloudLayer = LayerMask.NameToLayer ("Cloud");
-//		originalEmmiter = cloudSphere.GetComponent<MeshParticleEmitter> ();
-//		originalAnimator = cloudSphere.GetComponent<ParticleAnimator> ();
-//		originalRenderer = cloudSphere.GetComponent<ParticleRenderer> ();
+		//		originalEmmiter = cloudSphere.GetComponent<MeshParticleEmitter> ();
+		//		originalAnimator = cloudSphere.GetComponent<ParticleAnimator> ();
+		//		originalRenderer = cloudSphere.GetComponent<ParticleRenderer> ();
 
 		int cloudTypes = clouds.Length - 1;
 		for(int j = 0; j<numberClouds; j++){
 			GameObject newCloud = Instantiate (clouds [Random.Range (0, cloudTypes)]);
+			newCloud.tag = cloudTag;
 			SetLayerRecursively (newCloud, cloudLayer);
 			newCloud.transform.parent = this.transform;
 			newCloud.transform.localPosition = new Vector3 (Random.Range (-maxDistance, maxDistance), Random.Range (minHeight, maxHeight), Random.Range (-maxDistance, maxDistance));
@@ -40,29 +61,24 @@ public class CloudGenerator : MonoBehaviour {
 			}
 			if(newCloud.GetComponent<Collider> () != null)
 				newCloud.GetComponent<Collider> ().isTrigger = true;
-//			SetParticles (newCloud);
+			//			SetParticles (newCloud);
 
-//			GameObject newCloud = Instantiate (cloud);
-//			newCloud.transform.parent = this.transform;
-//			newCloud.transform.localPosition = new Vector3 (Random.Range (-maxDistance, maxDistance), Random.Range (-maxDistance, maxDistance), Random.Range (-maxDistance, maxDistance));
-//
-//			int count = Random.Range (minCount, maxCount);
-//			for (int i = 0; i < count; i++) {
-//				GameObject newCloudSphere = Instantiate (cloudSphere);
-//				newCloudSphere.transform.parent = newCloud.transform;
-//
-//				float scale = Random.Range (minRadius, maxRadius);
-//				newCloudSphere.transform.localScale = new Vector3(scale, scale, scale);
-//
-//				float distance = Mathf.Sqrt (count)/4;
-//				newCloudSphere.transform.localPosition = new Vector3 (Random.Range (-distance, distance), Random.Range (-distance, distance), Random.Range (-distance, distance));
-//			}
+			//			GameObject newCloud = Instantiate (cloud);
+			//			newCloud.transform.parent = this.transform;
+			//			newCloud.transform.localPosition = new Vector3 (Random.Range (-maxDistance, maxDistance), Random.Range (-maxDistance, maxDistance), Random.Range (-maxDistance, maxDistance));
+			//
+			//			int count = Random.Range (minCount, maxCount);
+			//			for (int i = 0; i < count; i++) {
+			//				GameObject newCloudSphere = Instantiate (cloudSphere);
+			//				newCloudSphere.transform.parent = newCloud.transform;
+			//
+			//				float scale = Random.Range (minRadius, maxRadius);
+			//				newCloudSphere.transform.localScale = new Vector3(scale, scale, scale);
+			//
+			//				float distance = Mathf.Sqrt (count)/4;
+			//				newCloudSphere.transform.localPosition = new Vector3 (Random.Range (-distance, distance), Random.Range (-distance, distance), Random.Range (-distance, distance));
+			//			}
 		}
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
 	}
 
 	void SetLayerRecursively(GameObject obj, int newLayer){
