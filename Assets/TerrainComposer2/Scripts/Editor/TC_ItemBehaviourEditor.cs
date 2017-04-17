@@ -33,6 +33,7 @@ namespace TerrainComposer2
         
         SerializedProperty shapes, topSize, bottomSize, shapeSize;
         SerializedProperty iterations, mipmapLevel, convexityMode, convexityStrength, blurMode, detectRange;
+        SerializedProperty distanceRules;
         SerializedProperty notes;
 
         // SelectItemGroup 
@@ -46,6 +47,7 @@ namespace TerrainComposer2
 
         // SpawnObject
         SerializedProperty spawnObject, linkToPrefab, go, rotRangeX, rotRangeY, rotRangeZ, isSnapRot, isSnapRotX, isSnapRotY, isSnapRotZ, snapRotX, snapRotY, snapRotZ, lookAtTarget, lookAtX, heightRange, includeTerrainHeight;
+        SerializedProperty customScaleRange, scaleRangeX, scaleRangeY, scaleRangeZ, parentMode, parentName, parentT, parentToTerrain;
 
         SPCurve localCurve = new SPCurve();
         SPCurve worldCurve = new SPCurve();
@@ -59,6 +61,9 @@ namespace TerrainComposer2
         TC_Node node;
         TC_SelectItemGroup selectItemGroup;
         TC_SelectItem selectItem;
+
+        TC_Settings settings;
+        TC_Generate generate;
 
         Event eventCurrent;
 
@@ -132,6 +137,8 @@ namespace TerrainComposer2
                 seed2 = serializedObject.FindProperty("seed");
             }
 
+            if (layer != null) distanceRules = serializedObject.FindProperty("distanceRules");
+            
             TC_Reporter.Log("OnEnable");
 
             if (layerLevel != null)
@@ -220,6 +227,7 @@ namespace TerrainComposer2
                 selectIndex = serializedObject.FindProperty("selectIndex");
                 // splatCustom = serializedObject.FindProperty("splatCustom");
                 // splatCustomValues = serializedObject.FindProperty("splatCustomValues");
+                distanceRules = serializedObject.FindProperty("distanceRules");
                 
                 if (selectItem.outputId == TC.treeOutput)
                 {
@@ -239,6 +247,10 @@ namespace TerrainComposer2
                     go = spawnObject.FindPropertyRelative("go");
 
                     linkToPrefab = spawnObject.FindPropertyRelative("linkToPrefab");
+                    parentMode = spawnObject.FindPropertyRelative("parentMode");
+                    parentName = spawnObject.FindPropertyRelative("parentName");
+                    parentT = spawnObject.FindPropertyRelative("parentT");
+                    parentToTerrain = spawnObject.FindPropertyRelative("parentToTerrain");
                     
                     heightRange = spawnObject.FindPropertyRelative("heightRange");
                     heightOffset = spawnObject.FindPropertyRelative("heightOffset");
@@ -258,6 +270,11 @@ namespace TerrainComposer2
                     snapRotX = spawnObject.FindPropertyRelative("snapRotX");
                     snapRotY = spawnObject.FindPropertyRelative("snapRotY");
                     snapRotZ = spawnObject.FindPropertyRelative("snapRotZ");
+
+                    customScaleRange = spawnObject.FindPropertyRelative("customScaleRange");
+                    scaleRangeX = spawnObject.FindPropertyRelative("scaleRangeX");
+                    scaleRangeY = spawnObject.FindPropertyRelative("scaleRangeY");
+                    scaleRangeZ = spawnObject.FindPropertyRelative("scaleRangeZ");
 
                     scaleRange = spawnObject.FindPropertyRelative("scaleRange");
                     scaleMulti = spawnObject.FindPropertyRelative("scaleMulti");
@@ -305,8 +322,8 @@ namespace TerrainComposer2
             if (eventCurrent.type == EventType.KeyUp) keyUp = true;
             else if (eventCurrent.type == EventType.KeyDown) keyUp = false;
 
-            if (eventCurrent.commandName == "Delete" || eventCurrent.commandName == "SoftDelete") { eventCurrent.Use(); cmdDelete = true; }
-            else if (eventCurrent.commandName == "Duplicate") { eventCurrent.Use(); cmdDuplicate = true; }
+            if ((eventCurrent.commandName == "Delete" || eventCurrent.commandName == "SoftDelete") && eventCurrent.type == EventType.Repaint) { eventCurrent.Use(); cmdDelete = true; }
+            else if (eventCurrent.commandName == "Duplicate" && eventCurrent.type == EventType.Repaint) { eventCurrent.Use(); cmdDuplicate = true; }
             
             if (cmdDelete && keyUp) { cmdDelete = keyUp = false; TC_NodeWindow.DeleteKey(); return; }
             else if (cmdDuplicate && keyUp) { cmdDuplicate = keyUp = false; TC_NodeWindow.DuplicateKey(); return; }
@@ -464,7 +481,10 @@ namespace TerrainComposer2
 
         public override void OnInspectorGUI()
         {
-            if (TC_Settings.instance == null) return;
+            settings = TC_Settings.instance;
+            generate = TC_Generate.instance;
+
+            if (settings == null) return;
             serializedObject.Update();
             
             EditorGUILayout.BeginHorizontal();
@@ -638,24 +658,24 @@ namespace TerrainComposer2
                     }
                     else if (node.inputTerrain == InputTerrain.Splatmap)
                     {
-                        if (TC_Settings.instance.hasMasterTerrain)
+                        if (settings.hasMasterTerrain)
                         {
                             EditorGUILayout.BeginHorizontal();
-                            DrawIntSlider(splatSelectIndex, 0, TC_Settings.instance.masterTerrain.terrainData.splatPrototypes.Length - 1, new GUIContent("Splat Index"));
+                            DrawIntSlider(splatSelectIndex, 0, settings.masterTerrain.terrainData.splatPrototypes.Length - 1, new GUIContent("Splat Index"));
                             EditorGUILayout.EndHorizontal();
                             EditorGUILayout.BeginHorizontal();
                             GUILayout.Space(5);
                             EditorGUILayout.PrefixLabel(" ");
-                            if (splatSelectIndex.intValue < TC_Settings.instance.masterTerrain.terrainData.splatPrototypes.Length)
+                            if (splatSelectIndex.intValue < settings.masterTerrain.terrainData.splatPrototypes.Length)
                             {
-                                DrawPreviewTexture(TC_Settings.instance.masterTerrain.terrainData.splatPrototypes[splatSelectIndex.intValue].texture, Color.white, Color.white, 150, 150);
+                                DrawPreviewTexture(settings.masterTerrain.terrainData.splatPrototypes[splatSelectIndex.intValue].texture, Color.white, Color.white, 150, 150);
                             }
                             EditorGUILayout.EndHorizontal();
                         }
                     }
                     else if (node.inputTerrain == InputTerrain.Normal)
                     {
-                        DrawCommingSoon("The normal node will be added in another beta release.");
+                        DrawCommingSoon("The normal node will be added in the next release.");
                     }
                     else if (node.inputTerrain == InputTerrain.Collision)
                     {
@@ -699,7 +719,6 @@ namespace TerrainComposer2
 
                     if (node.inputFile == InputFile.RawImage) DrawRawImage();
                     else if (node.inputFile == InputFile.Image) DrawImage();
-                    else if (node.inputFile == InputFile.Image) DrawCommingSoon("The image node will be added in another beta release.");
                 }
                 else if (node.inputKind == InputKind.Current)
                 {
@@ -725,7 +744,7 @@ namespace TerrainComposer2
                 }
                 else if (node.inputKind == InputKind.Portal)
                 {
-                    DrawCommingSoon("Portals will be added in another beta release.");
+                    DrawCommingSoon("Portals will be added in another release.");
                 }
             }
             else if (selectItemGroup != null)
@@ -750,23 +769,43 @@ namespace TerrainComposer2
                 DrawCurve(worldCurve, "Global Height Curve");
             }
 
-            if (TC_Generate.instance.generateDone != TC_Generate.instance.generateDoneOld)
+            if (generate.generateDone != generate.generateDoneOld)
             {
                 // Debug.Log("Generate Done");
                 Repaint();
-                TC_Generate.instance.generateDoneOld = TC_Generate.instance.generateDone;
+                generate.generateDoneOld = generate.generateDone;
             }
 
             // DrawMethod();
             // Draw Inspector
             // if (node == null)
+            
+            if (layerGroup != null)
+            {
+                if (layerGroup.level == 0)
+                {
+                    if (layerGroup.outputId == TC.heightOutput) DrawExport(settings.heightmapFilename, 0);
+                    if (layerGroup.outputId == TC.splatOutput) DrawExport(settings.splatmapFilename, 1);
+                    else if (layerGroup.outputId == TC.colorOutput) DrawExport(settings.colormapFilename, 2);
+                }
+            }
+
             TD.DrawSpacer();
+
+            //if (layer != null)
+            //{
+            //    if (layer.outputId == TC.treeOutput || layer.outputId == TC.objectOutput)
+            //    {
+            //        DrawDistantRules();
+            //        TD.DrawSpacer();
+            //    }
+            //}
 
             TD.DrawLabelWidthUnderline("Notes", 14);
 
             notes.stringValue = EditorGUILayout.TextArea(notes.stringValue);
 
-            if (TC_Settings.instance.drawDefaultInspector) base.OnInspectorGUI();  
+            if (settings.drawDefaultInspector) base.OnInspectorGUI();  
             TD.DrawSpacer();
             
             serializedObject.ApplyModifiedProperties();
@@ -786,6 +825,206 @@ namespace TerrainComposer2
                     AutoGenerate();
                 }
             }
+        }
+
+        void DrawDistantRules()
+        {
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Space(0);
+            Rect rect = GUILayoutUtility.GetLastRect();
+            distanceRules.isExpanded = EditorGUI.Foldout(new Rect(rect.x, rect.y + 3, 25, 18), distanceRules.isExpanded, "");
+            if (distanceRules.isExpanded) TD.DrawLabelWidthUnderline(distanceRules.displayName, 12); else TD.DrawLabel(distanceRules.displayName, 12);
+            EditorGUILayout.EndHorizontal();
+
+            if (distanceRules.isExpanded)
+            {
+                GUILayout.Space(5);
+                EditorGUILayout.BeginVertical("Box");
+                EditorGUILayout.BeginHorizontal();
+                    distanceRules.arraySize = EditorGUILayout.IntField("Size", distanceRules.arraySize);
+                    if (GUILayout.Button("+", EditorStyles.miniButtonMid, GUILayout.Width(25)))
+                    {
+                        distanceRules.InsertArrayElementAtIndex(0);
+                    }
+                EditorGUILayout.EndHorizontal();
+                
+                EditorGUI.indentLevel++;
+
+                for (int i = 0; i < distanceRules.arraySize; i++)
+                {
+                    SerializedProperty elementProperty = distanceRules.GetArrayElementAtIndex(i);
+
+                    EditorGUILayout.BeginHorizontal();
+                        TD.DrawProperty(elementProperty, new GUIContent("Rule " + (i + 1)));
+                        if (GUILayout.Button("-", EditorStyles.miniButtonMid, GUILayout.Width(25)))
+                        {
+                            distanceRules.DeleteArrayElementAtIndex(i--); continue;
+                        }
+                    EditorGUILayout.EndHorizontal();
+
+                    if (elementProperty.isExpanded)
+                    {
+                        SerializedProperty range = elementProperty.FindPropertyRelative("range");
+                        if (range != null)
+                        {
+                            DrawVector2(range, false, "Min", "Max", new GUIContent("Distance Range"), 55, 55);
+                        }
+
+                        SerializedProperty ruleItems = elementProperty.FindPropertyRelative("items");
+                        if (ruleItems != null)
+                        {
+                            EditorGUI.indentLevel++;
+                            DrawRuleItmes(ruleItems);
+                            EditorGUI.indentLevel--;
+                        }
+                    }
+                }
+
+                EditorGUI.indentLevel--;
+                EditorGUILayout.EndVertical();
+            }
+        }
+
+        void DrawRuleItmes(SerializedProperty ruleItems)
+        {
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Space(0);
+            Rect rect = GUILayoutUtility.GetLastRect();
+            ruleItems.isExpanded = EditorGUI.Foldout(new Rect(rect.x, rect.y + 3, 25, 18), ruleItems.isExpanded, "");
+            TD.DrawLabel(ruleItems.displayName, 12);
+            EditorGUILayout.EndHorizontal();
+
+            if (ruleItems.isExpanded)
+            {
+                EditorGUILayout.BeginVertical("Box");
+                EditorGUI.indentLevel++;
+                ruleItems.arraySize = EditorGUILayout.IntField("Size", ruleItems.arraySize);
+                EditorGUI.indentLevel--;
+
+                EditorGUI.indentLevel++;
+
+                for (int i = 0; i < ruleItems.arraySize; i++)
+                {
+                    SerializedProperty elementProperty = ruleItems.GetArrayElementAtIndex(i);
+
+                    TD.DrawProperty(elementProperty, new GUIContent("Item " + (i + 1)));
+                    DrawRuleItem(elementProperty);
+                }
+                EditorGUI.indentLevel--;
+                EditorGUILayout.EndVertical();
+            }
+        }
+
+        void DrawRuleItem(SerializedProperty ruleItemElement)
+        {
+            TC_ItemBehaviour ruleItem = ruleItemElement.objectReferenceValue as TC_ItemBehaviour;
+            if (ruleItem == null) return;
+
+            TC_Layer ruleLayer = ruleItem as TC_Layer;
+
+            if (ruleLayer != null)
+            {
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.Space(60);
+                for (int i = 0; i < ruleLayer.selectItemGroup.itemList.Count; i++)
+                {
+                    TC_SelectItem selectItem = ruleLayer.selectItemGroup.itemList[i];
+                    GUILayout.Button(new GUIContent(selectItem.preview.tex), GUILayout.Width(50), GUILayout.Height(50));
+                }
+                EditorGUILayout.EndHorizontal();
+            }
+        }
+        
+        void DrawExport(string filename, int mode)
+        {
+            TD.DrawSpacer();
+
+            GUI.changed = false;
+
+            TD.DrawLabelWidthUnderline("Export", 14);
+
+            GUI.color = Color.blue * TD.editorSkinMulti;
+            EditorGUILayout.BeginVertical("Box");
+            GUI.color = Color.white;
+
+            EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Path");
+                EditorGUILayout.LabelField(settings.exportPath);
+                if (GUILayout.Button("Select", GUILayout.Width(50))) SelectExportPath();
+            EditorGUILayout.EndHorizontal();
+
+            string filenameText, buttonText;
+            int buttonWidth;
+
+            if (mode == 0) { filenameText = "Heightmap Filename"; buttonText = "Export Heightmap"; buttonWidth = 125; } else { filenameText = "Filename"; buttonText = "Export"; buttonWidth = 50; }
+
+            filename = EditorGUILayout.TextField(filenameText, filename);
+
+            if (mode == 0)
+            {
+                settings.combineHeightmapImage = EditorGUILayout.Toggle("Combine Image", settings.combineHeightmapImage);
+            }
+            else if (mode == 1 || mode == 2)
+            {
+                settings.imageExportFormat = (TC_Settings.ImageExportFormat)EditorGUILayout.EnumPopup("Image Format", settings.imageExportFormat);
+            }
+
+            if (GUI.changed)
+            {
+                EditorUtility.SetDirty(settings);
+            }
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.PrefixLabel(" ");
+            if (GUILayout.Button(buttonText, GUILayout.Width(buttonWidth)))
+            {
+                if (mode == 0)
+                {
+                    if (settings.combineHeightmapImage) generate.ExportHeightmapCombined(settings.exportPath); else generate.ExportHeightmap(settings.exportPath);
+                }
+                else if (mode == 1) generate.ExportSplatmap(settings.exportPath);
+                else if (mode == 2) generate.ExportColormap(settings.exportPath, true);
+
+            }
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.EndVertical();
+
+            if (mode == 0)
+            {
+                GUILayout.Space(10);
+                GUI.color = Color.green * TD.editorSkinMulti;
+                EditorGUILayout.BeginVertical("Box");
+                GUI.color = Color.white;
+
+                filename = EditorGUILayout.TextField("Normal map Filename", settings.normalmapFilename);
+                settings.imageExportFormat = (TC_Settings.ImageExportFormat)EditorGUILayout.EnumPopup("Image Format", settings.imageExportFormat);
+                settings.normalmapStrength = EditorGUILayout.FloatField("Normal map Strength", settings.normalmapStrength);
+
+                EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.PrefixLabel(" ");
+
+                    if (GUILayout.Button("Export Normal map", GUILayout.Width(buttonWidth)))
+                    {
+                        generate.ExportNormalmap(settings.exportPath, true);
+                    }
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.EndVertical();
+            }
+            
+        }
+
+        public void SelectExportPath()
+        {
+            string path = settings.exportPath;
+
+            if (path == "") path = Application.dataPath;
+
+            string newPath = EditorUtility.SaveFolderPanel("Export path", path, "");
+
+            if (newPath == "") return;
+
+            settings.exportPath = newPath;
         }
 
         void AutoGenerate()
@@ -1119,7 +1358,7 @@ namespace TerrainComposer2
                     }
                 }
 
-                if (cellNoiseMode.enumValueIndex == (int)CellNoiseMode.Normal)
+                if (inputNoise.enumValueIndex == (int)InputNoise.Cell && cellNoiseMode.enumValueIndex == (int)CellNoiseMode.Normal)
                 {
                     DrawIntSlider(cellType, 1, 9);
                     DrawIntSlider(distanceFunction, 1, 7);
@@ -1146,15 +1385,50 @@ namespace TerrainComposer2
             bool active = spCurve.active.boolValue;
 
             if (!active) GUI.color = new Color(1, 1, 1, 0.35f);
-            DrawMinMaxSlider(spCurve.range, 0, 1, 0.001f, new GUIContent("Curve Range"));
+
+            float multi = 1;
+
+            if (node != null)
+            {
+                if (node.inputKind == InputKind.Terrain)
+                {
+                    if (node.inputTerrain == InputTerrain.Height) multi = 1;
+                    else if (node.inputTerrain == InputTerrain.Angle) multi = 90;
+                }
+            }
+
+            spCurve.range.vector2Value *= multi;
+
+            TD.DrawProperty(spCurve.range, new GUIContent("Curve Range"));
+            if (spCurve.range.vector2Value.x < 0) spCurve.range.vector2Value = new Vector2(0, spCurve.range.vector2Value.y);
+            else if (spCurve.range.vector2Value.x > multi - 0.001f) spCurve.range.vector2Value = new Vector2(multi - 0.001f, spCurve.range.vector2Value.y);
+
+            if (spCurve.range.vector2Value.y < 0.001f) spCurve.range.vector2Value = new Vector2(spCurve.range.vector2Value.x, 0.001f);
+            else if (spCurve.range.vector2Value.y > multi) spCurve.range.vector2Value = new Vector2(spCurve.range.vector2Value.x, multi);
+
+            spCurve.range.vector2Value /= multi;
+
+            DrawMinMaxSlider(spCurve.range, 0, 1, 0.001f, new GUIContent(" "));
+            
             // GUILayout.Space(3);
 
             EditorGUILayout.BeginHorizontal();
             TD.DrawProperty(spCurve.curve, new GUIContent(label));
-            if (GUILayout.Button("I", EditorStyles.miniButtonMid, GUILayout.Width(25)))
+            //if (GUILayout.Button("C", GUILayout.Width(25)))
+            //{
+            //    AnimationCurve curve = spCurve.curve.animationCurveValue;
+
+            //    for (int i = 0; i < curve.keys.Length; i++)
+            //    {
+            //        Keyframe key = curve.keys[i];
+            //        Debug.Log(key.time + ", " + key.value + ", " + key.inTangent + ", " + key.outTangent);
+            //    }
+            //}
+
+            if (GUILayout.Button("Options", EditorStyles.miniButtonMid, GUILayout.Width(50)))
             {
-                spCurve.curve.animationCurveValue = Mathw.InvertCurve(spCurve.curve.animationCurveValue);
-                AutoGenerate();
+                clickedCurve = spCurve;
+                ClickCurveMenu();
             }
             EditorGUILayout.EndHorizontal();
 
@@ -1163,6 +1437,46 @@ namespace TerrainComposer2
 
             // -------
             EditorGUILayout.EndVertical();
+        }
+
+        public SPCurve clickedCurve;
+
+        void ClickCurveMenu()
+        {
+            GenericMenu menu = new GenericMenu();
+            
+            menu.AddItem(new GUIContent("Invert"), false, CurveMenuInput, "invert");
+            menu.AddSeparator("");
+            menu.AddItem(new GUIContent("Linear Curve"), false, CurveMenuInput, "linearCurve");
+            menu.AddItem(new GUIContent("Linear Bell Curve"), false, CurveMenuInput, "linearBellCurve");
+            menu.AddItem(new GUIContent("Smooth Bell Curve"), false, CurveMenuInput, "smoothBellCurve");
+
+            menu.ShowAsContext();
+        }
+
+        void CurveMenuInput(object obj)
+        {
+            string cmd = obj.ToString();
+
+            if (cmd == "invert") clickedCurve.curve.animationCurveValue = Mathw.InvertCurve(clickedCurve.curve.animationCurveValue);
+            else if (cmd == "linearCurve") clickedCurve.curve.animationCurveValue = AnimationCurve.Linear(0, 0, 1, 1);
+            else if (cmd == "linearBellCurve")
+            {
+                Keyframe[] frames = new Keyframe[3];
+                frames[0] = new Keyframe(0, 0, 0, 2);
+                frames[1] = new Keyframe(0.5f, 1, 2, -2);
+                frames[2] = new Keyframe(1, 0, -2, 0);
+
+                clickedCurve.curve.animationCurveValue = new AnimationCurve(frames);
+            }
+            else if (cmd == "smoothBellCurve")
+            {
+                clickedCurve.curve.animationCurveValue = new AnimationCurve(new Keyframe[] { new Keyframe(0, 0), new Keyframe(0.5f, 1), new Keyframe(1, 0) });
+            }
+
+            serializedObject.ApplyModifiedProperties();
+
+            AutoGenerate();
         }
 
         public void DrawShape()
@@ -1272,7 +1586,7 @@ namespace TerrainComposer2
 
         public void DrawRawImage()
         {
-            if (TC_Settings.instance.presetMode == PresetMode.StampMode)
+            if (settings.presetMode == PresetMode.StampMode)
             {
                 GUI.changed = false;
                 EditorGUILayout.BeginHorizontal();
@@ -1285,6 +1599,7 @@ namespace TerrainComposer2
 
                 if (GUI.changed)
                 {
+                    TC.RefreshOutputReferences(item.outputId);
                     // Debug.Log("GUI changed");
                     Texture tex = (Texture)stampTex.objectReferenceValue;
                     if (tex == null)
@@ -1517,7 +1832,7 @@ namespace TerrainComposer2
 
         void DrawTerrainHeightSlider(Rect rect)
         {
-            if (!TC_Settings.instance.hasMasterTerrain) return;
+            if (!settings.hasMasterTerrain) return;
 
             TC_Area2D area2D = TC_Area2D.current;
 
@@ -1553,12 +1868,12 @@ namespace TerrainComposer2
 
             area2D.currentTerrainArea.ApplySize();
             DoRepaint();
-            TC_Generate.instance.Generate(true);
+            generate.Generate(true);
         }
 
         void DrawSelectItem()
         {
-            if (!TC_Settings.instance.hasMasterTerrain) return;
+            if (!settings.hasMasterTerrain) return;
 
             int length = selectItem.GetItemTotalFromTerrain();
 
@@ -1578,7 +1893,7 @@ namespace TerrainComposer2
                 //    {
                 //        EditorGUILayout.BeginHorizontal();
                 //        GUILayout.Space(15);
-                //        DrawPreviewTexture(TC_Settings.instance.masterTerrain.terrainData.splatPrototypes[i].texture, Color.white, Color.white);
+                //        DrawPreviewTexture(settings.masterTerrain.terrainData.splatPrototypes[i].texture, Color.white, Color.white);
                 //        GUILayout.Space(5);
                 //        DrawSlider(splatCustomValues.GetArrayElementAtIndex(i), 0, 1, new GUIContent(""));
                 //        EditorGUILayout.EndHorizontal();
@@ -1606,12 +1921,12 @@ namespace TerrainComposer2
                 EditorGUILayout.BeginHorizontal();
                 if (layerGroup.outputId == TC.treeOutput)
                 {
-                    terrainLayer.treeResolutionPM = EditorGUILayout.IntField(new GUIContent("Tree Resolution Per Meter"), terrainLayer.treeResolutionPM);
+                    terrainLayer.treeResolutionPM = EditorGUILayout.FloatField(new GUIContent("Tree Resolution Per Meter"), terrainLayer.treeResolutionPM);
                     if (terrainLayer.treeResolutionPM > 89) terrainLayer.treeResolutionPM = 89;
                 }
                 else if (layerGroup.outputId == TC.objectOutput)
                 {
-                    terrainLayer.objectResolutionPM = EditorGUILayout.IntField(new GUIContent("Object Resolution Per Meter"), terrainLayer.objectResolutionPM);
+                    terrainLayer.objectResolutionPM = EditorGUILayout.FloatField(new GUIContent("Object Resolution Per Meter"), terrainLayer.objectResolutionPM);
                     if (terrainLayer.objectResolutionPM > 89) terrainLayer.objectResolutionPM = 89;
                 }
                 else if (layerGroup.outputId == TC.colorOutput) terrainLayer.colormapResolution = EditorGUILayout.IntField(new GUIContent("Colormap Resolution"), terrainLayer.colormapResolution);
@@ -1630,9 +1945,9 @@ namespace TerrainComposer2
         
         void DrawTreeSelectItem()
         {
-            if (!TC_Settings.instance.hasMasterTerrain) return;
+            if (!settings.hasMasterTerrain) return;
 
-            int treeLength = TC_Settings.instance.masterTerrain.terrainData.treePrototypes.Length;
+            int treeLength = settings.masterTerrain.terrainData.treePrototypes.Length;
 
             DrawIntSlider(selectIndex, 0, treeLength - 1, new GUIContent("Tree Index"));
             if (GUI.changed) selectItem.Refresh();
@@ -1644,15 +1959,20 @@ namespace TerrainComposer2
                 GUI.color = Color.white;
                 TD.DrawLabelWidthUnderline("Position", 14);
                 DrawSlider(randomPosition, 0, 1, new GUIContent("Random Position"));
-                // TD.DrawProperty(heightOffset);
+                if (GUI.changed)
+                {
+                    serializedObject.ApplyModifiedProperties();
+                    selectItem.parentItem.CreateMixBuffer();
+                }
+            // TD.DrawProperty(heightOffset);
             EditorGUILayout.EndVertical();
 
             TD.DrawSpacer();
 
-            DrawScale();
+            DrawScale(false);
         }
 
-        void DrawScale()
+        void DrawScale(bool isObjectItem)
         {
             GUI.color = Color.blue * TD.editorSkinMulti;
             EditorGUILayout.BeginVertical("Box");
@@ -1660,12 +1980,30 @@ namespace TerrainComposer2
 
             TD.DrawLabelWidthUnderline("Scale", 14);
 
-            EditorGUILayout.BeginHorizontal();
-            // GUILayout.Space(15);
-            
-            DrawVector2(scaleRange, true, "Min", "Max", new GUIContent("Scale Range"));
-           
-            EditorGUILayout.EndHorizontal();
+            if (isObjectItem)
+            {
+                TD.DrawProperty(customScaleRange, new GUIContent("Custom Scale"));
+            }
+
+            if (isObjectItem)
+            {
+                if (customScaleRange.boolValue)
+                {
+                    DrawVector2(scaleRangeX, true, "Min", "Max", new GUIContent("Scale Range X"));
+                    DrawVector2(scaleRangeY, true, "Min", "Max", new GUIContent("Scale Range Y"));
+                    DrawVector2(scaleRangeZ, true, "Min", "Max", new GUIContent("Scale Range Z"));
+                }
+                else
+                {
+                    DrawVector2(scaleRange, true, "Min", "Max", new GUIContent("Scale Range"));
+                    DrawSlider(nonUniformScale, 0, 1);
+                }
+            }
+            else
+            {
+                DrawVector2(scaleRange, true, "Min", "Max", new GUIContent("Scale Range"));
+                DrawSlider(nonUniformScale, 0, 1);
+            }
 
             GUI.changed = false;
             TD.DrawProperty(scaleMulti);
@@ -1673,8 +2011,7 @@ namespace TerrainComposer2
             {
                 if (scaleMulti.floatValue < 0.01f) scaleMulti.floatValue = 0.01f;
             }
-
-            DrawSlider(nonUniformScale, 0, 1);
+            
             TD.DrawProperty(scaleCurve);
 
             TC_SelectItemGroup selectableItemGroup = selectItem.parentItem;
@@ -1710,6 +2047,21 @@ namespace TerrainComposer2
             }
 
             Color color = Color.white;
+            
+            TD.DrawProperty(parentMode);
+            if (GUI.changed) TC.RefreshOutputReferences(TC.objectOutput);
+
+            if (parentMode.enumValueIndex == (int)TC_SelectItem.SpawnObject.ParentMode.Create)
+            {
+                TD.DrawProperty(parentName);
+                if (GUI.changed) TC.RefreshOutputReferences(TC.objectOutput);
+                TD.DrawProperty(parentToTerrain);
+            }
+            else if (parentMode.enumValueIndex == (int)TC_SelectItem.SpawnObject.ParentMode.Existing)
+            {
+                TD.DrawProperty(parentT);
+                if (GUI.changed) TC.RefreshOutputReferences(TC.objectOutput);
+            }
 
             if (linkToPrefab.boolValue == true)
             {
@@ -1718,8 +2070,10 @@ namespace TerrainComposer2
                     if (PrefabUtility.GetPrefabType(go.objectReferenceValue) != PrefabType.Prefab) color = Color.red;
                 }
             }
+
             GUI.color = color;
             TD.DrawProperty(linkToPrefab);
+
             GUI.color = Color.white;
 
             EditorGUILayout.EndVertical();
@@ -1733,6 +2087,11 @@ namespace TerrainComposer2
             TD.DrawLabelWidthUnderline("Position", 14);
             
             DrawSlider(randomPosition, 0, 1, new GUIContent("Random Position"));
+            if (GUI.changed)
+            {
+                serializedObject.ApplyModifiedProperties();
+                selectItem.parentItem.CreateMixBuffer();
+            }
             DrawVector2(heightRange, false, "Min", "Max", new GUIContent("Height Range"));
             // TD.DrawProperty(includeScale); TODO: Is this needed?
             TD.DrawProperty(heightOffset);
@@ -1747,9 +2106,9 @@ namespace TerrainComposer2
 
             TD.DrawLabelWidthUnderline("Rotation", 14);
 
-            DrawVector2(rotRangeX, false, "Min", "Max", new GUIContent("Rotation X Range"));
-            DrawVector2(rotRangeY, false, "Min", "Max", new GUIContent("Rotation Y Range"));
-            DrawVector2(rotRangeZ, false, "Min", "Max", new GUIContent("Rotation Z Range"));
+            DrawVector2(rotRangeX, false, "Min", "Max", new GUIContent("Rotation Range X"));
+            DrawVector2(rotRangeY, false, "Min", "Max", new GUIContent("Rotation Range Y"));
+            DrawVector2(rotRangeZ, false, "Min", "Max", new GUIContent("Rotation Range Z"));
 
             TD.DrawProperty(isSnapRot, new GUIContent("Snap Rotation"));
             if (isSnapRot.boolValue)
@@ -1765,7 +2124,7 @@ namespace TerrainComposer2
 
             TD.DrawSpacer();
 
-            DrawScale();
+            DrawScale(true);
         }
 
         void DrawSnapRotation(SerializedProperty isSnapRot, SerializedProperty snapRotAxis, string label)

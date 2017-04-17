@@ -12,6 +12,7 @@ namespace TerrainComposer2
 
         public float seed = 0;
         
+        // Compute height, trees and objects
         public ComputeBuffer ComputeSingle(float seedParent, bool first = false)
         {
             TC_Compute compute = TC_Compute.instance;
@@ -271,6 +272,38 @@ namespace TerrainComposer2
             }
         }
 
+        public void ResetPlaced()
+        {
+            for (int i = 0; i < itemList.Count; i++)
+            {
+                TC_Layer layer = itemList[i] as TC_Layer;
+                if (layer != null) layer.ResetPlaced();
+                else
+                {
+                    TC_LayerGroup layerGroup = itemList[i] as TC_LayerGroup;
+                    if (layerGroup != null) layerGroup.ResetPlaced();
+                }
+            }
+        }
+
+        public int CalcPlaced()
+        {
+            int placed = 0;
+
+            for (int i = 0; i < itemList.Count; i++)
+            {
+                TC_Layer layer = itemList[i] as TC_Layer;
+                if (layer != null) placed += layer.CalcPlaced();
+                else
+                {
+                    TC_LayerGroup layerGroup = itemList[i] as TC_LayerGroup;
+                    if (layerGroup != null) placed += layerGroup.CalcPlaced();
+                }
+            }
+
+            return placed;
+        }
+
         public override void SetLockChildrenPosition(bool lockPos)
         {
             lockPosParent = lockPos;
@@ -308,6 +341,20 @@ namespace TerrainComposer2
             }
 
             return false;
+        }
+
+        public void ResetObjects()
+        {
+            for (int i = 0; i < itemList.Count; i++)
+            {
+                TC_Layer layer = itemList[i] as TC_Layer;
+                if (layer != null) layer.ResetObjects(); 
+                else
+                {
+                    TC_LayerGroup layerGroup = itemList[i] as TC_LayerGroup;
+                    if (layerGroup != null) layerGroup.ResetObjects();
+                }
+            }
         }
 
         public override void GetItems(bool refresh, bool rebuildGlobalLists, bool resetTextures)

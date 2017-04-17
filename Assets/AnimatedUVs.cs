@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[ExecuteInEditMode]
 public class AnimatedUVs : MonoBehaviour 
 {
 	public int materialIndex = 0;
@@ -14,7 +15,7 @@ public class AnimatedUVs : MonoBehaviour
 		uvOffset += ( uvAnimationRate * Time.deltaTime );
 		if( GetComponent<Renderer>().enabled )
 		{
-			GetComponent<Renderer>().materials[ materialIndex ].SetTextureOffset( textureName, uvOffset );
+			GetComponent<Renderer>().sharedMaterial.SetTextureOffset( textureName, uvOffset );
 		}
 	}
 }

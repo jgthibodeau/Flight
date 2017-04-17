@@ -34,6 +34,10 @@ public class Player : MonoBehaviour {
 	public float gravityDownDistance;
 	public bool keepUprightAlways;
 
+	public Vector3 centerOfMass = new Vector3 (0, 0, 0);
+	public Vector3 inertiaTensor = new Vector3 (0, 0, 0);
+	public Quaternion inertiaTensorRotation = new Quaternion (0.3f, 0, 0, 1f);
+
 	// Use this for initialization
 	void Start () {
 		PerchableLayer = LayerMask.NameToLayer ("Perchable");
@@ -42,6 +46,7 @@ public class Player : MonoBehaviour {
 
 		characterCollider = transform.GetComponent<Collider> ();
 		rigidBody = transform.GetComponent<Rigidbody> ();
+//		rigidBody = transform.GetComponentInChildren<Rigidbody> ();
 
 		glideV2Script = transform.GetComponent<GlideV2> ();
 		grabScript = transform.GetComponent<Grab> ();
@@ -56,7 +61,14 @@ public class Player : MonoBehaviour {
 
 		glideV2Script.gravity = gravity;
 
-		rigidBody.centerOfMass = Vector3.zero;
+//		rigidBody.ResetCenterOfMass ();
+//		rigidBody.ResetInertiaTensor ();
+		rigidBody.centerOfMass = centerOfMass;
+		rigidBody.inertiaTensorRotation = inertiaTensorRotation;
+		Debug.Log ("centerOfMass: "+rigidBody.centerOfMass);
+		Debug.Log ("inertiaTensor: "+rigidBody.inertiaTensor);
+		Debug.Log ("inertiaTensorRotation: "+rigidBody.inertiaTensorRotation);
+
 
 		//		leftWing = transform.Find ("bird2/1/Bird_rig_3/1_2/Backbones_null_3/Wing_3");
 		//		rightWing = transform.Find ("bird2/1/Bird_rig_3/1_2/Backbones_null_3/Wing_1_3");
@@ -66,6 +78,12 @@ public class Player : MonoBehaviour {
 	}
 
 	void FixedUpdate () {
+		rigidBody.centerOfMass = centerOfMass;
+		rigidBody.inertiaTensorRotation = inertiaTensorRotation;
+		Debug.Log ("centerOfMass: "+rigidBody.centerOfMass);
+		Debug.Log ("inertiaTensor: "+rigidBody.inertiaTensor);
+		Debug.Log ("inertiaTensorRotation: "+rigidBody.inertiaTensorRotation);
+
 //		center = transform.position + centerOfGravity.x * transform.right + centerOfGravity.y * transform.up + centerOfGravity.z * transform.forward;
 
 		//assume not fully grounded
@@ -216,8 +234,8 @@ public class Player : MonoBehaviour {
 			walkScript.forward = 0;
 			walkScript.right = 0;
 
-			glideV2Script.rigidBody.velocity = Vector3.zero;
-			glideV2Script.rigidBody.constraints = RigidbodyConstraints.FreezePosition;
+			rigidBody.velocity = Vector3.zero;
+			rigidBody.constraints = RigidbodyConstraints.FreezePosition;
 
 
 			grabScript.grab = false;
@@ -245,7 +263,7 @@ public class Player : MonoBehaviour {
 				glideV2Script.wingsOut = true;
 			}
 
-			glideV2Script.rigidBody.constraints = RigidbodyConstraints.None;
+			rigidBody.constraints = RigidbodyConstraints.None;
 
 
 			grabScript.grab = (Input.GetAxis ("Grab") != 0);

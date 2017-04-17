@@ -223,9 +223,9 @@ namespace Gaia
             var tImporter = AssetImporter.GetAtPath(assetPath) as TextureImporter;
             if (tImporter != null)
             {
-                if (tImporter.textureType != TextureImporterType.Bump)
+                if (tImporter.textureType != TextureImporterType.NormalMap)
                 {
-                    tImporter.textureType = TextureImporterType.Bump;
+                    tImporter.textureType = TextureImporterType.NormalMap;
                     //tImporter.convertToNormalmap = true;
                     tImporter.grayscaleToAlpha = false;
                     tImporter.normalmap = true;
@@ -251,9 +251,9 @@ namespace Gaia
             var tImporter = AssetImporter.GetAtPath(assetPath) as TextureImporter;
             if (tImporter != null)
             {
-                if (tImporter.textureType != TextureImporterType.Advanced || tImporter.isReadable != true)
+                if (tImporter.textureType != TextureImporterType.Default || tImporter.isReadable != true)
                 {
-                    tImporter.textureType = TextureImporterType.Advanced;
+                    tImporter.textureType = TextureImporterType.Default;
                     tImporter.isReadable = true;
                     AssetDatabase.ImportAsset(assetPath);
                     AssetDatabase.Refresh();
@@ -608,7 +608,7 @@ namespace Gaia
             mesh.normals = normals;
             mesh.uv = uvs;
             mesh.triangles = triangles;
-            mesh.Optimize();
+            ;
             mesh.RecalculateBounds();
             mesh.RecalculateNormals();
             return mesh;

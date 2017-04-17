@@ -187,16 +187,7 @@ namespace TerrainComposer2
                     DrawConnectionIndicator(item, new Vector2(pos.x + 289, pos.y + TD.cardHeight + 4), true, nodeFoldout);
                 }
             }
-            else
-            {
-                if (item.outputId == TC.treeOutput || item.outputId == TC.objectOutput)
-                {
-                    Rect rectButton = new Rect(pos.x + 7.24f, pos.y + 306f, 254f, 30);
-                    TD.DrawTextureScaled(rectButton, TD.texButton, color * (item.active ? 1 : 0.75f)); 
-                    TD.DrawText(pos + new Vector2(12.24f, 308f), "Placed: " + (item.outputId == TC.treeOutput ? TC_Generate.instance.treesCount : TC_Generate.instance.objectsCount), 21, Color.white * (item.active ? 1 : 0.75f));
-                }
-            }
-
+           
             return nodeRect;
         }
 
@@ -331,7 +322,7 @@ namespace TerrainComposer2
 
             // menu.AddItem(new GUIContent("Add Layer"), false, LeftClickMenu, "Add Layer");
             string instanceID = layerGroup.GetInstanceID().ToString();
-            
+
             //if (layerGroup.level > 1)
             //{
             //    menu.AddSeparator("");
@@ -340,7 +331,21 @@ namespace TerrainComposer2
             //    menu.AddItem(new GUIContent("Duplicate Layer Group"), false, LeftClickMenu, instanceID + ":Duplicate LayerGroup");
             //    menu.AddSeparator("");
             //}
-            if (layerGroup.groupResult.itemList.Count > 0) menu.AddItem(new GUIContent("Clear Layer Group"), false, LeftClickMenu, instanceID + ":Clear LayerGroup");
+            if (layerGroup.groupResult.itemList.Count > 0)
+            {
+                //if (layerGroup.level == 0 && layerGroup.outputId == TC.heightOutput)
+                //{
+                //    menu.AddItem(new GUIContent("Export Heightmap"), false, LeftClickMenu, instanceID + ":Export Heightmap");
+                //    menu.AddSeparator("");
+                //}
+                //else if (layerGroup.level == 0 && layerGroup.outputId == TC.colorOutput)
+                //{
+                //    menu.AddItem(new GUIContent("Export Colormap"), false, LeftClickMenu, instanceID + ":Export Colormap");
+                //    menu.AddSeparator("");
+                //}
+                
+                menu.AddItem(new GUIContent("Clear Layer Group"), false, LeftClickMenu, instanceID + ":Clear LayerGroup");
+            }
             // if (layerGroup.level > 1) menu.AddItem(new GUIContent("Erase Layer Group"), false, LeftClickMenu, instanceID + ":Erase LayerGroup");
 
             menu.ShowAsContext();

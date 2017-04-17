@@ -60,7 +60,7 @@ namespace TerrainComposer2
                 
                 if (nodeGroup.foldout == 2 && !hideSelectNodes)
                 {
-                    if (nodeGroup.itemList.Count > 1) TD.DrawMethod(nodeGroup, pos + new Vector2(TD.texCardBody.width - 18, 172), true, colNode, activeMulti);
+                    if (nodeGroup.itemList.Count > 1 && nodeFoldout) TD.DrawMethod(nodeGroup, pos + new Vector2(TD.texCardBody.width - 18, 172), true, colNode, activeMulti);
 
                     for (int i = nodeGroup.itemList.Count - 1; i >= 0; --i)
                     {
@@ -70,7 +70,7 @@ namespace TerrainComposer2
                         {
                             TC_NodeGUI.Draw(node, nodeFoldout, i == 0 ? false : true, pos, colNode, activeMulti);
                             if (i != 0) pos.x -= TD.nodeWidthHSpace;
-                            if (node.inputKind != InputKind.Current && node.inputKind != InputKind.Portal && i != 0)
+                            if (node.inputKind != InputKind.Current && node.inputKind != InputKind.Portal && i != 0 && nodeFoldout)
                             {
                                 TD.DrawMethod(node, pos + new Vector2(TD.texCardBody.width - 18, 172), false, colNode, (node.active ? 1 : 0.5f) * activeMulti);
                             }

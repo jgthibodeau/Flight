@@ -12,16 +12,20 @@ namespace TerrainComposer2
         [NonSerialized] public TC_NodeGroup selectNodeGroup;
         // public new TC_LayerGroupResult parentItem;
 
+        public List<TC_SelectItem.DistanceRule> distanceRules;
+        
         public bool doNormalize;
         public float placeLimit = 0.5f;
         public float selectValue;
         public float maskValue;
 
         public float seed = 0;
+        public int placed;
 
         float splatTotal;
         float x, y;
 
+        // Compute Heightm
         public void ComputeHeight(ref ComputeBuffer layerBuffer, ref ComputeBuffer maskBuffer, float seedParent, bool first = false)
         {
             TC_Compute compute = TC_Compute.instance;
@@ -47,6 +51,7 @@ namespace TerrainComposer2
             else TC_Reporter.Log("Layerbuffer " + listIndex + " = null, reporting from layer");
         }
 
+        // Compute color, splat and grass
         public bool ComputeMulti(ref RenderTexture[] renderTextures, ref ComputeBuffer maskBuffer, float seedParent, bool first = false)
         {
             TC_Compute compute = TC_Compute.instance;
@@ -91,6 +96,7 @@ namespace TerrainComposer2
             return didCompute;
         }
 
+        // Compute trees and objects
         public bool ComputeItem(ref ComputeBuffer itemMapBuffer, ref ComputeBuffer maskBuffer, float seedParent, bool first = false)
         {
             TC_Compute compute = TC_Compute.instance;
@@ -133,6 +139,22 @@ namespace TerrainComposer2
             preview = layerS.preview;
             maskNodeGroup.LinkClone(layerS.maskNodeGroup);
             selectNodeGroup.LinkClone(layerS.selectNodeGroup);
+        }
+
+        public void ResetPlaced()
+        {
+            selectItemGroup.ResetPlaced();
+        }
+
+        public int CalcPlaced()
+        {
+            placed = selectItemGroup.CalcPlaced();
+            return placed; 
+        }
+
+        public void ResetObjects()
+        {
+            selectItemGroup.ResetObjects();
         }
 
         public override void GetItems(bool refresh, bool rebuildGlobalLists, bool resetTextures)

@@ -14,7 +14,7 @@ namespace TerrainComposer2
 
         public SplatCustom[] splatMixBuffer;
         public ColorItem[] colorMixBuffer;
-        public Vector4[] indices; // layerLevel item list
+        public ItemSettings[] indices; // layerLevel item list
         public Transform endT;
         public Vector2 scaleMinMaxMulti = Vector2.one;
         public float scaleMulti = 1;
@@ -25,17 +25,20 @@ namespace TerrainComposer2
         public bool linkScaleToMask = true;
 
         public bool untouched = true;
-        
+        public int placed;
+
         public override void Awake()
         {
             if (!firstLoad)
             {
                 t = transform;
                 GetItems(true, true, false);
-            }
-            
-            base.Awake();
 
+                if (TC_Settings.instance) linkScaleToMask = TC_Settings.instance.global.linkScaleToMaskDefault;
+            }
+
+            base.Awake();
+            
             t.hideFlags = HideFlags.NotEditable | HideFlags.HideInInspector;
         }
 
@@ -74,9 +77,26 @@ namespace TerrainComposer2
             base.OnTransformChildrenChanged();
         }
 
+        public void ResetPlaced()
+        {
+            for (int i = 0; i < itemList.Count; i++) itemList[i].placed = 0;
+        }
+
+        public int CalcPlaced()
+        {
+            placed = 0;
+            for (int i = 0; i < itemList.Count; i++) placed += itemList[i].placed;
+            return placed;
+        }
+
         public void SetReadWriteTextureItems()
         {
             for (int i = 0; i < itemList.Count; i++) TC.SetTextureReadWrite(itemList[i].preview.tex);
+        }
+
+        public void ResetObjects()
+        {
+            for (int i = 0; i < itemList.Count; i++) itemList[i].ResetObjects();
         }
 
         public void CalcPreview(bool calcValues = true)
@@ -249,7 +269,9 @@ namespace TerrainComposer2
                     else if (outputId == TC.objectOutput)
                     {
                         if (selectItem.spawnObject == null) selectItem.spawnObject = new TC_SelectItem.SpawnObject();
-                        if (selectItem.spawnObject.go == null)
+                        if (selectItem.spawnObject.go == null 
+                            || (selectItem.spawnObject.parentMode == TC_SelectItem.SpawnObject.ParentMode.Existing && selectItem.spawnObject.parentT == null) 
+                            || (selectItem.spawnObject.parentMode == TC_SelectItem.SpawnObject.ParentMode.Create && selectItem.spawnObject.parentName == ""))
                         {
                             selectItem.active = false;
                             TC_Area2D.current.terrainLayer.objectSelectItems.Remove(selectItem);
@@ -260,7 +282,15 @@ namespace TerrainComposer2
                         {
                             bool addToList = true;
 
-                            List<TC_SelectItem> objectSelectItems = TC_Area2D.current.terrainLayer.objectSelectItems;
+                            TC_Area2D area2D;
+
+                            if (TC_Area2D.current == null)
+                            {
+                                area2D = FindObjectOfType<TC_Area2D>();
+                            }
+                            else area2D = TC_Area2D.current;
+
+                            List<TC_SelectItem> objectSelectItems = area2D.terrainLayer.objectSelectItems;
 
                             if (!rebuildGlobalLists)
                             {
@@ -310,8 +340,8 @@ namespace TerrainComposer2
         {
             // Debug.Log("Create Item Mix buffer");
 
-            if (indices == null) indices = new Vector4[totalActive];
-            else if (indices.Length != itemList.Count) indices = new Vector4[totalActive];
+            if (indices == null) indices = new ItemSettings[totalActive];
+            else if (indices.Length != itemList.Count) indices = new ItemSettings[totalActive];
 
             int index = 0;
             
@@ -319,7 +349,11 @@ namespace TerrainComposer2
             {
                 TC_SelectItem item = itemList[i];
 
-                if (item.active) indices[index++] = new Vector4(item.globalListIndex, item.range.x, item.range.y, item.opacity * opacity);
+                if (item.active)
+                {
+                    indices[index++] = new ItemSettings(item.globalListIndex, outputId == TC.treeOutput ? item.tree.randomPosition : item.spawnObject.randomPosition, item.range, item.opacity * opacity);
+                    // Debug.Log(indices[index - 1].randomPosition);
+                }
             }
         }
 
@@ -600,7 +634,7 @@ namespace TerrainComposer2
             this.map0 = map0;
             this.map1 = map1;
         }
-    };
+    }
 
     [Serializable]
     public struct ColorItem
@@ -613,5 +647,21 @@ namespace TerrainComposer2
             this.select = select;
             this.color = color;
         }
-    };
+    }
+
+    public struct ItemSettings
+    {
+        public int index;
+        public float randomPosition;
+        public Vector2 range;
+        public float opacity;
+
+        public ItemSettings(int index, float randomPosition, Vector2 range, float opacity)
+        {
+            this.index = index;
+            this.randomPosition = randomPosition;
+            this.range = range;
+            this.opacity = opacity;
+        }
+    }
 }

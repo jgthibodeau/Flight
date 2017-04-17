@@ -69,6 +69,8 @@ public class GlideV2 : MonoBehaviour {
 	public float pitchScale = 1.5f;
 	public float volumeScale = 0.7f;
 	public float trailScale = 0.3f;
+	public float trailStartWidth = 0f;
+	public float trailTime = 0.5f;
 
 	public float angleOfAttackLeft;
 	public float angleOfAttackRight;
@@ -137,13 +139,13 @@ public class GlideV2 : MonoBehaviour {
 		}
 
 		//audio based on speed
-		airAudioSource.pitch = drag * pitchScale;
-		airAudioSource.volume = drag * volumeScale;
+		airAudioSource.pitch = speed * pitchScale;
+		airAudioSource.volume = speed * volumeScale;
 
 		foreach(TrailRenderer trail in trails){
-			trail.endWidth = drag * trailScale;
-			trail.startWidth = 0f;
-			trail.time = 0.5f;
+			trail.endWidth = speed * trailScale;
+			trail.startWidth = trailStartWidth;
+			trail.time = trailTime;
 		}
 
 		birdAnimator.WingsOut = wingsOut;
@@ -169,7 +171,7 @@ public class GlideV2 : MonoBehaviour {
 //		}
 
 		if (!isGrounded) {
-			rigidBody.constraints = RigidbodyConstraints.None;
+//			rigidBody.constraints = RigidbodyConstraints.None;
 			rigidBody.drag = 0;
 
 			//rotate towards motion
@@ -178,7 +180,7 @@ public class GlideV2 : MonoBehaviour {
 				transform.rotation = Quaternion.Euler (rotation);
 			}
 
-			rigidBody.constraints = RigidbodyConstraints.None;
+//			rigidBody.constraints = RigidbodyConstraints.None;
 			rigidBody.drag = 0;
 			AngledDragLift ();
 		} else {

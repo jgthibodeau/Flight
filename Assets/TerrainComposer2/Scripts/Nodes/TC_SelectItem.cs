@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace TerrainComposer2
 {
@@ -19,10 +20,14 @@ namespace TerrainComposer2
         public bool splatCustom;
         public float splatCustomTotal;
 
+        // public List<DistanceRule> distanceRules;
+
         public int globalListIndex = -1;
+        public int placed;
         
         [NonSerialized] TC_Settings settings;
 
+        
         public override void Awake()
         {
             // Debug.Log("Awake SelectItem");
@@ -41,6 +46,21 @@ namespace TerrainComposer2
             splatCustomTotal = 0;
             for (int i = 0; i < splatCustomValues.Length; i++) splatCustomTotal += splatCustomValues[i];
             // Debug.Log(splatCustomTotal);
+        }
+
+        public void ResetObjects()
+        {
+            if (spawnObject != null)
+            {
+                if (spawnObject.parentMode == SpawnObject.ParentMode.Create)
+                {
+                    if (spawnObject.newParentT != null) DestroyImmediate(spawnObject.newParentT.gameObject);
+                }
+                else if (spawnObject.parentMode == SpawnObject.ParentMode.Existing)
+                {
+                    if (spawnObject.parentT != null) TC.DestroyChildrenTransform(spawnObject.parentT);
+                }
+            }
         }
 
         public void SetPreviewColor()
@@ -181,9 +201,18 @@ namespace TerrainComposer2
         [Serializable]
         public class SpawnObject
         {
+            public enum ParentMode { Terrain, Existing, Create };
+
             public GameObject go;
 
             public bool linkToPrefab = false;
+
+            public ParentMode parentMode;
+            public string parentName;
+            public Transform parentT;
+            public Transform newParentT;
+            public bool parentToTerrain;
+
             public float randomPosition = 1;
             public Vector2 heightRange = Vector2.zero;
             public bool includeScale = false;
@@ -195,6 +224,11 @@ namespace TerrainComposer2
             public Vector2 rotRangeZ = Vector2.zero;
             public bool isSnapRot, isSnapRotX = true, isSnapRotY = true, isSnapRotZ = true;
             public float snapRotX = 45 , snapRotY = 45, snapRotZ = 45;
+
+            public bool customScaleRange;
+            public Vector2 scaleRangeX = Vector2.one;
+            public Vector2 scaleRangeY = Vector2.one;
+            public Vector2 scaleRangeZ = Vector2.one;
 
             public Vector2 scaleRange = Vector2.one;
             public float scaleMulti = 1;
@@ -217,5 +251,13 @@ namespace TerrainComposer2
             public float scaleMulti = 1;
             public AnimationCurve scaleCurve = AnimationCurve.Linear(0, 0, 1, 1);
         }
+
+        [Serializable]
+        public class DistanceRule
+        {
+            public List<TC_ItemBehaviour> items;
+            public Vector2 range;
+        }
+
     }
 }

@@ -124,6 +124,39 @@ namespace TerrainComposer2
             rect.yMax = Mathf.Max(rect.yMax, rect2.yMax);
         }
 
+		public static Rect ClampRect (Rect baseRect, Rect clampRect)
+		{
+			Rect rect = new Rect ();
+			rect.xMin = Mathf.Max (baseRect.xMin, clampRect.xMin);
+			rect.xMax = Mathf.Min (baseRect.xMax, clampRect.xMax);
+			rect.yMin = Mathf.Max (baseRect.yMin, clampRect.yMin);
+			rect.yMax = Mathf.Min (baseRect.yMax, clampRect.yMax);
+			return rect;
+		}
+
+		public static bool OverlapRect (Rect baseRect, Rect testRect, out Rect overlapRect)
+		{
+			overlapRect = new Rect(0, 0, 0, 0);
+			if (testRect.xMax > baseRect.xMin && testRect.xMin < baseRect.xMax && testRect.yMax > baseRect.yMin && testRect.yMin < baseRect.yMax)
+			{
+				overlapRect = ClampRect (baseRect, testRect);
+				return true;
+			}
+			return false;
+		}
+
+		public static Rect UniformRectToResolution (Rect rect, Int2 targetRes, Int2 sampleRes, out Int2 samplePos)
+		{
+			Vector2 ratio = new Vector2 ((float)targetRes.x/sampleRes.x, (float)targetRes.y/sampleRes.y);
+
+			samplePos = new Int2 (Mathf.FloorToInt (rect.x*sampleRes.x), Mathf.FloorToInt (rect.y*sampleRes.y));
+
+			Vector2 size = new Vector2 (Mathf.Ceil (rect.width*sampleRes.x)*ratio.x, Mathf.Ceil (rect.height*sampleRes.y)*ratio.y);
+			Vector2 pos = new Vector2 (samplePos.x*ratio.x, samplePos.y*ratio.y);
+
+			return new Rect (pos, size);
+		}
+
         static public AnimationCurve SetAnimationCurveLinear(AnimationCurve curve)
         {
             AnimationCurve newCurve = new AnimationCurve();

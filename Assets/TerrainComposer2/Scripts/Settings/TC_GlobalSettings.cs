@@ -37,6 +37,10 @@ namespace TerrainComposer2
         public float nodeHSpace = 5;
         public float bracketHSpace = 10;
 
+        public bool showResolutionWarnings = true;
+        public bool linkScaleToMaskDefault = true;
+        public bool documentationClicked;
+
         public Rect rect, rect2, rect3, rect4, rect5, rect6, rect7, rect8;
 
         public KeyCode keyZoomIn = KeyCode.Plus;

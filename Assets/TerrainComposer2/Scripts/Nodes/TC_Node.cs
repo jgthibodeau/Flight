@@ -44,6 +44,7 @@ namespace TerrainComposer2
         public float convexityStrength = 5;
 
         public Texture stampTex;
+        // public Texture[] texArray;
         public string pathTexStamp = "";
         public bool isStampInResourcesFolder;
         public string resourcesFolder;
@@ -175,6 +176,8 @@ namespace TerrainComposer2
         
         public void Init()
         {
+            // Debug.Log("Init");
+
             if (inputKind == InputKind.Terrain)
             {
                 if (inputTerrain == InputTerrain.Normal) { active = false; }
@@ -222,6 +225,10 @@ namespace TerrainComposer2
                         active = false; stampTex = null;
                     }
                     else active = true;
+                }
+                else if (inputFile == InputFile.Image)
+                {
+                    if (stampTex == null) active = false;
                 }
             }
             else if (inputKind == InputKind.Portal) { active = false; }
@@ -358,7 +365,16 @@ namespace TerrainComposer2
         const int red = 0, green = 1, blue = 2, alpha = 3;
 
         public ColorSelectMode colSelectMode = ColorSelectMode.ColorRange;
-        public ColChannel[] colChannels = new ColChannel[4];
+        public ColChannel[] colChannels;
+        public Int2 tiles = new Int2(1, 1);
+
+
+        public ImageSettings()
+        {
+            colChannels = new ColChannel[4];
+            for (int i = 0; i < 4; i++) colChannels[i] = new ColChannel();
+            colChannels[3].active = false;
+        }
         
         [Serializable]
         public class ColChannel

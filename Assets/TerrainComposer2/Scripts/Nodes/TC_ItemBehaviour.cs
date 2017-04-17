@@ -84,7 +84,11 @@ namespace TerrainComposer2
             // Debug.Log("Awake");
             if (!firstLoad)
             {
-                
+
+                firstLoad = true;
+                #if UNITY_EDITOR
+                    UnityEditor.EditorUtility.SetDirty(this);
+                #endif
             }
 
             rtDisplay = null;
@@ -93,8 +97,6 @@ namespace TerrainComposer2
             t = transform;
             t.hasChanged = false;
             
-            firstLoad = true;
-
             // Debug.Log("Awake " + name);
             // TCGenerate.singleton.AutoGenerate();
             // RemoveCloneText();
@@ -258,7 +260,7 @@ namespace TerrainComposer2
                 else if (type == typeof(TC_Layer)) label = "Layer";
                 else if (type == typeof(TC_Node)) label = "Node";
                 else if (type == typeof(TC_SelectItem)) label = "Item";
-                else if (type == typeof(TC_SelectItemGroup)) label = "ItemGroup";
+                else if (type == typeof(TC_SelectItemGroup)) label = "Item Group";
             }
 
             // Debug.Log("Add " + label);

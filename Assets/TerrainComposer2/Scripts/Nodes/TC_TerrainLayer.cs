@@ -14,8 +14,8 @@ namespace TerrainComposer2
         // [NonSerialized]
         public List<TC_SelectItem> treeSelectItems;
         
-        public int treeResolutionPM = 128;
-        public int objectResolutionPM = 128;
+        public float treeResolutionPM = 128;
+        public float objectResolutionPM = 128;
         public Vector2 objectAreaSize;
         public Transform objectTransform; // stream around camera
 
@@ -98,6 +98,27 @@ namespace TerrainComposer2
             return returnValue;
         }
 
+        public void ResetPlaced()
+        {
+            layerGroups[TC.treeOutput].ResetPlaced();
+            layerGroups[TC.objectOutput].ResetPlaced();
+        }
+
+        public void CalcTreePlaced()
+        {
+            layerGroups[TC.treeOutput].CalcPlaced();
+        }
+
+        public void CalcObjectPlaced()
+        {
+            layerGroups[TC.objectOutput].CalcPlaced();
+        }
+
+        public void ResetObjects()
+        {
+            layerGroups[TC.objectOutput].ResetObjects();
+        }
+        
         public void Reset()
         {
             TC.DestroyChildrenTransform(t);

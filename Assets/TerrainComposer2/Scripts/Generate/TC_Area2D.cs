@@ -24,10 +24,11 @@ namespace TerrainComposer2
 
         public TC_PreviewArea previewArea;
         public Rect area, totalArea;
+        public Bounds totalTerrainBounds;
         public TC_TerrainLayer layerLevelC;
         public TC_TerrainLayer terrainLayer;
-        public Vector2 resolution, resolutionPM, resToPreview, worldPos, localPos, pos, localNPos, previewPos, snapOffsetUV;
-        public Vector3 startPos, terrainSize;
+        public Vector2 resolution, resolutionPM, resToPreview, worldPos, localPos, pos, localNPos, previewPos, snapOffsetUV, outputOffsetV2;
+        public Vector3 startPos, terrainSize, outputOffsetV3;
         public Bounds bounds;
         public Int2 intResolution;
         public float heightN, height, angle;
@@ -39,7 +40,7 @@ namespace TerrainComposer2
         public float progress;
         public bool showProgressBar;
         public int previewResolution;
-        public float resExpandBorderPercentage = 0.0625f;
+        [NonSerialized] public float resExpandBorderPercentage = 0.0625f;
         [NonSerialized] public int resExpandBorder;
         [NonSerialized] public float resExpandBorderSize;
 
@@ -49,6 +50,7 @@ namespace TerrainComposer2
         // public List<SpawnObject> spawnObjectList = new List<SpawnObject>();
 
         void Awake() { current = this; } 
+        void Start() { current = this; }
 
         void OnDestroy() { current = null; }
 
@@ -90,8 +92,16 @@ namespace TerrainComposer2
             intResolution = new Int2();
             Int2 resolution2 = new Int2();
 
-            resExpandBorder = Mathf.RoundToInt((terrain.terrainData.heightmapResolution - 1) * resExpandBorderPercentage);
-            resExpandBorderSize = terrain.terrainData.size.x * resExpandBorderPercentage;
+            if (terrain.terrainData.heightmapResolution > 2049)
+            {
+                resExpandBorder = 0;
+                resExpandBorderSize = 0;
+            }
+            else
+            {
+                resExpandBorder = Mathf.RoundToInt((terrain.terrainData.heightmapResolution - 1) * resExpandBorderPercentage);
+                resExpandBorderSize = terrain.terrainData.size.x * resExpandBorderPercentage;
+            }
 
             // Debug.Log(resExpandBorder);
             // Debug.Log(resExpandBorderSize);
@@ -124,6 +134,9 @@ namespace TerrainComposer2
             }
             else if (outputId == TC.colorOutput) { intResolution.x = intResolution.y = terrainLayer.colormapResolution; resolution2 = intResolution; }
 
+            outputOffsetV2 = new Vector2(terrainLayer.layerGroups[outputId].t.position.x, terrainLayer.layerGroups[outputId].t.position.z);
+            outputOffsetV3 = new Vector3(outputOffsetV2.x, 0, outputOffsetV2.y);
+
             resolution = intResolution.ToVector2();
 
             if (intResolution.x < TC_Settings.instance.previewResolution) { previewResolution = intResolution.x; TC_Reporter.Log("From " + TC_Settings.instance.previewResolution + " To " + previewResolution); }
@@ -131,7 +144,12 @@ namespace TerrainComposer2
 
             resToPreview = new Vector2((previewResolution - 0) / (totalArea.width + 0), (previewResolution - 0) / (totalArea.height + 0));
 
-            resolutionPM = new Vector2(terrain.terrainData.size.x / (resolution2.x - 1), terrain.terrainData.size.z / (resolution2.y - 1));
+            if (outputId == TC.heightOutput || outputId == TC.splatOutput) resolutionPM = new Vector2(terrain.terrainData.size.x / (resolution2.x - 1), terrain.terrainData.size.z / (resolution2.y - 1));
+            else resolutionPM = new Vector2(terrain.terrainData.size.x / (resolution2.x - 0), terrain.terrainData.size.z / (resolution2.y - 0));
+
+            // if (outputId == TC.objectOutput) Debug.Log(resolutionPM);
+
+            // resolutionPM = new Vector2(terrain.terrainData.size.x / (resolution2.x - 1), terrain.terrainData.size.z / (resolution2.y - 1));
 
             if (outputId == TC.heightOutput)
             {
@@ -147,7 +165,7 @@ namespace TerrainComposer2
 
                 if (outputId == TC.treeOutput || outputId == TC.objectOutput)
                 {
-                    posSnap += resolutionPM / 2;
+                    // posSnap += resolutionPM / 2;
                 }
                 area = new Rect(posSnap.x, posSnap.y, intResolution.x, intResolution.y);
 
@@ -175,9 +193,13 @@ namespace TerrainComposer2
         public bool CalcTotalArea()
         {
             Terrain terrain;
-            Vector2 minPos = new Vector2(999999999, 999999999);
-            Vector2 maxPos = new Vector2(-999999999, -99999999);
+            Vector2 minPos = new Vector2(Mathf.Infinity, Mathf.Infinity);
+            Vector2 maxPos = new Vector2(-Mathf.Infinity, -Mathf.Infinity);
+            Vector2 heightPos = new Vector2(Mathf.Infinity, -Mathf.Infinity);
+            Vector2 heightPosTerrain;
             Vector2 pos;
+
+            Vector3 position, size;
 
 
             for (int j = 0; j < terrainAreas.Length; j++)
@@ -187,12 +209,19 @@ namespace TerrainComposer2
                     terrain = terrainAreas[j].terrains[i].terrain;
                     if (terrain == null) return false;
                     if (!terrain.gameObject.activeSelf) continue;
-                    if (terrain.transform.position.x < minPos.x) minPos.x = terrain.transform.position.x;
-                    if (terrain.transform.position.z < minPos.y) minPos.y = terrain.transform.position.z;
 
-                    pos = new Vector2(terrain.transform.position.x + terrain.terrainData.size.x, terrain.transform.position.z + terrain.terrainData.size.z);
+                    position = terrain.transform.position;
+                    size = terrain.terrainData.size;
+
+                    if (position.x < minPos.x) minPos.x = position.x;
+                    if (position.z < minPos.y) minPos.y = position.z;
+
+                    pos = new Vector2(position.x + size.x, position.z + size.z);
+                    heightPosTerrain = new Vector2(position.y, position.y + size.y);
                     if (pos.x > maxPos.x) maxPos.x = pos.x;
                     if (pos.y > maxPos.y) maxPos.y = pos.y;
+                    if (heightPosTerrain.x < heightPos.x) heightPos.x = heightPosTerrain.x;
+                    if (heightPosTerrain.y > heightPos.y) heightPos.y = heightPosTerrain.y;
                 }
             }
 
@@ -201,6 +230,10 @@ namespace TerrainComposer2
             totalArea.yMin = minPos.y;
             totalArea.xMax = maxPos.x;
             totalArea.yMax = maxPos.y;
+
+            totalTerrainBounds = new Bounds();
+            totalTerrainBounds.min = new Vector3(minPos.x, heightPos.x, minPos.y);
+            totalTerrainBounds.max = new Vector3(maxPos.x, heightPos.y, maxPos.y);
 
             return true;
         }

@@ -14,6 +14,7 @@ namespace TerrainComposer2
         SerializedProperty masterTerrain;
         SerializedProperty previewResolution;
         SerializedProperty hideTerrainGroup;
+        SerializedProperty useTCRuntime;
 
         // Global Settings
         SerializedObject global;
@@ -30,12 +31,15 @@ namespace TerrainComposer2
         SerializedProperty colSelectItem;
 
         SerializedProperty keyZoomIn, keyZoomOut;
+        SerializedProperty showResolutionWarnings;
+        SerializedProperty linkScaleToMaskDefault;
 
         public void OnEnable()
         { 
             masterTerrain = serializedObject.FindProperty("masterTerrain");
             previewResolution = serializedObject.FindProperty("previewResolution");
             hideTerrainGroup = serializedObject.FindProperty("hideTerrainGroup");
+            useTCRuntime = serializedObject.FindProperty("useTCRuntime");
 
             global = new SerializedObject(((TC_Settings)target).global);
             
@@ -54,6 +58,9 @@ namespace TerrainComposer2
 
             keyZoomIn = global.FindProperty("keyZoomIn");
             keyZoomOut = global.FindProperty("keyZoomOut");
+
+            showResolutionWarnings = global.FindProperty("showResolutionWarnings");
+            linkScaleToMaskDefault = global.FindProperty("linkScaleToMaskDefault");
 
             Transform t = ((MonoBehaviour)target).transform;
             t.hideFlags = HideFlags.NotEditable | HideFlags.HideInInspector;
@@ -94,6 +101,12 @@ namespace TerrainComposer2
                 serializedObject.ApplyModifiedProperties();
                 TC_NodeWindow.DebugMode();
             }
+
+            TD.DrawProperty(useTCRuntime);
+            if (GUI.changed)
+            {
+                if (!useTCRuntime.boolValue) TC_Settings.instance.transform.parent.tag = "EditorOnly"; else TC_Settings.instance.transform.parent.tag = "Untagged";
+            }
             
             EditorGUILayout.EndVertical();
 
@@ -106,6 +119,7 @@ namespace TerrainComposer2
 
             EditorGUILayout.BeginVertical("Box");
             TD.DrawProperty(tooltip);
+            TD.DrawProperty(showResolutionWarnings);
             
             GUI.changed = false;
             Vector3 defaultTerrainSize = globalSettings.defaultTerrainSize;
@@ -116,6 +130,13 @@ namespace TerrainComposer2
                 globalSettings.defaultTerrainSize = defaultTerrainSize;
                 EditorUtility.SetDirty(globalSettings);
             }
+            EditorGUILayout.EndVertical();
+
+            GUILayout.Space(5);
+
+            TD.DrawLabelWidthUnderline("Trees and Objects", 12);
+            EditorGUILayout.BeginVertical("Box");
+                TD.DrawProperty(linkScaleToMaskDefault, new GUIContent("Link Scale To Mask Default"));
             EditorGUILayout.EndVertical();
 
             GUILayout.Space(5);

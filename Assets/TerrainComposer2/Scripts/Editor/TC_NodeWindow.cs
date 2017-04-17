@@ -30,7 +30,9 @@ namespace TerrainComposer2
             Undo.undoRedoPerformed += UndoRedoPerformed;
 
             // Debug.Log("Node Window OnEnable");
-            TC.RefreshOutputReferences(6);
+            // Debug.Log(Application.isPlaying);
+
+            // if (!Application.isPlaying) TC.RefreshOutputReferences(6);
         }
 
         void OnFocus()
@@ -58,7 +60,7 @@ namespace TerrainComposer2
             // Debug.Log("Perform undo");
             if (TD.SelectionContainsItemBehaviour())
             {
-                TC.refreshOutputReferences = TC.allOutput;
+                TC.RefreshOutputReferences(TC.allOutput);
                 TC.AutoGenerate();
             }
         }
@@ -174,7 +176,7 @@ namespace TerrainComposer2
                     GUI.color = Color.white;
                 }
                 string fps = TC_Reporter.BenchmarkStop("| fps ", false);
-                EditorGUI.LabelField(new Rect(180, 0, 250, 17), "Node Draw " + TD.countDrawNode + "| Nodes Culled " + TD.countDrawNodeCulled + fps);
+                EditorGUI.LabelField(new Rect((Screen.width / 2) - 200, 0, 250, 17), "Node Draw " + TD.countDrawNode + "| Nodes Culled " + TD.countDrawNodeCulled + fps);
             }
 
             if (onFocus) Repaint();
@@ -376,6 +378,11 @@ namespace TerrainComposer2
             TC_Settings settings = TC_Settings.instance;
             float width = 55;
 
+            GUI.color = EditorGUIUtility.isProSkin ? new Color(0.2f, 0.2f, 0.2f) : new Color(0.5f, 0.5f, 0.5f);
+            
+            GUI.DrawTexture(new Rect(0, 0, Screen.width, 20), Texture2D.whiteTexture);
+            GUI.color = Color.white;
+
             EditorGUILayout.BeginHorizontal();
             if (!TC_Settings.instance.hideMenuBar)
             {
@@ -398,20 +405,39 @@ namespace TerrainComposer2
                     DrawHelp(menu, false);
                     menu.DropDown(new Rect(1 + width * 2, 17, 1, 1));
                 }
+                if (!TC_Settings.instance.global.documentationClicked) GUI.color = new Color(Mathf.Abs(Mathf.Sin(Time.realtimeSinceStartup)), Mathf.Abs(Mathf.Cos(Time.realtimeSinceStartup)), 0);
+                else GUI.color = Color.white;
 
-                GUILayout.Space(Screen.width - 540 - (width + 5));
+                if (GUILayout.Button("Documentation", EditorStyles.miniButtonMid, GUILayout.Width(width + 40)))
+                {
+                    if (Event.current.shift) TC_Settings.instance.global.documentationClicked = false;
+                    else
+                    {
+                        TC_Settings.instance.global.documentationClicked = true;
+                        Application.OpenURL("http://www.terraincomposer.com/terraincomposer2-documentation/");
+                    }
+                }
+                GUI.color = Color.white;
+
+                GUILayout.Space(Screen.width - 620 - ((width * 2) + 45));
             }
-            else GUILayout.Space(Screen.width - 536 - (width + 5));
+            else GUILayout.Space(Screen.width - 449 - (width + 5));
 
             GUI.changed = false;
             float labelWidthOld = EditorGUIUtility.labelWidth;
             EditorGUIUtility.labelWidth = 45;
             settings.seed = EditorGUILayout.FloatField("Seed", settings.seed, GUILayout.Width(100));
+            if (GUILayout.Button("Random", EditorStyles.miniButtonMid, GUILayout.Width(50)))
+            {
+                if (eventCurrent.control) TC_Settings.instance.seed = 0; else TC_Settings.instance.seed = Random.Range(-20000.0f, 20000.0f);
+                GUI.changed = true;
+            }
             if (GUI.changed)
             {
                 EditorUtility.SetDirty(settings);
                 TC.AutoGenerate();
             }
+            GUILayout.Space(20);
             EditorGUIUtility.labelWidth = labelWidthOld;
 
             for (int i = 0; i < 6; i++)
@@ -488,8 +514,9 @@ namespace TerrainComposer2
         void DrawHelp(GenericMenu menu, bool showPath)
         {
             string path = showPath ? "Help/" : "";
-            menu.AddItem(new GUIContent(path + "Documentation"), TC_Settings.instance.showFps, ClickMenuMain, "Documentation");
-            menu.AddSeparator("Help/");
+            // menu.AddItem(new GUIContent(path + "Documentation"), TC_Settings.instance.showFps, ClickMenuMain, "Documentation");
+            // menu.AddSeparator(path);
+            // menu.AddItem(new GUIContent(path + "Tooltip"), TC_Settings.instance.global.tooltip, ClickMenuMain, "Tooltip");
             menu.AddItem(new GUIContent(path + "About..."), false, ClickMenuMain, "About...");
         }
 
@@ -498,6 +525,7 @@ namespace TerrainComposer2
             if (EditorUtility.DisplayDialog("New TerrainComposer Project", "Are you sure you want to start a new TerrainComposer project?", "Yes", "Cancel"))
             {
                 TC_Area2D.current.terrainLayer.New(true);
+                TC_Settings.instance.seed = 0;
             }
         }
 
@@ -519,12 +547,16 @@ namespace TerrainComposer2
             }
             else if (cmd == "Refresh")
             {
-                TC_Generate.instance.RefreshOutputReferences(6, true); 
+                TC_Generate.instance.RefreshOutputReferences(6, true);
                 if (TC_Generate.instance.autoGenerate) TC_Generate.instance.Generate(false);
             }
-            else if (cmd == "ResetTextures") TC.refreshOutputReferences = 7;
+            else if (cmd == "ResetTextures") TC.RefreshOutputReferences(7);
             else if (cmd == "Documentation") Application.OpenURL("http://www.terraincomposer.com/terraincomposer2-documentation/");
-            else if (cmd == "About...") TC.AddMessage("TerrainComposer 2 Beta 7d", 0, 4);
+            else if (cmd == "Tooltip")
+            {
+                TC_Settings.instance.global.tooltip = !TC_Settings.instance.global.tooltip;
+            }
+            else if (cmd == "About...") TC.AddMessage("TerrainComposer version " + TC.GetVersionNumber().ToString(), 0, 4);
         }
 
         void Open()

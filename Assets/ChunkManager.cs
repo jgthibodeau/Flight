@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 [ExecuteInEditMode]
 public class ChunkManager : MonoBehaviour {
+	public bool doUpdate;
 	public bool resetChunks = false;
 
 	public float chunkSize;
@@ -19,12 +20,15 @@ public class ChunkManager : MonoBehaviour {
 	public GameObject defaultChunk;
 	public int chunkRadius;
 
+	public int chunkObjectRadius;
+
 	private TerrainComposer2.TC_TerrainArea terrainArea;
 
 	public Transform player;
 
 	public bool replaceWater;
 	public GameObject water;
+	public float seaLevel;
 
 	// Use this for initialization
 	void Start () {
@@ -50,7 +54,7 @@ public class ChunkManager : MonoBehaviour {
 			if (replaceWater) {
 				GameObject newWater = GameObject.Instantiate (water);
 				newWater.transform.SetParent (terrain.terrain.transform);
-				newWater.transform.localPosition = new Vector3 (0, newWater.transform.localPosition.y, 0);
+				newWater.transform.localPosition = new Vector3 (0, seaLevel, 0);
 				newWater.SetActive (true);
 			}
 
@@ -79,13 +83,15 @@ public class ChunkManager : MonoBehaviour {
 			resetChunks = false;
 		}
 
-		TerrainComposer2.Int2 newChunk = new TerrainComposer2.Int2((int)((player.position.x - zeroChunk.x) / chunkSize), (int)((player.position.z - zeroChunk.y) / chunkSize));
-//		Debug.Log ("********************");
-//		Debug.Log ("currentChunk: " + currentChunk.x + ", " + currentChunk.y);
-//		Debug.Log ("newChunk: " + newChunk.x + ", " + newChunk.y);
-		if (currentChunk.x != newChunk.x || currentChunk.y != newChunk.y) {
-			currentChunk = newChunk;
-			UpdateChunks ();
+		if (doUpdate) {
+			TerrainComposer2.Int2 newChunk = new TerrainComposer2.Int2 ((int)((player.position.x - zeroChunk.x) / chunkSize), (int)((player.position.z - zeroChunk.y) / chunkSize));
+			//		Debug.Log ("********************");
+			//		Debug.Log ("currentChunk: " + currentChunk.x + ", " + currentChunk.y);
+			//		Debug.Log ("newChunk: " + newChunk.x + ", " + newChunk.y);
+			if (currentChunk.x != newChunk.x || currentChunk.y != newChunk.y) {
+				currentChunk = newChunk;
+				UpdateChunks ();
+			}
 		}
 	}
 
@@ -94,8 +100,12 @@ public class ChunkManager : MonoBehaviour {
 		int maxChunkX = currentChunk.x + chunkRadius;
 		int minChunkZ = currentChunk.y - chunkRadius;
 		int maxChunkZ = currentChunk.y + chunkRadius;
-//		Debug.Log ("chunkX range: " + minChunkX + " - " + maxChunkX);
-//		Debug.Log ("chunkZ range: " + minChunkZ + " - " + maxChunkZ);
+
+
+		int minChunkObjectX = currentChunk.x - chunkObjectRadius;
+		int maxChunkObjectX = currentChunk.x + chunkObjectRadius;
+		int minChunkObjectZ = currentChunk.y - chunkObjectRadius;
+		int maxChunkObjectZ = currentChunk.y + chunkObjectRadius;
 
 		//set unloadable chunks equal to currently loaded chunks
 		unloadableChunks.Clear ();
@@ -115,7 +125,7 @@ public class ChunkManager : MonoBehaviour {
 
 					//put chunk into list of currently loaded chunks and enable it
 					if (!loadedChunks.Contains (chunk)) {
-						chunk.tc_terrain.terrain.gameObject.SetActive (true);
+						chunk.toggleTerrain (true);
 						loadedChunks.Add (chunk);
 					}
 
@@ -123,22 +133,45 @@ public class ChunkManager : MonoBehaviour {
 					if (unloadableChunks.Contains (chunk)) {
 						unloadableChunks.Remove (chunk);
 					}
+
+					//if chunk is within object distance, enable its objects
+					if (x >= minChunkObjectX && x <= maxChunkObjectX && z >= minChunkObjectZ && z <= maxChunkObjectZ) {
+						chunk.toggleObjects (true);
+					}
 				}
 			}
 		}
 
 		//disable all chunks in the list of unloadable chunks and remove them from the loaded chunks list
 		foreach (Chunk chunk in unloadableChunks) {
-			chunk.tc_terrain.terrain.gameObject.SetActive (false);
+			chunk.toggleTerrain (false);
+			chunk.toggleObjects (false);
 			loadedChunks.Remove (chunk);
 		}
 	}
 
 	public class Chunk{
-		public TerrainComposer2.TCUnityTerrain tc_terrain;
+		private TerrainComposer2.TCUnityTerrain tc_terrain;
+		private GameObject objectManager;
+		private bool objectsEnabled = false;
+		private bool terrainEnabled = false;
 
 		public Chunk(TerrainComposer2.TCUnityTerrain tc_terrain){
 			this.tc_terrain = tc_terrain;
+		}
+
+		public void toggleTerrain(bool enabled) {
+			if (enabled != terrainEnabled) {
+				tc_terrain.terrain.gameObject.SetActive (enabled);
+				terrainEnabled = enabled;
+			}
+		}
+
+		public void toggleObjects(bool enabled) {
+			if (enabled != objectsEnabled) {
+				objectManager.SetActive (enabled);
+				objectsEnabled = enabled;
+			}
 		}
 	}
 }

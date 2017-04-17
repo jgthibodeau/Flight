@@ -57,6 +57,7 @@ namespace TerrainComposer2
                         int total = selectItem.GetItemTotalFromTerrain();
                         if (total > 1)
                         {
+                            if (selectItem.outputId == TC.treeOutput) sliderPos.y -= 17;
                             if (Event.current.button != 2) selectItem.selectIndex = (int)GUI.HorizontalSlider(new Rect(sliderPos.x, sliderPos.y, 110, 16), selectItem.selectIndex, 0, total - 1);
                             else GUI.HorizontalSlider(new Rect(sliderPos.x, sliderPos.y, 110, 16), selectItem.selectIndex, 0, total - 1);
                         }

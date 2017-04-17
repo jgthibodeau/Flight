@@ -22,17 +22,21 @@ namespace TerrainComposer2
             if (nodeFoldout)
             {
                 Rect rectButton = new Rect(pos.x + 7.24f, pos.y + 306.09f, 253.92f, 30);
-                string text = node.GetInputPopup().ToString();
 
-                TD.DrawTextureScaled(rectButton, TD.texButton, color * activeMulti);
-                TD.DrawText(new Vector2(rectButton.x + 5.02f, rectButton.y + 14.54f), text, 21, Color.white, FontStyle.Normal, HorTextAlign.Left, VerTextAlign.Center);
+                if (TD.GetRectScaled(rectButton).y > 0)
+                {
+                    string text = node.GetInputPopup().ToString();
 
-                //if (node.inputKind == InputKind.Terrain && node.inputTerrain == InputTerrain.Splatmap)
-                //{
-                //    TD.DrawTextureScaled(new Rect(pos.x + g.rect3.x, pos.y + g.rect3.y, 75, 75), TC_Settings.instance.GetPreviewSplatTexture(node.splatSelectIndex), Color.white * activeMulti * 0.8f);
-                //}
-                DrawAddItem(rect, pos, node);
-                DropDownMenuInput(TD.GetRectScaled(rectButton), node);
+                    TD.DrawTextureScaled(rectButton, TD.texButton, color * activeMulti);
+                    TD.DrawText(new Vector2(rectButton.x + 5.02f, rectButton.y + 14.54f), text, 21, Color.white, FontStyle.Normal, HorTextAlign.Left, VerTextAlign.Center);
+
+                    //if (node.inputKind == InputKind.Terrain && node.inputTerrain == InputTerrain.Splatmap)
+                    //{
+                    //    TD.DrawTextureScaled(new Rect(pos.x + g.rect3.x, pos.y + g.rect3.y, 75, 75), TC_Settings.instance.GetPreviewSplatTexture(node.splatSelectIndex), Color.white * activeMulti * 0.8f);
+                    //}
+                    DrawAddItem(rect, pos, node);
+                    DropDownMenuInput(TD.GetRectScaled(rectButton), node);
+                }
                 LeftClickMenu(rect, node);
             }
         }
@@ -134,6 +138,7 @@ namespace TerrainComposer2
                 if (changed)
                 {
                     node.Init();
+                    EditorUtility.SetDirty(node);
                     TC.RefreshOutputReferences(node.outputId, true);
                 }
             }

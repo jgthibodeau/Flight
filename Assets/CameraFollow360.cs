@@ -2,7 +2,13 @@
 using System.Collections;
 
 public class CameraFollow360 : MonoBehaviour {
+	public bool shake;
+	public float shakeScale;
+
 	public Transform target;
+	public bool lookAtVelocity;
+	public bool adjustHeight;
+	public Rigidbody targetRigidbody;
 	private Vector3 prevLookPosition;
 
 	public float upOffset = 0.5f;
@@ -19,13 +25,28 @@ public class CameraFollow360 : MonoBehaviour {
 	public float rotationDamping = 2.0f;
 	public float rotationUpDamping = 2.0f;
 
+	public bool rotate;
+
 	// Use this for initialization
 	void Start () {
 		prevLookPosition = CalcTargetPosition();
 	}
 
 	Vector3 CalcTargetPosition(){
-		return target.position + target.up * upOffset + target.forward * forwardOffset;
+		Vector3 targetPositon = target.position;
+		if (lookAtVelocity) {
+			targetPositon += targetRigidbody.velocity * forwardOffset;
+			if (adjustHeight) {
+				targetPositon += Vector3.up * upOffset;
+			}
+		} else {
+			targetPositon += target.forward * forwardOffset;
+			if (adjustHeight) {
+				targetPositon += target.up * upOffset;
+			}
+		}
+
+		return targetPositon;
 	}
 	
 	// Update is called once per frame
@@ -69,11 +90,25 @@ public class CameraFollow360 : MonoBehaviour {
 //		prevLookPosition = targetLook;
 //		this.transform.LookAt (targetLook, targetUp);
 		Vector3 lookPosition = CalcTargetPosition ();
-		Quaternion lookDirection = Quaternion.LookRotation (lookPosition - transform.position, target.up);
-		if (rotationDamp) {
-			transform.rotation = Quaternion.Lerp (transform.rotation, lookDirection, Time.fixedDeltaTime * rotationDamping);
+		Quaternion lookDirection;
+		if (rotate) {
+			lookDirection = Quaternion.LookRotation (lookPosition - transform.position, target.up);
 		} else {
-			transform.rotation = lookDirection;
+			lookDirection = Quaternion.LookRotation (lookPosition - transform.position, Vector3.up);
+		}
+		if (rotationDamp) {
+			lookDirection = Quaternion.Lerp (transform.rotation, lookDirection, Time.fixedDeltaTime * rotationDamping);
+		}
+		transform.rotation = lookDirection;
+
+		//shake
+		if (shake) {
+			float shakeAmount = target.GetComponent<Rigidbody> ().velocity.magnitude * shakeScale;
+			Vector3 shakedPosition = transform.position;
+			shakedPosition.x += Random.Range (-shakeAmount, shakeAmount);
+			shakedPosition.y += Random.Range (-shakeAmount, shakeAmount);
+			shakedPosition.z += Random.Range (-shakeAmount, shakeAmount);
+			transform.position = shakedPosition;
 		}
 	}
 }

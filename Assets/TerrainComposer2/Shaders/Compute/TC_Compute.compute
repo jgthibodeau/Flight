@@ -19,13 +19,21 @@ struct ItemMap
 	float3 pos;
 }; 
 
+struct ItemSettings
+{
+	int index;
+	float randomPosition;
+	float2 range;
+	float opacity;
+};
+
 static const uint heightOutput = 0;
 
 RWStructuredBuffer<float> resultBuffer; 
-RWStructuredBuffer<float4> itemIndexBuffer; 
 RWStructuredBuffer<ItemMap> itemMapBuffer;
 RWStructuredBuffer<float4> itemColorBuffer;
 
+StructuredBuffer<ItemSettings> itemIndexBuffer; 
 StructuredBuffer<float> rightBuffer;
 StructuredBuffer<float> maskBuffer; 
 StructuredBuffer<ItemMap> rightItemMapBuffer;
@@ -101,7 +109,7 @@ float shapeSize;
 float2 range;
 
 float2 texResolution; 
-float2 resConversion;
+float2 resolutionPM;
 float2 resToPreview;
 
 float2 uv;
@@ -166,7 +174,7 @@ void GetPos(uint id)
 	pos.y = 0;
 	pos.x = (id - (pos.z * resolutionX)); 
 
-	pos.xz *= resConversion.xy;
+	pos.xz *= resolutionPM.xy;
 	
 	texID = float2((pos.x + areaPos.x - totalAreaPos.x) * resToPreview.x, (pos.z + areaPos.y - totalAreaPos.y) * resToPreview.y);
 	
@@ -181,7 +189,7 @@ void GetPosUV(uint id)
 
 	uv = float2(pos.x / (resolutionX - 1), pos.z / (resolutionY - 1)) + uvOffset;
 
-	pos.xz *= resConversion.xy;
+	pos.xz *= resolutionPM.xy;
 	
 	texID = float2((pos.x + areaPos.x - totalAreaPos.x) * resToPreview.x, (pos.z + areaPos.y - totalAreaPos.y) * resToPreview.y);
 	
@@ -193,7 +201,7 @@ void GetPos2(uint id)
 	pos2.y = (id / resolutionX);
 	pos2.x = (id - (pos2.y * resolutionX)); 
 
-	texID = float2(((pos2.x * resConversion.x) + areaPos.x - totalAreaPos.x) * resToPreview.x, ((pos2.y * resConversion.y) + areaPos.y - totalAreaPos.y) * resToPreview.y);
+	texID = float2(((pos2.x * resolutionPM.x) + areaPos.x - totalAreaPos.x) * resToPreview.x, ((pos2.y * resolutionPM.y) + areaPos.y - totalAreaPos.y) * resToPreview.y);
 }
 
 void GetWorldPos2(uint id)
@@ -201,7 +209,7 @@ void GetWorldPos2(uint id)
 	pos2.y = (id / resolutionX);
 	pos2.x = (id - (pos2.y * resolutionX)); 
 
-	pos2 = (pos2 * resConversion) + areaPos;
+	pos2 = (pos2 * resolutionPM) + areaPos;
 	texID = (pos2 - totalAreaPos) * resToPreview;
 }
 
@@ -212,13 +220,13 @@ void GetWorldPosUV2(uint id)
 
 	uv = (pos2.xy / (resolutionX - 1)) + uvOffset;
 
-	pos2 = (pos2 * resConversion) + areaPos;
+	pos2 = (pos2 * resolutionPM) + areaPos;
 	texID = (pos2 - totalAreaPos) * resToPreview;
 }
 
 void GetTexID(uint2 id)
 {
-	texID = float2(((id.x * resConversion.x) + areaPos.x - totalAreaPos.x) * resToPreview.x, ((id.y * resConversion.y) + areaPos.y - totalAreaPos.y) * resToPreview.y);
+	texID = float2(((id.x * resolutionPM.x) + areaPos.x - totalAreaPos.x) * resToPreview.x, ((id.y * resolutionPM.y) + areaPos.y - totalAreaPos.y) * resToPreview.y);
 }
 
 void GetUV(uint id)
@@ -415,7 +423,7 @@ void TerrainTex (uint2 id : SV_DispatchThreadID)
 
 	float4 h;
 	
-	float2 s = float2(1.0 / resolutionX, 1.0 / resolutionY); 
+	float2 s = float2(1.0 / (resolutionX * 1.0), 1.0 / (resolutionY * 1.0)); 
 	
 	float2 uv = float2(id.x / ((resolutionX - 1) * 1.0), id.y / ((resolutionY - 1) * 1.0));
 
@@ -425,23 +433,24 @@ void TerrainTex (uint2 id : SV_DispatchThreadID)
 	h[3] = resultTexRead.SampleLevel(_LinearClamp, uv + float2(0, s.y), 0).r;   
 				
 	float3 n;
-	n.z = ((h[0] - h[3]) * -4000) / resConversion.x;
-	n.x = ((h[1] - h[2]) * -4000) / resConversion.y;
+	n.z = ((h[0] - h[3]) * 4000) / resolutionPM.x;
+	n.x = ((h[1] - h[2]) * 4000) / resolutionPM.y;
 	n.y = 2 * (1000 / terrainHeight);
 	n = normalize(n) * 0.5 + 0.5;
+	// n.xz = (n.xz + 1) * 0.5;
 	
 	float height = resultTexRead.SampleLevel(_LinearClamp, uv, 0).r; 
 	height *= 65535;
 	float h1 = floor(height / 256);
 	float h2 = height - (h1 * 256);
 
-	terrainTex[id] = float4(h1 / 255.0, h2 / 255.0, n.x, n.y);  // idOffset
+	terrainTex[id] = float4(h1 / 255.0, h2 / 255.0, n.x, n.z);  // idOffset
 	// terrainTex[id] = float4(n.x, n.z, 0,0);  
 }
 
 // ==================================================================
 // Terrain
-
+ 
 #pragma kernel TerrainHeight
 [numthreads(1024,1,1)] 
 void TerrainHeight (uint id : SV_DispatchThreadID)
@@ -473,10 +482,10 @@ void TerrainAngle (uint id : SV_DispatchThreadID)
 	uv += resExpandBorder;
 	uv /= (terrainTexReadResolution);
 
-	// float2 xz = terrainTexRead.SampleLevel(_LinearClamp, p, 0).ba * 2 - 1;
-	// h = 1 - sqrt(1-saturate(dot(xz, xz)));
-	 
-	h = 1 - ((terrainTexRead.SampleLevel(_LinearClamp, uv, 0).a - 0.5) * 2);
+	// h = 1 - ((terrainTexRead.SampleLevel(_LinearClamp, uv, 0).a - 0.5) * 2);
+
+	float2 n = (terrainTexRead.SampleLevel(_LinearClamp, uv, 0).ba - 0.5) * 2;
+	h = 1 - (sqrt(1- dot(n, n)) * 1);// - 0.5) * 2);
 	
 	ApplySplatVertical();
 
@@ -546,6 +555,7 @@ void TerrainCollisionHeight (uint id : SV_DispatchThreadID)
 	GetPosUV(id);
 	
 	float h0 = tex1.SampleLevel(_PointClamp, float2(uv.x, 1 - uv.y), 0).r;
+	
 	h0 *= 1 - step(1, h0);
 	h0 -= 1 / terrainHeight;
 	
@@ -559,6 +569,28 @@ void TerrainCollisionHeight (uint id : SV_DispatchThreadID)
 	SetPreviewTex();
 }
 
+#pragma kernel TerrainCollisionHeightInverted
+[numthreads(1024,1,1)] 
+void TerrainCollisionHeightInverted (uint id : SV_DispatchThreadID)
+{ 
+	GetPosUV(id);
+	
+	float h0 = 1 - tex1.SampleLevel(_PointClamp, float2(uv.x, 1 - uv.y), 0).r;
+	
+	h0 *= 1 - step(1, h0);
+	h0 -= 1 / terrainHeight;
+	
+	if (h0 >= range.x && h0 <= range.y) h = h0;
+
+	// if (h == 1) h = rightBuffer[id];
+	// h = min(h, rightBuffer[id]);
+	 
+	resultBuffer[id] = h;
+
+	SetPreviewTex();
+}
+
+
 #pragma kernel TerrainCollisionHeightInclude
 [numthreads(1024,1,1)] 
 void TerrainCollisionHeightInclude (uint id : SV_DispatchThreadID)
@@ -566,6 +598,7 @@ void TerrainCollisionHeightInclude (uint id : SV_DispatchThreadID)
 	GetPosUV(id);
 
 	float h0 = tex1.SampleLevel(_PointClamp, float2(uv.x, 1 - uv.y), 0).r;
+
 	h0 *= 1 - step(1, h0);
 	h0 -= 1 / terrainHeight;
 
@@ -592,6 +625,41 @@ void TerrainCollisionHeightInclude (uint id : SV_DispatchThreadID)
 	SetPreviewTex();
 }
 
+#pragma kernel TerrainCollisionHeightIncludeInverted
+[numthreads(1024,1,1)] 
+void TerrainCollisionHeightIncludeInverted (uint id : SV_DispatchThreadID)
+{ 
+	GetPosUV(id);
+
+	float h0 = 1 - tex1.SampleLevel(_PointClamp, float2(uv.x, 1 - uv.y), 0).r;
+
+	h0 *= 1 - step(1, h0);
+	h0 -= 1 / terrainHeight;
+
+	uv *= (terrainTexReadNormalResolution);
+	uv += resExpandBorder;
+	uv /= (terrainTexReadResolution);
+	
+	// float2 h0 = terrainTexRead.SampleLevel(_LinearClamp, uv, 0).rg * 255;  
+	// float height = ((h0.x * 256.0) + h0.y) / 65535.0;   
+	// height /= (1000 / terrainHeight);
+
+	h = rightBuffer[id];
+
+	
+	float deltaH = h0 - h;
+
+	if (deltaH >= range.x && deltaH <= range.y) h = h0;
+
+	// if (h == 1) h = rightBuffer[id];
+	// h = min(h, rightBuffer[id]);
+	
+	resultBuffer[id] = h;
+
+	SetPreviewTex();
+}
+
+
 #pragma kernel TerrainCollisionMask
 [numthreads(1024,1,1)] 
 void TerrainCollisionMask (uint id : SV_DispatchThreadID)
@@ -608,6 +676,24 @@ void TerrainCollisionMask (uint id : SV_DispatchThreadID)
 
 	SetPreviewTex();
 }
+
+#pragma kernel TerrainCollisionMaskInverted
+[numthreads(1024,1,1)] 
+void TerrainCollisionMaskInverted (uint id : SV_DispatchThreadID)
+{ 
+	GetPosUV(id);
+	
+	h = 1 - tex1.SampleLevel(_PointClamp, float2(uv.x, 1 - uv.y), 0).r;
+	
+	h *= step(1, h);
+	
+	ApplySplatVertical();  
+	
+	resultBuffer[id] = h;
+
+	SetPreviewTex();
+}
+
 
 // ==================================================================
 // File
@@ -645,7 +731,7 @@ void ImageColor (uint id : SV_DispatchThreadID)
 	
 	if (uv.x >= 0 && uv.x <= 1 && uv.y >= 0 && uv.y <= 1) 
 	{ 
-		float4 col = leftSplatmap0.SampleLevel(_LinearClamp, uv, 0);
+		float4 col = leftSplatmap0.SampleLevel(_PointClamp, uv, 0);
 
 		if (col.r == redChannel.y && redChannel.x == 1) h = col.r;
 		if (col.g == greenChannel.y && greenChannel.x == 1) h = max(h, col.g);
@@ -673,10 +759,10 @@ void ImageColorRange (uint id : SV_DispatchThreadID)
 	{ 
 		float4 col = leftSplatmap0.SampleLevel(_LinearClamp, uv, 0);
 
-		if (col.r > redChannel.y && col.r < redChannel.z && redChannel.x == 1) h = col.r;
-		if (col.g > greenChannel.y && col.g < greenChannel.z && greenChannel.x == 1) h = max(h, col.g);
-		if (col.b > blueChannel.y && col.b < blueChannel.z && blueChannel.x == 1) h = max(h, col.b);
-		if (col.a > alphaChannel.y && col.a < alphaChannel.z && alphaChannel.x == 1) h = max(h, col.a);
+		if (col.r >= redChannel.y && col.r <= redChannel.z && redChannel.x == 1) h = col.r;
+		if (col.g >= greenChannel.y && col.g <= greenChannel.z && greenChannel.x == 1) h = max(h, col.g);
+		if (col.b >= blueChannel.y && col.b <= blueChannel.z && blueChannel.x == 1) h = max(h, col.b);
+		if (col.a >= alphaChannel.y && col.a <= alphaChannel.z && alphaChannel.x == 1) h = max(h, col.a);
 
 		ApplyVertical();
 	}
@@ -1063,6 +1149,7 @@ void CalcColor (uint id : SV_DispatchThreadID)
 	}
 
 	color /= total; 
+	
 	splatmap0[pos2] = color;
 	 
 	// Do tex id
@@ -1097,10 +1184,9 @@ void NormalizeSplat (uint2 id : SV_DispatchThreadID)
 [numthreads(1024,1,1)]  
 void CalcObject (uint id : SV_DispatchThreadID)  
 { 
-	GetWorldPos2(id);
+	GetWorldPosUV2(id);
 
 	float v = resultBuffer[id]; 
-	uint listIndex = 1;
 	uint index = 0;
 	float density = 0;
 
@@ -1110,20 +1196,37 @@ void CalcObject (uint id : SV_DispatchThreadID)
 
 	for (uint i = 0; i < itemCount; i++)
 	{
-		if (v <= (itemIndexBuffer[i].z + ((random - 0.5) * mixValue))) { listIndex = itemIndexBuffer[i].x; density = itemIndexBuffer[i].w; found = true; break;}
-		index++; 
+		if (v <= (itemIndexBuffer[i].range.y + ((random - 0.5) * mixValue))) { found = true; break;}
+		index++;   
 	}
 
-	if (!found) { listIndex = itemIndexBuffer[itemCount - 1].x; density = itemIndexBuffer[itemCount - 1].w; index--; }
+	if (!found) index--;
+
+	density = itemIndexBuffer[index].opacity;
 
 	float place = step(random + 0.00001, density);
 
-	itemMapBuffer[id].index = listIndex; 
+	itemMapBuffer[id].index = itemIndexBuffer[index].index; 
 	itemMapBuffer[id].density = density * place;
 	itemMapBuffer[id].maskValue = 1;
 
 	splatPreviewTex[texID] = itemColorBuffer[index] * place;
 	previewTex[texID] = colLayer * saturate(density + 0.5) * place;
+
+	float random2 = Random(pos2 + float2(997.5, 0));  
+	float halfPixel = 0.5 / resolutionX;
+
+	float2 uvPos = ((saturate(float2(random, random2)) - 0.5) / (resolutionX)) * itemIndexBuffer[index].randomPosition;
+
+	float2 uv2 = (uv + uvPos) * (terrainTexReadNormalResolution - 1);
+	uv2 += resExpandBorder;
+	uv2 /= (terrainTexReadResolution - 1);
+		
+	float2 h0 = terrainTexRead.SampleLevel(_LinearClamp, uv2, 0).rg * 255.0; 
+	h0.x *= 256.0;
+	h = (h0.x + h0.y) / 65535.0;
+		
+	itemMapBuffer[id].pos = float3(uvPos.x, h, uvPos.y); 
 }
 
 #pragma kernel CalcObjectPosition
@@ -1137,8 +1240,8 @@ void CalcObjectPosition (uint id : SV_DispatchThreadID)
 	float density = itemMapBuffer[id].maskValue * itemMapBuffer[id].density;
 	itemMapBuffer[id].density = density;
 
-	//if (density > 0)
-	//{
+	if (density > 0)  
+	{
 		int index = itemMapBuffer[id].index;
 
 		float random2 = Random(pos2 + float2(997.5, 0));  
@@ -1147,10 +1250,10 @@ void CalcObjectPosition (uint id : SV_DispatchThreadID)
 		float halfPixel = 0.5 / resolutionX;
 
 		// uv += halfPixel;
-		// uv -= snapOffset;
-		uv += ((saturate(float2(random, random2)) - 0.5) / (resolutionX)) * randomPositionValue;
+		// uv -= snapOffset; 
+		float2 uvPos = ((saturate(float2(random, random2)) - 0.5) / (resolutionX)) * randomPositionValue;
 
-		float2 uv2 = uv * (terrainTexReadNormalResolution - 1);
+		float2 uv2 = (uv + uvPos) * (terrainTexReadNormalResolution - 1);
 		uv2 += resExpandBorder;
 		uv2 /= (terrainTexReadResolution - 1);
 		
@@ -1159,8 +1262,8 @@ void CalcObjectPosition (uint id : SV_DispatchThreadID)
 		h0.x *= 256.0;
 		h = (h0.x + h0.y) / 65535.0;
 		
-		itemMapBuffer[id].pos = float3(uv.x, h, uv.y); 
-	//}
+		itemMapBuffer[id].pos = float3(uvPos.x, h, uvPos.y); 
+	}
 }
 
 // =============================================================================================
@@ -1174,12 +1277,14 @@ void MethodItemTexMask (uint id : SV_DispatchThreadID)
 	
 	float random = Random(pos2) + 0.00001;
 
-	float maskValue = maskBuffer[id];
+	uint id2 = (itemMapBuffer[id].pos.x * resolutionX) + (itemMapBuffer[id].pos.z * resolutionY * resolutionX);
+
+	float maskValue = maskBuffer[id - 1 - resolutionX];
 
 	h = itemMapBuffer[id].maskValue * maskValue;
 	float place = step(random, h * itemMapBuffer[id].density);
 
-	itemMapBuffer[id].maskValue = h * place;
+	itemMapBuffer[id].maskValue = h;// * place;
 	
 	// if (worldCurveKeysLength > 0) h = Evaluate(h, worldCurveKeysLength, worldCurveKeys, worldCurveCalc);
 	// h = lerp(h, saturate(h), mask);
@@ -1194,6 +1299,8 @@ void MethodItemTex0Mask (uint id : SV_DispatchThreadID)
 	GetPos2(id);
 	
 	float random = Random(pos2) + 0.00001;
+
+	uint id2 = (itemMapBuffer[id].pos.x * resolutionX) + (itemMapBuffer[id].pos.z * resolutionY * resolutionX);
 
 	float maskValue = maskBuffer[id];
 
@@ -1227,6 +1334,7 @@ void MethodItemTexLerp (uint id : SV_DispatchThreadID)
 		maskValue = rightItemMapBuffer[id].maskValue;
 
 		itemMapBuffer[id].index = rightItemMapBuffer[id].index;
+		itemMapBuffer[id].pos = rightItemMapBuffer[id].pos;
 		itemMapBuffer[id].density = density;
 		itemMapBuffer[id].maskValue = maskValue;
 		previewColor = rightPreviewTex[texID]; 
@@ -1263,6 +1371,7 @@ void MethodItemTexLerpMask (uint id : SV_DispatchThreadID)
 		float rightMaskValue = rightItemMapBuffer[id].maskValue * maskValue;
 		float density = rightItemMapBuffer[id].density;
 		itemMapBuffer[id].index = rightItemMapBuffer[id].index;
+		itemMapBuffer[id].pos = rightItemMapBuffer[id].pos;
 		itemMapBuffer[id].density = density;
 		itemMapBuffer[id].maskValue = rightMaskValue;
 
@@ -1297,6 +1406,7 @@ void MethodItemTexMax (uint id : SV_DispatchThreadID)
 	{
 		float density = rightItemMapBuffer[id].density;
 		itemMapBuffer[id].index = rightItemMapBuffer[id].index;
+		itemMapBuffer[id].pos = rightItemMapBuffer[id].pos;
 		itemMapBuffer[id].density = density;
 		itemMapBuffer[id].maskValue = rightMaskValue; 
 		previewColor = rightPreviewTex[texID];  
@@ -1329,6 +1439,7 @@ void MethodItemTexMin (uint id : SV_DispatchThreadID)
 	{
 		float density = rightItemMapBuffer[id].density;
 		itemMapBuffer[id].index = rightItemMapBuffer[id].index;
+		itemMapBuffer[id].pos = rightItemMapBuffer[id].pos;
 		itemMapBuffer[id].density = density;
 		itemMapBuffer[id].maskValue = rightMaskValue;
 		previewColor = rightPreviewTex[texID]; 
@@ -2273,15 +2384,15 @@ void NoiseMultiFractal12(uint id : SV_DispatchThreadID) { GetPos(id); GetUV(); h
 // ================================================================= 
 
 #pragma kernel NoiseIQNormal
-[numthreads(1024, 1, 1)]    
+[numthreads(512, 1, 1)]    
 void NoiseIQNormal(uint id : SV_DispatchThreadID) { GetPos(id); GetUV(); h = 0;	if (uv.x >= 0 && uv.x <= 1 && uv.y >= 0 && uv.y <= 1) { pos.y += _Seed; h = IQNormal(); ApplyVertical(); } resultBuffer[id] = h; SetPreviewTex(); }
 
 #pragma kernel NoiseIQSimplex
-[numthreads(1024, 1, 1)]    
+[numthreads(512, 1, 1)]    
 void NoiseIQSimplex(uint id : SV_DispatchThreadID) { GetPos(id); GetUV(); h = 0; if (uv.x >= 0 && uv.x <= 1 && uv.y >= 0 && uv.y <= 1) { pos.y += _Seed; h = IQSimplex(); ApplyVertical(); } resultBuffer[id] = h; SetPreviewTex(); }
 
 #pragma kernel NoiseIQValue
-[numthreads(1024, 1, 1)]    
+[numthreads(512, 1, 1)]    
 void NoiseIQValue(uint id : SV_DispatchThreadID) { GetPos(id); GetUV(); h = 0; if (uv.x >= 0 && uv.x <= 1 && uv.y >= 0 && uv.y <= 1) { pos.y += _Seed; h = IQValue(); ApplyVertical(); } resultBuffer[id] = h; SetPreviewTex(); }
 
 
@@ -2289,15 +2400,15 @@ void NoiseIQValue(uint id : SV_DispatchThreadID) { GetPos(id); GetUV(); h = 0; i
 // ================================================================= 
 
 #pragma kernel NoiseSwissNormal
-[numthreads(1024, 1, 1)]    
+[numthreads(512, 1, 1)]    
 void NoiseSwissNormal(uint id : SV_DispatchThreadID) { GetPos(id); GetUV(); h = 0;	if (uv.x >= 0 && uv.x <= 1 && uv.y >= 0 && uv.y <= 1) { pos.y += _Seed; h = SwissNormal(); ApplyVertical(); } resultBuffer[id] = h; SetPreviewTex(); }
 
 #pragma kernel NoiseSwissSimplex
-[numthreads(1024, 1, 1)]    
+[numthreads(512, 1, 1)]    
 void NoiseSwissSimplex(uint id : SV_DispatchThreadID) { GetPos(id); GetUV(); h = 0; if (uv.x >= 0 && uv.x <= 1 && uv.y >= 0 && uv.y <= 1) { pos.y += _Seed; h = SwissSimplex(); ApplyVertical(); } resultBuffer[id] = h; SetPreviewTex(); }
 
 #pragma kernel NoiseSwissValue
-[numthreads(1024, 1, 1)]    
+[numthreads(512, 1, 1)]    
 void NoiseSwissValue(uint id : SV_DispatchThreadID) { GetPos(id); GetUV(); h = 0; if (uv.x >= 0 && uv.x <= 1 && uv.y >= 0 && uv.y <= 1) { pos.y += _Seed; h = SwissValue(); ApplyVertical(); } resultBuffer[id] = h; SetPreviewTex(); }
 
 
@@ -2306,16 +2417,16 @@ void NoiseSwissValue(uint id : SV_DispatchThreadID) { GetPos(id); GetUV(); h = 0
 // ================================================================= 
 
 #pragma kernel NoiseJordanNormal
-[numthreads(1024, 1, 1)]    
+[numthreads(512, 1, 1)]    
 void NoiseJordanNormal(uint id : SV_DispatchThreadID) { GetPos(id); GetUV(); h = 0;	if (uv.x >= 0 && uv.x <= 1 && uv.y >= 0 && uv.y <= 1) { pos.y += _Seed; h = JordanNormal(); ApplyVertical(); } resultBuffer[id] = h; SetPreviewTex(); }
 
 #pragma kernel NoiseJordanSimplex
-[numthreads(1024, 1, 1)]    
+[numthreads(512, 1, 1)]    
 void NoiseJordanSimplex(uint id : SV_DispatchThreadID) { GetPos(id); GetUV(); h = 0; if (uv.x >= 0 && uv.x <= 1 && uv.y >= 0 && uv.y <= 1) { pos.y += _Seed; h = JordanSimplex(); ApplyVertical(); } resultBuffer[id] = h; SetPreviewTex(); }
 // void NoiseJordanSimplex(uint id : SV_DispatchThreadID) { GetPos(id); GetUV(); h = 0; if (uv.x >= 0 && uv.x <= 1 && uv.y >= 0 && uv.y <= 1) { pos.y += _Seed; h = jordanTurbulence(pos.xz, pos.y, _Octaves, _Lacunarity, _Frequency, 0.8, 0.5, 0.4, 0.35, 1.0, 0.8, 1.0); ApplyVertical(); } resultBuffer[id] = h; SetPreviewTex(); }
 
 #pragma kernel NoiseJordanValue
-[numthreads(1024, 1, 1)]    
+[numthreads(512, 1, 1)]    
 void NoiseJordanValue(uint id : SV_DispatchThreadID) { GetPos(id); GetUV(); h = 0; if (uv.x >= 0 && uv.x <= 1 && uv.y >= 0 && uv.y <= 1) { pos.y += _Seed; h = JordanValue(); ApplyVertical(); } resultBuffer[id] = h; SetPreviewTex(); }
 
 

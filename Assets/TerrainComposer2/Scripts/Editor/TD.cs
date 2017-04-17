@@ -561,8 +561,12 @@ namespace TerrainComposer2
             if (isPrefab) return null;
             if (item.parentItem == null) return null;
             int siblingIndex = item.t.GetSiblingIndex();
-            if (siblingIndex == 0) return null;
+            if (siblingIndex <= 0) return null;
             // Debug.Log(siblingIndex + " " + (siblingIndex - 1)+ " "+item.parentItem.t.childCount);
+
+            if (siblingIndex > item.parentItem.t.childCount) return null;
+            
+
             return item.parentItem.t.GetChild(siblingIndex - 1).GetComponent<TC_ItemBehaviour>();
         }
 
@@ -838,7 +842,7 @@ namespace TerrainComposer2
             if (selectItemGroupReceive != null) selectItemGroupReceive.refreshRanges = true;
             if (selectItemReceive != null) selectItemReceive.parentItem.refreshRanges = true;
 
-            TC.refreshOutputReferences = (itemReceive.outputId == itemToDrop.outputId) ? itemReceive.outputId : TC.allOutput;
+            TC.RefreshOutputReferences((itemReceive.outputId == itemToDrop.outputId) ? itemReceive.outputId : TC.allOutput);
             CheckDropInDifferentLevel(itemReceive, itemToDrop);
             TC.AutoGenerate();
 
@@ -853,7 +857,7 @@ namespace TerrainComposer2
             Undo.SetTransformParent(itemToDrop.transform, itemReceive.transform, "Move " + itemToDrop.name);
             itemToDrop.transform.SetSiblingIndex(startIndex);
 
-            TC.refreshOutputReferences = (itemReceive.outputId == itemToDrop.outputId) ? itemReceive.outputId : TC.allOutput;
+            TC.RefreshOutputReferences((itemReceive.outputId == itemToDrop.outputId) ? itemReceive.outputId : TC.allOutput);
             CheckDropInDifferentLevel(itemReceive, itemToDrop);
             TC.AutoGenerate();
         }
@@ -927,6 +931,7 @@ namespace TerrainComposer2
             if (!item.active) activeMulti *= 0.75f;
 
             Rect rectNode = GetRectScaled(pos.x, pos.y, texCardBody.width, nodeFoldout ? cardHeight : 32);
+
             if (!InScreenSpace(rectNode))
             {
                 ++countDrawNodeCulled;
@@ -935,10 +940,7 @@ namespace TerrainComposer2
 
             ++countDrawNode;
 
-            if (rectNode.Contains(eventCurrent.mousePosition))
-            {
-                hoverItem = item;
-            }
+            if (rectNode.Contains(eventCurrent.mousePosition)) hoverItem = item;
 
             if (Mathw.ArrayContains(Selection.transforms, item.t)) item.Repaint();
 
@@ -946,20 +948,23 @@ namespace TerrainComposer2
             // DrawRect(new Rect(rect.x, rect.y, rect.width, nodeHeaderHeight), new Color32(56, 56, 56, 255));
 
             DrawTextureScaled(pos.x, pos.y, texCardHeader, color * activeMulti);
-            
-            string text = item.t.name;
-            if (selectItemGroup != null) text = TC.outputNames[item.outputId] + " Group";
-            if (node != null)
+
+            if (GetPositionScaled(pos).y > 0)
             {
-                if (node.inputKind == InputKind.File)
+                string text = item.t.name;
+                if (selectItemGroup != null) text = TC.outputNames[item.outputId] + " Group";
+                if (node != null)
                 {
-                    if (node.inputFile == InputFile.RawImage)
+                    if (node.inputKind == InputKind.File)
                     {
-                        if (text == "Node" && node.stampTex != null) text = node.stampTex.name;
+                        if (node.inputFile == InputFile.RawImage)
+                        {
+                            if (text == "Node" && node.stampTex != null) text = node.stampTex.name;
+                        }
                     }
                 }
+                DrawText(new Vector2(pos.x + 2, pos.y + 3), Mathw.CutString(text, TC.nodeLabelLength), 20, Color.white * activeMulti, FontStyle.Normal, HorTextAlign.Left); // TODO: Optimize by caching name
             }
-            DrawText(new Vector2(pos.x + 2, pos.y + 3), Mathw.CutString(text, TC.nodeLabelLength), 20, Color.white * activeMulti, FontStyle.Normal, HorTextAlign.Left); // TODO: Optimize by caching name
             
             // Rect previewRect = new Rect(rect.x + nodeBorderWidth, rect.y + previewOffsetY, rect.width - (nodeBorderWidth * 2), nodeWidth - (nodeBorderWidth * 2));
 
@@ -977,6 +982,7 @@ namespace TerrainComposer2
             {
                 if (nodeGroup.type == NodeGroupType.Select) drawEye = false;
             }
+
             //if (node != null)
             //{
             //    if (node.nodeType == NodeGroupType.Select)
@@ -991,7 +997,7 @@ namespace TerrainComposer2
             
             if (drawEye)
             {
-                mouseButton = Button(rectEye, item.visible ? texEye : texEyeClosed, true, item.visible ? new Color(1, 1, 1, 0.25f) : new Color(1, 0, 0, 0.65f), item.visible ? Color.white : Color.red, Color.white, true, false);
+                mouseButton = Button(rectEye, item.visible ? texEye : texEyeClosed, true, item.visible && item.active ? new Color(1, 1, 1, 0.25f) : new Color(1, 0, 0, 0.65f), item.visible && item.active ? Color.white : Color.red, Color.white, true, false);
                 if (mouseButton == 0)
                 {
                     item.visible = !item.visible;
@@ -1067,7 +1073,7 @@ namespace TerrainComposer2
                 {
                     // Rect previewRect2 = GetRect(new Rect(previewRect.xMin + 0.5f, previewRect.yMin + 0.5f, previewRect.width - 1, previewRect.height - 1));
                     GUI.color = previewColor;
-                    
+
                     // GUI.DrawTexture(rectPreview, Texture2D.whiteTexture);
                     Texture texPreview = null;
 
@@ -1103,9 +1109,25 @@ namespace TerrainComposer2
 
                     // PreviewEdit(item);
                 }
-                
                 GUI.color = Color.white;
-                
+
+                if (item.outputId == TC.treeOutput || item.outputId == TC.objectOutput)
+                {
+                    if (selectItem != null || layer != null || layerGroup != null || selectItemGroup != null)
+                    {
+                        Rect rectButton2 = new Rect(pos.x + 7.24f, pos.y + 306f, 254f, 30);
+                        DrawTextureScaled(rectButton2, texButton, color * (item.active ? 1 : 0.75f));
+
+                        int placed = 0;
+                        if (selectItem != null) placed = selectItem.placed;
+                        else if (layer != null) placed = layer.placed;
+                        else if (layerGroup != null) placed = layerGroup.placed;
+                        else if (selectItemGroup != null) placed = selectItemGroup.placed;
+
+                        DrawText(pos + new Vector2(12.24f, 308f), "Placed: " + placed, 21, Color.white * (item.active ? 1 : 0.75f));
+                    }
+                }
+
                 Rect rectSlider = new Rect(rectNode.x + 5, rectNode.y + texCardBody.width + 6, 37 * scale, 10 * scale);
 
                 rectSlider.y += 12 * scale;
@@ -1130,55 +1152,53 @@ namespace TerrainComposer2
                         }
                     }
                     else drawMethod = false;
-                }
-                
-                if (drawMethod)
-                {
-                    DrawMethod(item, pos + new Vector2(310, 187), false, color, activeMulti);
-                }
-            }
 
-            Rect rectButton = new Rect(pos.x + 7.24f, pos.y + 306f + 35, 254f, 30);
-            if (nodeFoldout)
-            {
-                bool drawOpacity = true;
+                    if (drawMethod) DrawMethod(item, pos + new Vector2(310, 187), false, color, activeMulti);
+                }
 
-                if (layerGroup != null)
+                Rect rectButton = new Rect(pos.x + 7.24f, pos.y + 306f + 35, 254f, 30);
+                if (GetRectScaled(rectButton).y > 0)
                 {
-                    if (layerGroup.level == 0) drawOpacity = false;
-                    else if (layerGroup.method != Method.Lerp || layerGroup.listIndex == ((TC_LayerGroupResult)layerGroup.parentItem).firstActive) drawOpacity = false;
-                }
-                else if (layer != null)
-                {
-                    if (layer.method != Method.Lerp || layer.listIndex == ((TC_LayerGroupResult)layer.parentItem).firstActive) drawOpacity = false;
-                }
-                else if (groupResult != null) drawOpacity = false;
-                else if (nodeGroup != null) drawOpacity = false;
-                else if (selectItem != null || selectItemGroup != null)
-                {
-                    if (item.outputId == TC.splatOutput || item.outputId == TC.colorOutput || item.outputId == TC.grassOutput) drawOpacity = false;
-                }
-                
-                if (drawOpacity)
-                {
-                    if (DrawOpacity(item, rectButton, color, activeMulti))
+                    bool drawOpacity = true;
+
+                    if (layerGroup != null)
                     {
-                        if (selectItem != null) selectItem.parentItem.CreateMixBuffer();
-                        else if (selectItemGroup != null) selectItemGroup.CreateMixBuffer();
-                        TC.repaintNodeWindow = true;
-                        TC.AutoGenerate();
+                        if (layerGroup.level == 0) drawOpacity = false;
+                        else if (layerGroup.method != Method.Lerp || layerGroup.listIndex == ((TC_LayerGroupResult)layerGroup.parentItem).firstActive) drawOpacity = false;
+                    }
+                    else if (layer != null)
+                    {
+                        if (layer.method != Method.Lerp) drawOpacity = false; // || layer.listIndex == ((TC_LayerGroupResult)layer.parentItem).firstActive) drawOpacity = false;
+                    }
+                    else if (groupResult != null) drawOpacity = false;
+                    else if (nodeGroup != null) drawOpacity = false;
+                    else if (selectItem != null || selectItemGroup != null)
+                    {
+                        if (item.outputId == TC.splatOutput || item.outputId == TC.colorOutput || item.outputId == TC.grassOutput) drawOpacity = false;
+                    }
+
+                    if (drawOpacity)
+                    {
+                        if (DrawOpacity(item, rectButton, color, activeMulti))
+                        {
+                            if (selectItem != null) selectItem.parentItem.CreateMixBuffer();
+                            else if (selectItemGroup != null) selectItemGroup.CreateMixBuffer();
+                            TC.repaintNodeWindow = true;
+                            EditorUtility.SetDirty(item);
+                            TC.AutoGenerate();
+                        }
                     }
                 }
+                if (selectItem != null && item.outputId == TC.treeOutput) rectPreview.height -= 35 * scale;
+                DragDropNode(item, rectPreview, rectNode, pos);
             }
-
+            
             if (Mathw.ArrayContains(Selection.transforms, item.t))
             {
                 if (nodeFoldout) DrawCommand.Add(new Rect(pos.x - 4f, pos.y - 4f, texSelectCard.width - 2, texSelectCard.height - 2), texSelectCard, Color.white, 1);
                 else DrawCommand.Add(new Rect(pos.x - 4f, pos.y - 4f, texSelectCardHeader.width - 2, texSelectCardHeader.height - 2), texSelectCardHeader, Color.white, 1);
             }
-
-            DragDropNode(item, rectPreview, rectNode, pos);
-
+            
             return rectPreview;
         }
 
@@ -1293,7 +1313,11 @@ namespace TerrainComposer2
             TC_ItemBehaviour item = EditorUtility.InstanceIDToObject(instanceID) as TC_ItemBehaviour;
             Method oldMethod = item.method;
             item.method = (Method)System.Enum.Parse(typeof(Method), command);
-            if (item.method != oldMethod) TC.AutoGenerate();
+            if (item.method != oldMethod)
+            {
+                EditorUtility.SetDirty(item);
+                TC.AutoGenerate();
+            }
         }
 
         static public string ObjectToCommandAndInstanceID(object obj, out int instanceID)

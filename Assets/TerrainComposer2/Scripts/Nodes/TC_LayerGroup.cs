@@ -15,7 +15,9 @@ namespace TerrainComposer2
         public Vector2 nodePos;
 
         public float seed = 0;
+        public int placed;
 
+        // Compute height, trees and objects
         public ComputeBuffer ComputeSingle(ref ComputeBuffer totalBuffer, float seedParent, bool first = false)
         {
             if (!groupResult.active) return null;
@@ -53,6 +55,7 @@ namespace TerrainComposer2
             return maskBuffer;
         }
 
+        // Compute Color, splat and grass
         public bool ComputeMulti(ref RenderTexture[] renderTextures, ref ComputeBuffer maskBuffer, float seedParent, bool first = false)
         {
             TC_Compute compute = TC_Compute.instance;
@@ -76,6 +79,17 @@ namespace TerrainComposer2
             else rtDisplay = groupResult.rtDisplay;
             
             return computed;
+        }
+
+        public void ResetPlaced()
+        {
+            groupResult.ResetPlaced();
+        }
+
+        public int CalcPlaced()
+        {
+            placed = groupResult.CalcPlaced();
+            return placed;
         }
         
         public void LinkClone(TC_LayerGroup layerGroupS)
@@ -104,6 +118,11 @@ namespace TerrainComposer2
             base.SetFirstLoad(active);
             maskNodeGroup.SetFirstLoad(active);
             groupResult.SetFirstLoad(active);
+        }
+
+        public void ResetObjects()
+        {
+            groupResult.ResetObjects();
         }
 
         public override void GetItems(bool refresh, bool rebuildGlobalLists, bool resetTextures)
