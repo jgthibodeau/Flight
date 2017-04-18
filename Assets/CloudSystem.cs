@@ -4,8 +4,8 @@ using System.Collections.Generic;
 
 [ExecuteInEditMode]
 public class CloudSystem : MonoBehaviour {
-//	public GameObject cloud;
-//	public GameObject cloudSphere;
+	//	public GameObject cloud;
+	//	public GameObject cloudSphere;
 
 	public int numberClouds;
 	public float maxDistance,minHeight,maxHeight;
@@ -33,18 +33,21 @@ public class CloudSystem : MonoBehaviour {
 
 	int cloudLayer;
 
+	public int updateChunkScale = 1;
+	private int currentChunkIndex = 0;
+
 	// Use this for initialization
 	void Start () {
 		cloudLayer = LayerMask.NameToLayer ("Cloud");
 		//spawn initial clouds
-		instancedClouds = new List<GameObject> ();
-//		player = GameObject.FindGameObjectWithTag (playerTag).transform;
+		instancedClouds = new List<GameObject> (numberClouds);
+		//		player = GameObject.FindGameObjectWithTag (playerTag).transform;
 	}
-	
+
 	// Update is called once per frame
 	void Update () {
 		if (createClouds) {
-			instancedClouds = new List<GameObject> ();
+			instancedClouds = new List<GameObject> (numberClouds);
 			GameObject[] oldClouds = GameObject.FindGameObjectsWithTag (cloudTag);
 			foreach (GameObject cloud in oldClouds) {
 				GameObject.DestroyImmediate (cloud);
@@ -54,10 +57,15 @@ public class CloudSystem : MonoBehaviour {
 			CreateClouds ();
 		}
 
-		//iterate over instanced clouds
-		List<GameObject> removableClouds = new List<GameObject> ();
+		//iterate over instanced clouds in chunks
+		//1,5,10
+		//2,6,11
+		//3,
+
 		float flipDistance = maxDistance + 10;
-		foreach (GameObject cloud in instancedClouds) {
+		//		foreach (GameObject cloud in instancedClouds) {
+		for (int i = currentChunkIndex; i < instancedClouds.Count; i += updateChunkScale) {
+			GameObject cloud = instancedClouds [i];
 			Vector2 playerPos = new Vector2 (player.transform.position.x, player.transform.position.z);
 			Vector2 cloudPos = new Vector2 (cloud.transform.position.x, cloud.transform.position.z);
 
@@ -86,10 +94,10 @@ public class CloudSystem : MonoBehaviour {
 			//move cloud
 			gameObject.transform.position += cloudSpeed * Time.deltaTime;
 		}
-//		foreach (GameObject cloud in removableClouds) {
-//			instancedClouds.Remove (cloud);
-//			GameObject.DestroyImmediate (cloud);
-//		}
+		currentChunkIndex++;
+		if (currentChunkIndex >= updateChunkScale) {
+			currentChunkIndex = 0;
+		}
 
 		//add clouds at edge of players forward in horizontal plane until we are back to full amount
 		for (int i = instancedClouds.Count; i < numberClouds; i++) {
@@ -116,7 +124,7 @@ public class CloudSystem : MonoBehaviour {
 		newCloud.tag = cloudTag;
 		SetLayerRecursively (newCloud, cloudLayer);
 		newCloud.transform.parent = this.transform;
-//		Vector3 position = new Vector3 (Random.Range (-maxDistance, maxDistance), Random.Range (minHeight, maxHeight), Random.Range (-maxDistance, maxDistance));
+		//		Vector3 position = new Vector3 (Random.Range (-maxDistance, maxDistance), Random.Range (minHeight, maxHeight), Random.Range (-maxDistance, maxDistance));
 		Vector2 randomPosition = Random.insideUnitCircle * (maxDistance-1f);
 		Vector3 position = new Vector3 (randomPosition.x + player.position.x, Random.Range (minHeight, maxHeight), randomPosition.y + player.position.z);
 
