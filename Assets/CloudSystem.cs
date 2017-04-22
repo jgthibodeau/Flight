@@ -17,7 +17,10 @@ public class CloudSystem : MonoBehaviour {
 	public float minScale;
 	public float maxScale;
 
+	public bool move;
 	public Vector3 cloudSpeed;
+
+	public float particleScale = 15f;
 
 	public GameObject[] clouds;
 	public bool createClouds = false;
@@ -62,46 +65,48 @@ public class CloudSystem : MonoBehaviour {
 		//2,6,11
 		//3,
 
-		float flipDistance = maxDistance + 10;
-		//		foreach (GameObject cloud in instancedClouds) {
-		for (int i = currentChunkIndex; i < instancedClouds.Count; i += updateChunkScale) {
-			GameObject cloud = instancedClouds [i];
-			Vector2 playerPos = new Vector2 (player.transform.position.x, player.transform.position.z);
-			Vector2 cloudPos = new Vector2 (cloud.transform.position.x, cloud.transform.position.z);
+		if (move) {
+			float flipDistance = maxDistance + 10;
+			//		foreach (GameObject cloud in instancedClouds) {
+			for (int i = currentChunkIndex; i < instancedClouds.Count; i += updateChunkScale) {
+				GameObject cloud = instancedClouds [i];
+				Vector2 playerPos = new Vector2 (player.transform.position.x, player.transform.position.z);
+				Vector2 cloudPos = new Vector2 (cloud.transform.position.x, cloud.transform.position.z);
 
-			//move any clouds that have moved too far away to opposite side
-			if (Vector2.Distance (playerPos, cloudPos) > flipDistance) {
-				Vector3 newCloudPos = cloud.transform.position;
-				float xDif = 2 * Mathf.Abs (playerPos.x - cloudPos.x);
-				if (cloudPos.x > playerPos.x) {
-					xDif *= -1;
-				}
-				newCloudPos.x += xDif;
-				cloudPos.x = newCloudPos.x;
+				//move any clouds that have moved too far away to opposite side
+				if (Vector2.Distance (playerPos, cloudPos) > flipDistance) {
+					Vector3 newCloudPos = cloud.transform.position;
+					float xDif = 2 * Mathf.Abs (playerPos.x - cloudPos.x);
+					if (cloudPos.x > playerPos.x) {
+						xDif *= -1;
+					}
+					newCloudPos.x += xDif;
+					cloudPos.x = newCloudPos.x;
 
-				float yDif = 2 * Mathf.Abs (playerPos.y - cloudPos.y);
-				if (cloudPos.y > playerPos.y) {
-					yDif *= -1;
-				}
-				newCloudPos.z += yDif;
-				cloudPos.y = newCloudPos.z;
+					float yDif = 2 * Mathf.Abs (playerPos.y - cloudPos.y);
+					if (cloudPos.y > playerPos.y) {
+						yDif *= -1;
+					}
+					newCloudPos.z += yDif;
+					cloudPos.y = newCloudPos.z;
 
-				//as long as the new position doesn't put us too far again, set it
-				if (Vector2.Distance (playerPos, cloudPos) <= flipDistance) {
-					cloud.transform.position = newCloudPos;
+					//as long as the new position doesn't put us too far again, set it
+					if (Vector2.Distance (playerPos, cloudPos) <= flipDistance) {
+						cloud.transform.position = newCloudPos;
+					}
 				}
+				//move cloud
+				gameObject.transform.position += cloudSpeed * Time.deltaTime;
 			}
-			//move cloud
-			gameObject.transform.position += cloudSpeed * Time.deltaTime;
-		}
-		currentChunkIndex++;
-		if (currentChunkIndex >= updateChunkScale) {
-			currentChunkIndex = 0;
-		}
+			currentChunkIndex++;
+			if (currentChunkIndex >= updateChunkScale) {
+				currentChunkIndex = 0;
+			}
 
-		//add clouds at edge of players forward in horizontal plane until we are back to full amount
-		for (int i = instancedClouds.Count; i < numberClouds; i++) {
-			CreateCloud ();
+			//add clouds at edge of players forward in horizontal plane until we are back to full amount
+			for (int i = instancedClouds.Count; i < numberClouds; i++) {
+				CreateCloud ();
+			}
 		}
 	}
 
@@ -133,8 +138,10 @@ public class CloudSystem : MonoBehaviour {
 		newCloud.transform.localScale = scale;
 
 		foreach (ParticleSystem ps in newCloud.transform.GetComponentsInChildren<ParticleSystem> ()) {
-			//				ps.main.startSize = scale.magnitude;
+			ParticleSystem.MainModule main = ps.main;
 			ps.transform.localScale = scale;
+			main.startSize = scale.magnitude * particleScale;
+			ps.Simulate (0, false, true);
 		}
 
 		if (newCloud.GetComponent<Collider> () != null) {
