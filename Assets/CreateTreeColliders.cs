@@ -12,6 +12,7 @@ public class CreateTreeColliders : MonoBehaviour {
 	public float colliderHeight;
 	public bool createColliders = false;
 	public Terrain terrain;
+	public GameObject terrainBase;
 
 	// Use this for initialization
 	void Start () {
@@ -30,17 +31,17 @@ public class CreateTreeColliders : MonoBehaviour {
 	}
 
 	void destroyTrees () {
-//		foreach (Terrain terrain in GameObject.FindObjectsOfType<Terrain> ()) {
-			Transform objectManager = terrain.transform.Find (ObjectManager);
+		foreach (Terrain foundTerrain in terrainBase.GetComponentsInChildren<Terrain> ()) {
+			Transform objectManager = foundTerrain.transform.Find (ObjectManager);
 			if (objectManager != null) {
-				Debug.Log ("found objectManager");
+//				Debug.Log ("found objectManager");
 				Transform treeColliders = objectManager.Find (TreeColliders);
 				if (treeColliders != null) {
-					Debug.Log ("found treeColliders");
+//					Debug.Log ("found treeColliders");
 					GameObject.DestroyImmediate (treeColliders.gameObject);
 				}
 			}
-//		}
+		}
 	}
 
 	void createTrees () {
@@ -48,12 +49,12 @@ public class CreateTreeColliders : MonoBehaviour {
 		GameObject tree;
 		CapsuleCollider ccollider;
 		long numberTrees = 0;
-//		foreach(Terrain terrain in GameObject.FindObjectsOfType<Terrain> ()){
-			Transform objectManager = terrain.transform.Find (ObjectManager);
+		foreach(Terrain foundTerrain in terrainBase.GetComponentsInChildren<Terrain> ()){
+			Transform objectManager = foundTerrain.transform.Find (ObjectManager);
 			if (objectManager == null) {
 				objectManager = new GameObject (ObjectManager).transform;
-				objectManager.SetParent (terrain.transform);
-				objectManager.transform.position = terrain.transform.position;
+				objectManager.SetParent (foundTerrain.transform);
+				objectManager.transform.position = foundTerrain.transform.position;
 			}
 			Transform treeColliders = objectManager.Find (TreeColliders);
 			if (treeColliders == null) {
@@ -62,15 +63,15 @@ public class CreateTreeColliders : MonoBehaviour {
 				treeColliders.transform.position = objectManager.position;
 			}
 
-			for (var i=0; i < terrain.terrainData.treeInstances.Length; i++){
+			for (var i=0; i < foundTerrain.terrainData.treeInstances.Length; i++){
 				numberTrees++;
-				TreeInstance treeInstance = terrain.terrainData.treeInstances [i];
+				TreeInstance treeInstance = foundTerrain.terrainData.treeInstances [i];
 				int treeIndex = treeInstance.prototypeIndex;
-				TreePrototype treePrototype = terrain.terrainData.treePrototypes [treeIndex];
+				TreePrototype treePrototype = foundTerrain.terrainData.treePrototypes [treeIndex];
 
-				pos = Vector3.Scale(treeInstance.position,terrain.terrainData.size)+terrain.transform.position;
+				pos = Vector3.Scale(treeInstance.position,foundTerrain.terrainData.size)+foundTerrain.transform.position;
 				pos.y += colliderHeight;
-				Debug.Log("A tree at world position "+pos+" type: "+ treeIndex);
+//				Debug.Log("A tree at world position "+pos+" type: "+ treeIndex);
 
 				tree = new GameObject (Tree);
 				tree.transform.position = pos;
@@ -93,7 +94,7 @@ public class CreateTreeColliders : MonoBehaviour {
 				//		treeCollider = Instantiate(treeColliderPrefab, pos, Quaternion.identity);
 				//		treeCollider.GetComponent(treeInfo).treeType = Terrain.activeTerrain.terrainData.treeInstances[i].prototypeIndex;
 			}
-//		}
-		Debug.Log ("Trees: "+numberTrees);
+		}
+//		Debug.Log ("Trees: "+numberTrees);
 	}
 }
