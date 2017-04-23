@@ -7,6 +7,7 @@ public class CameraFollow360 : MonoBehaviour {
 
 	public Transform target;
 	public bool lookAtVelocity;
+	public float minVelocity;
 	public bool adjustHeight;
 	public Rigidbody targetRigidbody;
 	private Vector3 prevLookPosition;
@@ -34,7 +35,7 @@ public class CameraFollow360 : MonoBehaviour {
 
 	Vector3 CalcTargetPosition(){
 		Vector3 targetPositon = target.position;
-		if (lookAtVelocity) {
+		if (lookAtVelocity && targetRigidbody.velocity.magnitude > minVelocity) {
 			targetPositon += targetRigidbody.velocity * forwardOffset;
 			if (adjustHeight) {
 				targetPositon += Vector3.up * upOffset;

@@ -17,17 +17,21 @@ public class CloudSystem : MonoBehaviour {
 	public float minScale;
 	public float maxScale;
 
+	public bool randomRotation;
+
 	public bool move;
 	public Vector3 cloudSpeed;
 
+	public bool setParticleScale;
 	public float particleScale = 15f;
 
-	public GameObject[] clouds;
+	public GameObject[] cloudPrefabs;
+	public float[] cloudProbabilities;
 	public bool createClouds = false;
 	string cloudTag = "Cloud";
 	string playerTag = "Player";
 
-	public List<GameObject> instancedClouds;
+	public List<Cloud> instancedClouds;
 	public Transform player;
 
 	MeshParticleEmitter originalEmmiter;
@@ -43,14 +47,14 @@ public class CloudSystem : MonoBehaviour {
 	void Start () {
 		cloudLayer = LayerMask.NameToLayer ("Cloud");
 		//spawn initial clouds
-		instancedClouds = new List<GameObject> (numberClouds);
+//		instancedClouds = new List<Cloud> (numberClouds);
 		//		player = GameObject.FindGameObjectWithTag (playerTag).transform;
 	}
 
 	// Update is called once per frame
 	void Update () {
 		if (createClouds) {
-			instancedClouds = new List<GameObject> (numberClouds);
+			instancedClouds = new List<Cloud> (numberClouds);
 			GameObject[] oldClouds = GameObject.FindGameObjectsWithTag (cloudTag);
 			foreach (GameObject cloud in oldClouds) {
 				GameObject.DestroyImmediate (cloud);
@@ -60,54 +64,37 @@ public class CloudSystem : MonoBehaviour {
 			CreateClouds ();
 		}
 
-		//iterate over instanced clouds in chunks
-		//1,5,10
-		//2,6,11
-		//3,
+		float flipDistance = maxDistance + 10;
+		float checkDistance = maxDistance;
+		foreach (Cloud cloud in instancedClouds) {
+//		for (int i = currentChunkIndex; i < instancedClouds.Count; i += updateChunkScale) {
+			//			Cloud cloud = instancedClouds [i];
+//			Vector3 realPlayerPos = Util.RigidBodyPosition (player.GetComponent<Rigidbody> ());
+//			Vector2 playerPos = new Vector2 (realPlayerPos.x, realPlayerPos.z);
+//			Vector2 cloudPos = new Vector2 (cloud.transform.position.x, cloud.transform.position.z);
 
-		if (move) {
-			float flipDistance = maxDistance + 10;
-			//		foreach (GameObject cloud in instancedClouds) {
-			for (int i = currentChunkIndex; i < instancedClouds.Count; i += updateChunkScale) {
-				GameObject cloud = instancedClouds [i];
-				Vector2 playerPos = new Vector2 (player.transform.position.x, player.transform.position.z);
-				Vector2 cloudPos = new Vector2 (cloud.transform.position.x, cloud.transform.position.z);
-
-				//move any clouds that have moved too far away to opposite side
-				if (Vector2.Distance (playerPos, cloudPos) > flipDistance) {
-					Vector3 newCloudPos = cloud.transform.position;
-					float xDif = 2 * Mathf.Abs (playerPos.x - cloudPos.x);
-					if (cloudPos.x > playerPos.x) {
-						xDif *= -1;
-					}
-					newCloudPos.x += xDif;
-					cloudPos.x = newCloudPos.x;
-
-					float yDif = 2 * Mathf.Abs (playerPos.y - cloudPos.y);
-					if (cloudPos.y > playerPos.y) {
-						yDif *= -1;
-					}
-					newCloudPos.z += yDif;
-					cloudPos.y = newCloudPos.z;
-
-					//as long as the new position doesn't put us too far again, set it
-					if (Vector2.Distance (playerPos, cloudPos) <= flipDistance) {
-						cloud.transform.position = newCloudPos;
-					}
-				}
-				//move cloud
-				gameObject.transform.position += cloudSpeed * Time.deltaTime;
-			}
-			currentChunkIndex++;
-			if (currentChunkIndex >= updateChunkScale) {
-				currentChunkIndex = 0;
+			if (cloud.lastDistance < checkDistance) {
+				cloud.lastDistance += (cloudSpeed + player.GetComponent<Rigidbody> ().velocity).magnitude * Time.deltaTime;
 			}
 
-			//add clouds at edge of players forward in horizontal plane until we are back to full amount
-			for (int i = instancedClouds.Count; i < numberClouds; i++) {
-				CreateCloud ();
+			if (cloud.lastDistance >= checkDistance) {
+				cloud.CalculateDistance ();
+			}
+
+			//move any clouds that have moved too far away to opposite side
+			if (cloud.lastDistance > flipDistance) {
+				cloud.Flip ();
 			}
 		}
+//		currentChunkIndex++;
+//		if (currentChunkIndex >= updateChunkScale) {
+//			currentChunkIndex = 0;
+//		}
+
+		//add clouds at edge of players forward in horizontal plane until we are back to full amount
+//		for (int i = instancedClouds.Count; i < numberClouds; i++) {
+//			CreateCloud ();
+//		}
 	}
 
 	void CreateClouds() {
@@ -121,49 +108,74 @@ public class CloudSystem : MonoBehaviour {
 		}
 	}
 
+	int GetCloudIndex () {
+		float total = 0;
+		foreach (float prob in cloudProbabilities) {
+			total += prob;
+		}
+		float randomPoint = Random.value * total;
+		for (int i = 0; i < cloudProbabilities.Length; i++) {
+			if (randomPoint < cloudProbabilities [i]) {
+				return i;
+			} else {
+				randomPoint -= cloudProbabilities [i];
+			}
+		}
+		return cloudProbabilities.Length - 1;
+	}
+
 	void CreateCloud() {
-		int cloudTypes = clouds.Length - 1;
-		GameObject newCloud = Instantiate (clouds [Random.Range (0, cloudTypes)]);
-		instancedClouds.Add (newCloud);
+		int cloudTypes = cloudPrefabs.Length;
+
+//		int cloudIndex = Random.Range (0, cloudTypes);
+		int cloudIndex = GetCloudIndex ();
+
+		GameObject newCloud = Instantiate (cloudPrefabs [cloudIndex]);
+		Transform cloudTransform = newCloud.transform;
 
 		newCloud.tag = cloudTag;
 		SetLayerRecursively (newCloud, cloudLayer);
-		newCloud.transform.parent = this.transform;
+		cloudTransform.parent = this.transform;
 		//		Vector3 position = new Vector3 (Random.Range (-maxDistance, maxDistance), Random.Range (minHeight, maxHeight), Random.Range (-maxDistance, maxDistance));
-		Vector2 randomPosition = Random.insideUnitCircle * (maxDistance-1f);
+		Vector2 randomPosition = Random.insideUnitCircle * (maxDistance);
 		Vector3 position = new Vector3 (randomPosition.x + player.position.x, Random.Range (minHeight, maxHeight), randomPosition.y + player.position.z);
+		cloudTransform.position = position;
 
-		newCloud.transform.position = position;
-		Vector3 scale = Vector3.one * Random.Range (minScale, maxScale);
-		newCloud.transform.localScale = scale;
+		if (randomRotation) {
+			Vector3 rotation = new Vector3 (0, Random.Range (0f, 360f), 0);
+			cloudTransform.rotation = Quaternion.Euler (rotation);
+		}
 
-		foreach (ParticleSystem ps in newCloud.transform.GetComponentsInChildren<ParticleSystem> ()) {
+		float scale = Random.Range (minScale, maxScale);
+		Vector3 localScale = Vector3.one * scale;
+
+//		newCloud.transform.sc = localScale;
+
+		foreach (Transform t in cloudTransform) {
+			t.localScale = localScale;
+		}
+
+		foreach (ParticleSystem ps in cloudTransform.GetComponentsInChildren<ParticleSystem> ()) {
 			ParticleSystem.MainModule main = ps.main;
-			ps.transform.localScale = scale;
-			main.startSize = scale.magnitude * particleScale;
+			if (setParticleScale) {
+				main.startSize = particleScale;
+			}
 			ps.Simulate (0, false, true);
 		}
 
 		if (newCloud.GetComponent<Collider> () != null) {
 			newCloud.GetComponent<Collider> ().isTrigger = true;
 		}
-		//			SetParticles (newCloud);
 
-		//			GameObject newCloud = Instantiate (cloud);
-		//			newCloud.transform.parent = this.transform;
-		//			newCloud.transform.localPosition = new Vector3 (Random.Range (-maxDistance, maxDistance), Random.Range (-maxDistance, maxDistance), Random.Range (-maxDistance, maxDistance));
-		//
-		//			int count = Random.Range (minCount, maxCount);
-		//			for (int i = 0; i < count; i++) {
-		//				GameObject newCloudSphere = Instantiate (cloudSphere);
-		//				newCloudSphere.transform.parent = newCloud.transform;
-		//
-		//				float scale = Random.Range (minRadius, maxRadius);
-		//				newCloudSphere.transform.localScale = new Vector3(scale, scale, scale);
-		//
-		//				float distance = Mathf.Sqrt (count)/4;
-		//				newCloudSphere.transform.localPosition = new Vector3 (Random.Range (-distance, distance), Random.Range (-distance, distance), Random.Range (-distance, distance));
-		//			}
+		Cloud cloudScript = newCloud.AddComponent<Cloud> ();
+		cloudScript.maxDistance = maxDistance;
+		cloudScript.speed = cloudSpeed;
+		cloudScript.flipDistance = maxDistance + 10;
+		cloudScript.checkDistance = maxDistance - 20;
+		cloudScript.lastDistance = maxDistance;
+		cloudScript.player = player;
+
+		instancedClouds.Add (cloudScript);
 	}
 
 	void SetLayerRecursively(GameObject obj, int newLayer){

@@ -5,6 +5,10 @@ public class Util : MonoBehaviour {
 	public static void DrawRigidbodyRay(Rigidbody rigidBody, Vector3 v1, Vector3 v2){
 		Debug.DrawRay (v1 + rigidBody.velocity * Time.fixedDeltaTime, v2);
 	}
+		
+	public static Vector3 RigidBodyPosition(Rigidbody rigidBody){
+		return rigidBody.transform.position + rigidBody.velocity * Time.fixedDeltaTime;
+	}
 
 	public static void DrawRigidbodyRay(Rigidbody rigidBody, Vector3 v1, Vector3 v2, Color color){
 		Debug.DrawRay (v1 + rigidBody.velocity * Time.fixedDeltaTime, v2, color);
