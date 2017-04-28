@@ -159,16 +159,9 @@ public class GlideV2 : MonoBehaviour {
 
 	void FixedUpdate () {
 		if (impulseFlapping) {
-			//			FlapImpulse ();
+//			FlapImpulse ();
 			SteadyFlap ();
 		}
-
-
-//		if (isFlapping) {
-////			Flap ();
-////			FlapLessBackward();
-//			FlapUpOnly ();
-//		}
 
 		if (!isGrounded) {
 //			rigidBody.constraints = RigidbodyConstraints.None;
@@ -189,9 +182,19 @@ public class GlideV2 : MonoBehaviour {
 	}
 
 	void SteadyFlap(){
-		Vector3 flapForce = (transform.forward + transform.up).normalized * flapForwardCoef * flapScale * flapSpeed;
+//		Vector3 flapForce = (transform.forward + transform.up).normalized * flapForwardCoef * flapScale * flapSpeed;
+//
+//		rigidBody.AddForceAtPosition (flapForce, transform.position);
+//
+//		Util.DrawRigidbodyRay(rigidBody, transform.position, flapForce);
+	}
 
-		rigidBody.AddForceAtPosition (flapForce, transform.position);
+	void FlapImpulse(){
+		Vector3 direction = (transform.up + transform.forward*flapDirection).normalized;
+
+		Vector3 flapForce = direction * flapForwardCoef * flapScale * flapSpeed;
+
+		rigidBody.AddForce (flapForce, ForceMode.Force);
 
 		Util.DrawRigidbodyRay(rigidBody, transform.position, flapForce);
 	}
@@ -208,11 +211,24 @@ public class GlideV2 : MonoBehaviour {
 
 			realLiftCoef = liftCoef * Mathf.Sin (angleOfAttack * Mathf.PI / 180f);
 
-			realLiftCoef *= (1f - 1f*flapDirection);
+//			realLiftCoef *= (1f - 0.5f*flapDirection);
+			realLiftCoef *= (1f - 1*flapDirection);
 
 			float liftForward = 0.5f * realLiftCoef * airDensity * wingLiftSurfaceArea * speed * speed;
 			liftForward = Mathf.Clamp (liftForward, -maxLift, maxLift);
 			Vector3 liftForce = transform.up * liftForward;
+
+			//TODO make this more seamless
+			if (liftForward > 0 && transform.rotation.eulerAngles.x < -270) {
+				Debug.Log ("flying too high");
+				liftForce = Vector3.zero;
+			}
+
+			else if (liftForward < 0 && transform.rotation.eulerAngles.x > 80) {
+				Debug.Log ("flying too low");
+				liftForce = Vector3.zero;
+			}
+
 			rigidBody.AddForceAtPosition (liftForce, transform.position, ForceMode.Force);
 			Util.DrawRigidbodyRay(rigidBody, transform.position, liftForce, Color.yellow);
 
@@ -237,11 +253,6 @@ public class GlideV2 : MonoBehaviour {
 		//drag based on wingspan
 		realDragCoef *= (1f - 0.5f*flapDirection);
 
-//		drag = realDragCoef * 0.5f * airDensity * speed * speed * wingDragSurfaceArea;
-//		Vector3 dragForce = rigidBody.velocity.normalized * (-1) * drag;
-//		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*dragForwardDistance);
-//		Util.DrawRigidbodyRay(rigidBody, transform.position - transform.forward*dragForwardDistance, dragForce, Color.green);
-
 		drag = realDragCoef * 0.5f * airDensity * speed * speed * wingDragSurfaceArea;
 		Vector3 dragForce = rigidBody.velocity.normalized * (-1) * drag;
 		rigidBody.AddForceAtPosition (dragForce, transform.position - transform.forward*dragForwardDistance);
@@ -249,7 +260,7 @@ public class GlideV2 : MonoBehaviour {
 
 		//tail drag
 		float realTailDragCoef = tailDragCoef * 0.5f * airDensity * speed * speed;
-		Vector3 tailDragAngle = (tailPitch * transform.up  + yaw * transform.right).normalized;
+		Vector3 tailDragAngle = (tailPitch * transform.up/*  + yaw * transform.right*/).normalized;
 		Vector3 tailDrag = realTailDragCoef * new Vector2 (pitch, yaw).magnitude * tailDragAngle;
 		tailDrag = Vector3.ClampMagnitude (tailDrag, maxTailDrag);
 		rigidBody.AddForceAtPosition (tailDrag, transform.position);
