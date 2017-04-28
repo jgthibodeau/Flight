@@ -35,17 +35,29 @@ public class CameraFollow360 : MonoBehaviour {
 
 	Vector3 CalcTargetPosition(){
 		Vector3 targetPositon = target.position;
+//		if (lookAtVelocity && targetRigidbody.velocity.magnitude > minVelocity) {
+//			targetPositon += targetRigidbody.velocity * forwardOffset;
+//			if (adjustHeight) {
+//				targetPositon += Vector3.up * upOffset;
+//			}
+//		} else {
+//			targetPositon += target.forward * forwardOffset;
+//			if (adjustHeight) {
+//				targetPositon += target.up * upOffset;
+//			}
+//		}
+
 		if (lookAtVelocity && targetRigidbody.velocity.magnitude > minVelocity) {
 			targetPositon += targetRigidbody.velocity * forwardOffset;
 			if (adjustHeight) {
 				targetPositon += Vector3.up * upOffset;
 			}
-		} else {
-			targetPositon += target.forward * forwardOffset;
-			if (adjustHeight) {
-				targetPositon += target.up * upOffset;
-			}
-		}
+		} //else {
+//			targetPositon += target.forward * forwardOffset;
+//			if (adjustHeight) {
+//				targetPositon += target.up * upOffset;
+//			}
+//		}
 
 		return targetPositon;
 	}

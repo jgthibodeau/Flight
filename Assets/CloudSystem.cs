@@ -28,6 +28,8 @@ public class CloudSystem : MonoBehaviour {
 	public GameObject[] cloudPrefabs;
 	public float[] cloudProbabilities;
 	public bool createClouds = false;
+	public float maxThickness;
+	public float minThickness;
 	string cloudTag = "Cloud";
 	string playerTag = "Player";
 
@@ -155,13 +157,20 @@ public class CloudSystem : MonoBehaviour {
 			t.localScale = localScale;
 		}
 
+
+		float thickness = 1f - (scale - minScale) / (maxScale - minScale);
+		thickness = (thickness * (maxThickness - minThickness)) + minThickness;
+		Debug.Log ("thickness: " + thickness);
 		foreach (ParticleSystem ps in cloudTransform.GetComponentsInChildren<ParticleSystem> ()) {
 			ParticleSystem.MainModule main = ps.main;
 			if (setParticleScale) {
 				main.startSize = particleScale;
 			}
+			ps.GetComponent<ParticleSystemRenderer> ().material.SetFloat ("_Thickness", thickness);
 			ps.Simulate (0, false, true);
 		}
+		Debug.Log ("thickness: " + thickness);
+		Debug.Break ();
 
 		if (newCloud.GetComponent<Collider> () != null) {
 			newCloud.GetComponent<Collider> ().isTrigger = true;
@@ -174,6 +183,9 @@ public class CloudSystem : MonoBehaviour {
 		cloudScript.checkDistance = maxDistance - 20;
 		cloudScript.lastDistance = maxDistance;
 		cloudScript.player = player;
+		cloudScript.minScale = minScale;
+		cloudScript.maxScale = maxScale;
+		cloudScript.scale = scale;
 
 		instancedClouds.Add (cloudScript);
 	}

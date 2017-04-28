@@ -13,6 +13,10 @@ public class Cloud : MonoBehaviour {
 	Vector2 cloudPos;
 	bool recentlyFlipped;
 
+	public float minScale;
+	public float maxScale;
+	public float scale;
+
 	void Start () {
 	}
 
