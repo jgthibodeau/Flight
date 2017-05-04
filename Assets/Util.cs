@@ -10,8 +10,8 @@ public class Util : MonoBehaviour {
 		return rigidBody.transform.position + rigidBody.velocity * Time.fixedDeltaTime;
 	}
 
-	public static void DrawRigidbodyRay(Rigidbody rigidBody, Vector3 v1, Vector3 v2, Color color){
-		Debug.DrawRay (v1 + rigidBody.velocity * Time.fixedDeltaTime, v2, color);
+	public static void DrawRigidbodyRay(Rigidbody rigidBody, Vector3 start, Vector3 dir, Color color){
+		Debug.DrawRay (start + rigidBody.velocity * Time.fixedDeltaTime, dir, color);
 	}
 
 

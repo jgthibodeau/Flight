@@ -26,12 +26,12 @@ public class Player : MonoBehaviour {
 	public BirdAnimator birdAnimator;
 	private Rigidbody rigidBody;
 	private bool isFlapping;
-	public Vector3 centerOfGravity;
 	private Vector3 center;
 	private bool landed;
 	public float gravity;
 	public float gravityForwardDistance;
 	public float gravityDownDistance;
+	public Vector3 centerOfGravity;
 	public bool keepUprightAlways;
 
 	public Vector3 centerOfMass = new Vector3 (0, 0, 0);
@@ -65,9 +65,9 @@ public class Player : MonoBehaviour {
 //		rigidBody.ResetInertiaTensor ();
 		rigidBody.centerOfMass = centerOfMass;
 		rigidBody.inertiaTensorRotation = inertiaTensorRotation;
-		Debug.Log ("centerOfMass: "+rigidBody.centerOfMass);
-		Debug.Log ("inertiaTensor: "+rigidBody.inertiaTensor);
-		Debug.Log ("inertiaTensorRotation: "+rigidBody.inertiaTensorRotation);
+//		Debug.Log ("centerOfMass: "+rigidBody.centerOfMass);
+//		Debug.Log ("inertiaTensor: "+rigidBody.inertiaTensor);
+//		Debug.Log ("inertiaTensorRotation: "+rigidBody.inertiaTensorRotation);
 
 
 		//		leftWing = transform.Find ("bird2/1/Bird_rig_3/1_2/Backbones_null_3/Wing_3");
@@ -80,9 +80,9 @@ public class Player : MonoBehaviour {
 	void FixedUpdate () {
 		rigidBody.centerOfMass = centerOfMass;
 		rigidBody.inertiaTensorRotation = inertiaTensorRotation;
-		Debug.Log ("centerOfMass: "+rigidBody.centerOfMass);
-		Debug.Log ("inertiaTensor: "+rigidBody.inertiaTensor);
-		Debug.Log ("inertiaTensorRotation: "+rigidBody.inertiaTensorRotation);
+//		Debug.Log ("centerOfMass: "+rigidBody.centerOfMass);
+//		Debug.Log ("inertiaTensor: "+rigidBody.inertiaTensor);
+//		Debug.Log ("inertiaTensorRotation: "+rigidBody.inertiaTensorRotation);
 
 //		center = transform.position + centerOfGravity.x * transform.right + centerOfGravity.y * transform.up + centerOfGravity.z * transform.forward;
 
@@ -132,17 +132,17 @@ public class Player : MonoBehaviour {
 
 	void AirGravity(){
 		Vector3 gravityForce = Vector3.down * gravity;
-		rigidBody.AddForceAtPosition (gravityForce, transform.position - transform.up * gravityDownDistance + transform.forward * gravityForwardDistance, ForceMode.Force);
-		Util.DrawRigidbodyRay(rigidBody, transform.position - transform.up * gravityDownDistance + transform.forward * gravityForwardDistance, gravityForce, Color.gray);
+		rigidBody.AddForceAtPosition (gravityForce, transform.position + transform.up * centerOfGravity.y + transform.forward * centerOfGravity.z, ForceMode.Force);
+		Util.DrawRigidbodyRay(rigidBody, transform.position + transform.up * centerOfGravity.y + transform.forward * centerOfGravity.z, gravityForce, Color.gray);
 	}
 
 	void GroundGravity(){
 		Vector3 gravityForce = -groundNormal * gravity;
-		//		rigidBody.AddForceAtPosition (gravityForce, transform.position - transform.up * 1 + transform.forward * gravityForwardDistance, ForceMode.Force);
+		//		rigidBody.AddForceAtPosition (gravityForce, transform.position - transform.up * 1 + transform.forward * centerOfGravity.z, ForceMode.Force);
 		rigidBody.AddForceAtPosition (gravityForce/2, transform.position - transform.up * 1 + transform.forward, ForceMode.Force);
 		rigidBody.AddForceAtPosition (gravityForce/2, transform.position - transform.up * 1 - transform.forward, ForceMode.Force);
 
-		Util.DrawRigidbodyRay(rigidBody, transform.position - transform.up * gravityDownDistance + transform.forward * gravityForwardDistance, gravityForce, Color.gray);
+		Util.DrawRigidbodyRay(rigidBody, transform.position + transform.up * centerOfGravity.y + transform.forward * centerOfGravity.z, gravityForce, Color.gray);
 	}
 
 	void RagdollGravity(){
@@ -170,7 +170,7 @@ public class Player : MonoBehaviour {
 		float uprightAngle = Vector3.Angle (transform.up, groundNormal);
 		isUpright = uprightAngle < uprightThreshold;
 		up = transform.up;
-		Debug.Log (uprightAngle);
+//		Debug.Log (uprightAngle);
 
 		glideV2Script.groundNormal = groundNormal;
 		walkScript.groundNormal = groundNormal;
@@ -272,7 +272,7 @@ public class Player : MonoBehaviour {
 
 
 	void OnTriggerEnter(Collider collisionInfo) {
-		Debug.Log (collisionInfo);
+//		Debug.Log (collisionInfo);
 		if (collisionInfo.gameObject.CompareTag ("Fish")) {
 			GameObject.Destroy (collisionInfo.gameObject);
 		}
