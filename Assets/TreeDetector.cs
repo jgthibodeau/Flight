@@ -20,7 +20,6 @@ public class TreeDetector : MonoBehaviour {
 	
 	// Update is called once per frame
 	void FixedUpdate () {
-		Debug.Log ("tree colliding...");
 		List<TreeCollider> disableableTrees = new List<TreeCollider> ();
 		foreach (TreeCollider t in enabledTrees.Keys) {
 			disableableTrees.Add (t);
@@ -28,10 +27,8 @@ public class TreeDetector : MonoBehaviour {
 
 //		foreach (RaycastHit hit in Physics.SphereCastAll (transform.position - transform.forward*0.1f, 1f, transform.forward*0.2f, radius, treeMask)) {
 		foreach (Collider hit in Physics.OverlapSphere (transform.position, radius, treeMask)) {
-			Debug.Log ("hit "+hit.transform.tag+" "+hit.transform.gameObject.layer);
-
 			if (hit.transform.tag == "Tree") {
-				Debug.Log ("Tree");
+//				Debug.Log ("hit tree");
 				TreeCollider tree = hit.transform.GetComponent<TreeCollider> ();
 
 				if (!enabledTrees.ContainsKey (tree)) {

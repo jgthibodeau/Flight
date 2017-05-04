@@ -40,7 +40,7 @@ public class Cloud : MonoBehaviour {
 
 		lastDistance /= 2;
 
-		Debug.Log ("lastDistance "+lastDistance);
+//		Debug.Log ("lastDistance "+lastDistance);
 		Vector3 newCloudPos = transform.position;
 		float xDif = 2 * (playerPos.x - cloudPos.x);
 		newCloudPos.x += xDif;
