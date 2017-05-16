@@ -30,6 +30,10 @@ public class CloudSystem : MonoBehaviour {
 	public bool createClouds = false;
 	public float maxThickness;
 	public float minThickness;
+	public int minEmission;
+	public int maxEmission;
+	public int lifetime;
+
 	string cloudTag = "Cloud";
 	string playerTag = "Player";
 
@@ -157,20 +161,20 @@ public class CloudSystem : MonoBehaviour {
 			t.localScale = localScale;
 		}
 
-
-		float thickness = 1f - (scale - minScale) / (maxScale - minScale);
-		thickness = (thickness * (maxThickness - minThickness)) + minThickness;
-		Debug.Log ("thickness: " + thickness);
+		float thickPercent = 1f - (scale - minScale) / (maxScale - minScale);
+		float thickness = (thickPercent * (maxThickness - minThickness)) + minThickness;
 		foreach (ParticleSystem ps in cloudTransform.GetComponentsInChildren<ParticleSystem> ()) {
 			ParticleSystem.MainModule main = ps.main;
 			if (setParticleScale) {
 				main.startSize = particleScale;
 			}
+			ParticleSystem.EmissionModule em = ps.emission;
+			em.rateOverTime = Random.Range (minEmission, maxEmission);//(thickPercent * (maxEmission - minEmission)) + minEmission;
+			main.startLifetime = lifetime;
+
 			ps.GetComponent<ParticleSystemRenderer> ().material.SetFloat ("_Thickness", thickness);
 			ps.Simulate (0, false, true);
 		}
-		Debug.Log ("thickness: " + thickness);
-		Debug.Break ();
 
 		if (newCloud.GetComponent<Collider> () != null) {
 			newCloud.GetComponent<Collider> ().isTrigger = true;

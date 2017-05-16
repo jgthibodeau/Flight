@@ -63,6 +63,7 @@ public class GlideV2 : MonoBehaviour {
 	public bool staticAngleOffset;
 	public float angleOffset = 0.015f;
 	public float angleScale = 0.05f;
+	public float liftAngle = 0;
 
 	public AudioSource airAudioSource;
 	public AudioSource flapAudioSource;
@@ -216,7 +217,7 @@ public class GlideV2 : MonoBehaviour {
 
 	void SteadyFlapDirectional(){
 		float realFlapSpeed = flapSpeed * (flapDirection + 3) / 4;
-		Vector3 flapForce = (transform.forward * flapDirection + transform.up * (1 - Mathf.Abs (flapDirection))).normalized * flapForwardCoef * flapScale * realFlapSpeed;
+		Vector3 flapForce = (transform.forward * flapDirection + transform.up/* * (1 - Mathf.Abs (flapDirection))*/).normalized * flapForwardCoef * flapScale * realFlapSpeed;
 
 		Vector3 flapPosition = transform.position + transform.up * playerScript.centerOfGravity.y + transform.forward * playerScript.centerOfGravity.z;
 		//		Vector3 aVel = rigidBody.angularVelocity;
@@ -253,13 +254,15 @@ public class GlideV2 : MonoBehaviour {
 		if(wingsOut){
 
 			realLiftCoef = liftCoef * Mathf.Sin (angleOfAttack * Mathf.PI / 180f);
+//			realLiftCoef = Mathf.Clamp (realLiftCoef, 0, realLiftCoef);
 
 			//			realLiftCoef *= (1f - 0.5f*flapDirection);
 			//			realLiftCoef *= (1f - 1*flapDirection);
 
 			lift = 0.5f * airDensity * speed * speed * wingLiftSurfaceArea * realLiftCoef;
 			lift = Mathf.Clamp (lift, -maxLift, maxLift);
-			Vector3 liftForce = transform.up * lift;
+			Vector3 liftDirection = (transform.up * (1 - liftAngle) + transform.forward * liftAngle).normalized;
+			Vector3 liftForce = liftDirection * lift;
 
 			//TODO make this more seamless
 //			if (liftForward > 0 && transform.rotation.eulerAngles.x < -270) {
@@ -276,23 +279,23 @@ public class GlideV2 : MonoBehaviour {
 //			rigidBody.AddForce (liftForce, ForceMode.Force);
 //			Util.DrawRigidbodyRay(rigidBody, transform.position, liftForce, Color.yellow);
 
-			Vector3 leftDirection = transform.up;
+			Vector3 leftDirection = (transform.up * (1 - liftAngle) + transform.forward * liftAngle).normalized;//transform.up;
 			if (roll < 0) {
 				leftDirection -= transform.right * roll;
 				leftDirection.Normalize ();
 			}
 			Vector3 leftForce = leftDirection * lift;
-			Vector3 leftPosition = transform.position - transform.right * wingOutDistance;
+			Vector3 leftPosition = transform.position - transform.right * wingOutDistance + transform.forward * wingForwardDistance;
 			rigidBody.AddForceAtPosition (leftForce, leftPosition, ForceMode.Force);
 			Util.DrawRigidbodyRay(rigidBody, leftPosition, leftForce, Color.yellow);
 
-			Vector3 rightDirection = transform.up;
+			Vector3 rightDirection = (transform.up * (1 - liftAngle) + transform.forward * liftAngle).normalized;//transform.up;
 			if (roll > 0) {
 				rightDirection -= transform.right * roll;
 				rightDirection.Normalize ();
 			}
 			Vector3 rightForce = rightDirection * lift;
-			Vector3 rightPosition = transform.position + transform.right * wingOutDistance;
+			Vector3 rightPosition = transform.position + transform.right * wingOutDistance + transform.forward * wingForwardDistance;
 			rigidBody.AddForceAtPosition (rightForce, rightPosition, ForceMode.Force);
 			Util.DrawRigidbodyRay(rigidBody, rightPosition, rightForce, Color.magenta);
 
