@@ -102,6 +102,9 @@ public class GlideV2 : MonoBehaviour {
 		airDensity = 1.2238f;
 
 		StartCoroutine(DiscreteFlap());
+
+		birdAnimator.leftWing = leftWing;
+		birdAnimator.leftWing = rightWing;
 	}
 
 	IEnumerator DiscreteFlap() {
@@ -259,7 +262,9 @@ public class GlideV2 : MonoBehaviour {
 			//			realLiftCoef *= (1f - 0.5f*flapDirection);
 			//			realLiftCoef *= (1f - 1*flapDirection);
 
-			lift = 0.5f * airDensity * speed * speed * wingLiftSurfaceArea * realLiftCoef;
+//			lift = 0.5f * airDensity * speed * speed * wingLiftSurfaceArea * realLiftCoef;
+			lift = 0.5f * airDensity * speed * speed * wingLiftSurfaceArea * realLiftCoef * (1 - pitch);
+
 			lift = Mathf.Clamp (lift, -maxLift, maxLift);
 			Vector3 liftDirection = (transform.up * (1 - liftAngle) + transform.forward * liftAngle).normalized;
 			Vector3 liftForce = liftDirection * lift;
@@ -358,12 +363,20 @@ public class GlideV2 : MonoBehaviour {
 		//parasitic drag
 		float parasiticDragMagnitude = 0.5f * airDensity * speed * speed * wingDragSurfaceArea * tailDragCoef;
 
-		Vector3 parasiticDirection = (rigidBody.velocity * (-1) + transform.up * pitch * angleScale).normalized;
+		Vector3 parasiticDirection = (rigidBody.velocity * (-1) + transform.right * yaw * angleScale).normalized;
 		Vector3 parasiticDragForce = parasiticDragMagnitude * parasiticDirection;
 		Vector3 parasiticPosition = transform.position - transform.forward * dragForwardDistance;
 		rigidBody.AddForceAtPosition (parasiticDragForce, parasiticPosition, ForceMode.Force);
 		Util.DrawRigidbodyRay(rigidBody, parasiticPosition, parasiticDragForce, Color.red);
 
+
+		float tailDragMagnitude = 0.5f * airDensity * speed * speed * wingDragSurfaceArea * tailDragCoef * (1 - flapDirection);
+
+		Vector3 tailDirection = (rigidBody.velocity * (-1) + transform.right * yaw * angleScale).normalized;
+		Vector3 tailDragForce = tailDragMagnitude * tailDirection;
+		Vector3 tailPosition = transform.position - transform.forward * dragForwardDistance;
+		rigidBody.AddForceAtPosition (tailDragForce, tailPosition, ForceMode.Force);
+		Util.DrawRigidbodyRay(rigidBody, tailPosition, tailDragForce, Color.blue);
 
 
 //		//induced drag
