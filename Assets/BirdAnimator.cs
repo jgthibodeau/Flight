@@ -13,6 +13,9 @@ public class BirdAnimator : MonoBehaviour {
 	private string idle = "idle1";
 	private Animation Animation;
 
+	[HideInInspector]
+	public Transform leftWing, rightWing;
+
 	// Use this for initialization
 	void Start () {
 		Animation = GetComponent<Animation> ();
@@ -62,6 +65,8 @@ public class BirdAnimator : MonoBehaviour {
 					Animation.CrossFade ("fly", FadeLength, PlayMode.StopAll);
 				} else {
 					Animation.CrossFade ("glide", FadeLength, PlayMode.StopAll);
+
+					//set left/right clavicle rotation and scale based on player input
 				}
 			} else {
 				Animation.CrossFade ("falling", FadeLength, PlayMode.StopAll);
