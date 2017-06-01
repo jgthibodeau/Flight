@@ -1343,7 +1343,7 @@ namespace Gaia
                     //}
 
                     //Find and raise the camera
-                    Transform cameraObj = playerObj.transform.FindChild("FirstPersonCharacter");
+                    Transform cameraObj = playerObj.transform.Find("FirstPersonCharacter");
                     if (cameraObj != null)
                     {
                         cameraObj.localPosition = new Vector3(cameraObj.localPosition.x, 1.6f, cameraObj.localPosition.z);

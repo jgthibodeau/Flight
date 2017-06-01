@@ -1,4 +1,6 @@
-﻿//***************************************************
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+//***************************************************
 //
 //  Author: Ben Hopkins
 //  Copyright (C) 2016 kode80 LLC, 
@@ -104,7 +106,7 @@ Shader "Hidden/kode80/VolumeClouds"
 			clouds_v2f vert(appdata_img v)
 			{
 			   	clouds_v2f o;
-				o.position = mul( UNITY_MATRIX_MVP, v.vertex);
+				o.position = UnityObjectToClipPos( v.vertex);
 				o.uv = v.texcoord;
 				
 				o.cameraRay = UVToCameraRay( o.uv);

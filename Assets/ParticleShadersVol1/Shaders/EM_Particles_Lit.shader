@@ -1,4 +1,6 @@
-﻿// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 
 Shader "Ethical Motion/Particles/Lit" {
 	Properties {
@@ -54,7 +56,7 @@ Shader "Ethical Motion/Particles/Lit" {
 		
 		void vert(inout appdata_full v, out Input o) {
 			UNITY_INITIALIZE_OUTPUT(Input, o);
-			o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+			o.vertex = UnityObjectToClipPos(v.vertex);
 			
 			#ifdef SOFTPARTICLE_ON
 				o.projPos = ComputeScreenPos(o.vertex);

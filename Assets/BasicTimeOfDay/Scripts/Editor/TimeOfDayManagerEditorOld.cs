@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEditor;
 
 [CustomEditor(typeof(TimeOfDayManager))] 
-public class TimeOfDayManagerEditor : Editor
+public class TimeOfDayManagerEditorOld : Editor
 {
 
 

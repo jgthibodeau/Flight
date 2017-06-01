@@ -1,4 +1,6 @@
-﻿// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 
 Shader "Ethical Motion/Particles/Lit MultiLight" {
 	Properties {
@@ -24,7 +26,7 @@ Shader "Ethical Motion/Particles/Lit MultiLight" {
 		
 		CGPROGRAM
 		#pragma surface surf Smoke vertex:vert addshadow alpha:fade nodynlightmap nodirlightmap  nometa
-		//#pragma target 5.0
+		#pragma target 3.0
 		#include "EMParticleLighting.cginc"
 		#pragma shader_feature SOFTPARTICLE_ON __
 		#pragma shader_feature DISTANCEFADE_ON __
@@ -64,7 +66,7 @@ Shader "Ethical Motion/Particles/Lit MultiLight" {
 		
 		void vert(inout appdata_full v, out Input o) {
 			UNITY_INITIALIZE_OUTPUT(Input, o);
-			o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+			o.vertex = UnityObjectToClipPos(v.vertex);
 			
 			#ifdef SOFTPARTICLE_ON
 				o.projPos = ComputeScreenPos(o.vertex);

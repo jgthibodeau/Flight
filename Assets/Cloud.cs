@@ -56,4 +56,24 @@ public class Cloud : MonoBehaviour {
 		//				}
 		recentlyFlipped = true;
 	}
+
+	void OnTriggerEnter(Collider collision){
+		if (collision.transform.tag == "MainCamera") {
+			Debug.Log ("camera in cloud");
+			foreach (Transform t in transform) {
+				Debug.Log ("enabling ps");
+				t.gameObject.SetActive (true);
+			}
+		}
+	}
+
+	void OnTriggerExit(Collider collision){
+		if (collision.transform.tag == "MainCamera") {
+			Debug.Log ("camera out cloud");
+			foreach (Transform t in transform) {
+				Debug.Log ("disabling ps");
+				t.gameObject.SetActive (false);
+			}
+		}
+	}
 }

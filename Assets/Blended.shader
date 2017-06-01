@@ -1,4 +1,6 @@
-﻿Shader "RenderFX/Skybox Blended With Fog" {
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "RenderFX/Skybox Blended With Fog" {
  Properties {
      _FogColor ("Fog Color", Color) = (.5, .5, .5, .5)
      _Fog ("Fog Intensity", Range(0.0,1.0)) = 1.0
@@ -38,7 +40,7 @@
      };
      v2f vert (appdata_t v) {
          v2f o;
-         o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+         o.vertex = UnityObjectToClipPos(v.vertex);
          o.texcoord = v.texcoord;
          return o;
      }
