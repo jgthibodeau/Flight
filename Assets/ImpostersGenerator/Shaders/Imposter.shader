@@ -1,4 +1,6 @@
-﻿Shader "Imposter" {
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Imposter" {
    Properties {
       _MainTex ("Texture Image", 2D) = "white" {}
 	  _Slices ("Texture slices", float) = 8.0
@@ -41,7 +43,7 @@
          {
             vertexOutput output;
 
-			output.pos = mul(UNITY_MATRIX_MVP, input.vertex);
+			output.pos = UnityObjectToClipPos(input.vertex);
 			output.offset = float2(_OffsetX,_OffsetY);
             output.tex = input.texcoord;
  

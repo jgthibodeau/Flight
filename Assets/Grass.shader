@@ -1,4 +1,6 @@
-﻿Shader "Custom/Grass" {
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Custom/Grass" {
 	Properties {
 		_MainTex ("Base (RGB)", 2D) = "white" {}
 		_GrassMask ("Mask", 2D) = "white" {}
@@ -40,7 +42,7 @@
 					p.y += .01;
 					p.x += sin(_Time.y + p.x * 0.1) * 0.01;
 					p.z += cos(_Time.y + p.z * 0.1) * 0.01;
-					o.pos = mul(UNITY_MATRIX_MVP, p);
+					o.pos = UnityObjectToClipPos(p);
 					o.uv0 = TRANSFORM_TEX(v.texcoord, _MainTex);
 					o.uv1 = v.texcoord;
 					return o;
@@ -61,7 +63,7 @@
 					p.y += .02;
 					p.x += sin(_Time.y + p.x * 0.1) * 0.02;
 					p.z += cos(_Time.y + p.z * 0.1) * 0.02;
-					o.pos = mul(UNITY_MATRIX_MVP, p);
+					o.pos = UnityObjectToClipPos(p);
 					o.uv0 = TRANSFORM_TEX(v.texcoord, _MainTex);
 					o.uv1 = v.texcoord;
 					return o;
@@ -82,7 +84,7 @@
 					p.y += .03;
 					p.x += sin(_Time.y + p.x * 0.1) * 0.03;
 					p.z += cos(_Time.y + p.z * 0.1) * 0.03;
-					o.pos = mul(UNITY_MATRIX_MVP, p);
+					o.pos = UnityObjectToClipPos(p);
 					o.uv0 = TRANSFORM_TEX(v.texcoord, _MainTex);
 					o.uv1 = v.texcoord;
 					return o;
@@ -103,7 +105,7 @@
 					p.y += .04;
 					p.x += sin(_Time.y + p.x * 0.1) * 0.04;
 					p.z += cos(_Time.y + p.z * 0.1) * 0.04;
-					o.pos = mul(UNITY_MATRIX_MVP, p);
+					o.pos = UnityObjectToClipPos(p);
 					o.uv0 = TRANSFORM_TEX(v.texcoord, _MainTex);
 					o.uv1 = v.texcoord;
 					return o;
@@ -124,7 +126,7 @@
 					p.y += .05;
 					p.x += sin(_Time.y + p.x * 0.1) * 0.05;
 					p.z += cos(_Time.y + p.z * 0.1) * 0.05;
-					o.pos = mul(UNITY_MATRIX_MVP, p);
+					o.pos = UnityObjectToClipPos(p);
 					o.uv0 = TRANSFORM_TEX(v.texcoord, _MainTex);
 					o.uv1 = v.texcoord;
 					return o;
@@ -145,7 +147,7 @@
 					p.y += .06;
 					p.x += sin(_Time.y + p.x * 0.1) * 0.06;
 					p.z += cos(_Time.y + p.z * 0.1) * 0.06;
-					o.pos = mul(UNITY_MATRIX_MVP, p);
+					o.pos = UnityObjectToClipPos(p);
 					o.uv0 = TRANSFORM_TEX(v.texcoord, _MainTex);
 					o.uv1 = v.texcoord;
 					return o;
@@ -166,7 +168,7 @@
 					p.y += .07;
 					p.x += sin(_Time.y + p.x * 0.1) * 0.07;
 					p.z += cos(_Time.y + p.z * 0.1) * 0.07;
-					o.pos = mul(UNITY_MATRIX_MVP, p);
+					o.pos = UnityObjectToClipPos(p);
 					o.uv0 = TRANSFORM_TEX(v.texcoord, _MainTex);
 					o.uv1 = v.texcoord;
 					return o;

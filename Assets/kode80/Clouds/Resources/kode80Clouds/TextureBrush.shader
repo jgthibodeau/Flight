@@ -1,4 +1,6 @@
-﻿//***************************************************
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+//***************************************************
 //
 //  Author: Ben Hopkins
 //  Copyright (C) 2016 kode80 LLC, 
@@ -61,7 +63,7 @@ Shader "Hidden/kode80/TextureBrush"
 			v2f vert( brush_v v)
 			{
 			   	v2f o;
-				o.position = mul( UNITY_MATRIX_MVP, v.vertex);
+				o.position = UnityObjectToClipPos( v.vertex);
 				o.uv = v.texcoord;
 				o.uv2 = v.texcoord2;
 			   	return o;

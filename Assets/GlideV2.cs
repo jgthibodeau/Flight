@@ -102,9 +102,6 @@ public class GlideV2 : MonoBehaviour {
 		airDensity = 1.2238f;
 
 		StartCoroutine(DiscreteFlap());
-
-		birdAnimator.leftWing = leftWing;
-		birdAnimator.leftWing = rightWing;
 	}
 
 	IEnumerator DiscreteFlap() {
@@ -177,6 +174,10 @@ public class GlideV2 : MonoBehaviour {
 		}
 
 		birdAnimator.WingsOut = wingsOut;
+
+		birdAnimator.pitch = pitch;
+		birdAnimator.roll = roll;
+		birdAnimator.tailPitch = flapDirection;
 	}
 
 	IEnumerator PlayFlapSound(float wait){
@@ -220,11 +221,15 @@ public class GlideV2 : MonoBehaviour {
 
 	void SteadyFlapDirectional(){
 		float realFlapSpeed = flapSpeed * (flapDirection + 3) / 4;
-		Vector3 flapForce = (transform.forward * flapDirection + transform.up/* * (1 - Mathf.Abs (flapDirection))*/).normalized * flapForwardCoef * flapScale * realFlapSpeed;
+//		Vector3 flapForceDirection = (transform.forward * flapDirection + transform.up/* * (1 - Mathf.Abs (flapDirection))*/).normalized;
+//		Vector3 flapForceDirection = (transform.up + transform.forward).normalized;
+		Vector3 flapForceDirection = (transform.forward * (1+flapDirection)/2 + transform.up * (1-flapDirection)/2).normalized;
+		Vector3 flapForce = flapForceDirection * flapForwardCoef * flapScale * realFlapSpeed;
 
 		Vector3 flapPosition = transform.position + transform.up * playerScript.centerOfGravity.y + transform.forward * playerScript.centerOfGravity.z;
 		//		Vector3 aVel = rigidBody.angularVelocity;
 		rigidBody.AddForce (flapForce, flapForceMode);
+//		rigidBody.AddForceAtPosition (flapForce, transform.position - 0.1f * transform.forward, flapForceMode);
 		//		rigidBody.angularVelocity = aVel;
 		//		rigidBody.AddTorque (transform.right * antiFlapTorqueScale * flapForce.magnitude);
 
@@ -361,9 +366,16 @@ public class GlideV2 : MonoBehaviour {
 		Util.DrawRigidbodyRay(rigidBody, position, inducedDragForce, Color.white);
 
 		//parasitic drag
+//		float dragAmount = (1 + flapDirection)/2f;
+//		Vector3 reverseVelocity = (rigidBody.velocity * -1).normalized;
+//		Vector3 backward = (transform.forward * -1);
+//		Vector3 tailDragDirection = ((backward * dragAmount) + (reverseVelocity * (1 - dragAmount))).normalized;
+//		Util.DrawRigidbodyRay (rigidBody, transform.position, 10 * tailDragDirection, Color.white);
+
 		float parasiticDragMagnitude = 0.5f * airDensity * speed * speed * wingDragSurfaceArea * tailDragCoef;
 
 		Vector3 parasiticDirection = (rigidBody.velocity * (-1) + transform.right * yaw * angleScale).normalized;
+//		Vector3 parasiticDirection = tailDragDirection;
 		Vector3 parasiticDragForce = parasiticDragMagnitude * parasiticDirection;
 		Vector3 parasiticPosition = transform.position - transform.forward * dragForwardDistance;
 		rigidBody.AddForceAtPosition (parasiticDragForce, parasiticPosition, ForceMode.Force);
@@ -373,6 +385,7 @@ public class GlideV2 : MonoBehaviour {
 		float tailDragMagnitude = 0.5f * airDensity * speed * speed * wingDragSurfaceArea * tailDragCoef * (1 - flapDirection);
 
 		Vector3 tailDirection = (rigidBody.velocity * (-1) + transform.right * yaw * angleScale).normalized;
+//		Vector3 tailDirection = tailDragDirection;
 		Vector3 tailDragForce = tailDragMagnitude * tailDirection;
 		Vector3 tailPosition = transform.position - transform.forward * dragForwardDistance;
 		rigidBody.AddForceAtPosition (tailDragForce, tailPosition, ForceMode.Force);

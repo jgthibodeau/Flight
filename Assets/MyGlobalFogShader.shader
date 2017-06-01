@@ -1,4 +1,6 @@
-﻿Shader "Custom/MyGlobalFogShader" {
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Custom/MyGlobalFogShader" {
 //Properties {
 //    _MainTex ("Base (RGB)", 2D) = "black" {}
 //}
@@ -213,7 +215,7 @@ CGINCLUDE
         #endif
        
         int index = (int)floor(xx+yy*2 + 0.5);
-        o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+        o.pos = UnityObjectToClipPos(v.vertex);
        
         o.uv2 = uv;
        

@@ -670,7 +670,7 @@ namespace TerrainComposer2
 
                     if (!TC.LoadGlobalSettings()) return false;
 
-                    Transform generateT = go.transform.FindChild("Generate");
+                    Transform generateT = go.transform.Find("Generate");
                     if (generateT != null)
                     {
                         TC_Compute compute = generateT.GetComponent<TC_Compute>();

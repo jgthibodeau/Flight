@@ -28,6 +28,7 @@ public class CloudSystem : MonoBehaviour {
 	public GameObject[] cloudPrefabs;
 	public float[] cloudProbabilities;
 	public bool createClouds = false;
+	public bool adjustParticles;
 	public float maxThickness;
 	public float minThickness;
 	public int minEmission;
@@ -157,23 +158,31 @@ public class CloudSystem : MonoBehaviour {
 
 //		newCloud.transform.sc = localScale;
 
-		foreach (Transform t in cloudTransform) {
-			t.localScale = localScale;
-		}
+//		foreach (Transform t in cloudTransform) {
+			cloudTransform.transform.localScale = localScale;
+//		}
 
 		float thickPercent = 1f - (scale - minScale) / (maxScale - minScale);
 		float thickness = (thickPercent * (maxThickness - minThickness)) + minThickness;
 		foreach (ParticleSystem ps in cloudTransform.GetComponentsInChildren<ParticleSystem> ()) {
-			ParticleSystem.MainModule main = ps.main;
-			if (setParticleScale) {
-				main.startSize = particleScale;
-			}
-			ParticleSystem.EmissionModule em = ps.emission;
-			em.rateOverTime = Random.Range (minEmission, maxEmission);//(thickPercent * (maxEmission - minEmission)) + minEmission;
-			main.startLifetime = lifetime;
+			if (adjustParticles) {
+				ParticleSystem.MainModule main = ps.main;
+				if (setParticleScale) {
+					main.startSize = particleScale;
+				} else {
+					main.startSizeMultiplier = 20*scale;
+				}
+				main.prewarm = true;
+				ParticleSystem.EmissionModule em = ps.emission;
+//				em.rateOverTime = Random.Range (minEmission, maxEmission);//(thickPercent * (maxEmission - minEmission)) + minEmission;
+//				main.startLifetime = lifetime;
+				ParticleSystem.ShapeModule shape = ps.shape;
+				shape.meshScale = scale;
 
-			ps.GetComponent<ParticleSystemRenderer> ().material.SetFloat ("_Thickness", thickness);
-			ps.Simulate (0, false, true);
+//				ps.GetComponent<ParticleSystemRenderer> ().material.SetFloat ("_Thickness", thickness);
+				ps.gameObject.SetActive (false);
+			}
+//			ps.Simulate (0, false, true);
 		}
 
 		if (newCloud.GetComponent<Collider> () != null) {

@@ -237,7 +237,7 @@ namespace TerrainComposer2
 
             GameObject go = GameObject.Find("TerrainComposer2");
 
-            Transform settingsT = go.transform.FindChild("Settings");
+            Transform settingsT = go.transform.Find("Settings");
             if (settingsT != null)
             {
                 TC_Settings settings = settingsT.GetComponent<TC_Settings>();
