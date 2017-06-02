@@ -64,6 +64,18 @@ public class Cloud : MonoBehaviour {
 				Debug.Log ("enabling ps");
 				t.gameObject.SetActive (true);
 			}
+			ParticleSystem ps = collision.transform.Find ("Cloud Puff").GetComponent<ParticleSystem> ();
+			if (ps != null) {
+//				Debug.Log ("bursting");
+//				Debug.Break ();
+//				ps.Emit (10);
+//				ps.Clear ();
+//				ps.Simulate (ps.main.duration);
+//				ps.Play ();
+				ps.Clear ();
+				ps.Simulate (0f, true, true);
+				ps.Play ();
+			}
 		}
 	}
 
@@ -73,6 +85,18 @@ public class Cloud : MonoBehaviour {
 			foreach (Transform t in transform) {
 				Debug.Log ("disabling ps");
 				t.gameObject.SetActive (false);
+			}
+			ParticleSystem ps = collision.transform.Find ("Cloud Puff").GetComponent<ParticleSystem> ();
+			if (ps != null) {
+//				Debug.Log ("bursting");
+//				Debug.Break ();
+//				ps.Emit (10);
+//				ps.Clear ();
+//				ps.Simulate (ps.main.duration);
+//				ps.Play ();
+				ps.Clear ();
+				ps.Simulate (0f, true, true);
+				ps.Play ();
 			}
 		}
 	}

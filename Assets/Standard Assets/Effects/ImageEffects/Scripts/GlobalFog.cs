@@ -23,12 +23,6 @@ namespace UnityStandardAssets.ImageEffects
 		[Tooltip("Push fog away from the camera by this amount")]
         public float startDistance = 0.0f;
 
-		public bool useRenderSettingFogValues = true;
-		public FogMode fogMode;
-		public float fogDensity;
-		public float fogStartDistance;
-		public float fogEndDistance;
-
         public Shader fogShader = null;
         private Material fogMaterial = null;
 
@@ -99,21 +93,10 @@ namespace UnityStandardAssets.ImageEffects
             fogMaterial.SetVector ("_HeightParams", new Vector4 (height, FdotC, paramK, heightDensity*0.5f));
             fogMaterial.SetVector ("_DistanceParams", new Vector4 (-Mathf.Max(startDistance,0.0f), excludeDepth, 0, 0));
 
-			var sceneMode = RenderSettings.fogMode;
-			var sceneDensity = RenderSettings.fogDensity;
-			var sceneStart = RenderSettings.fogStartDistance;
-			var sceneEnd = RenderSettings.fogEndDistance;
-			if (useRenderSettingFogValues) {
-				sceneMode = RenderSettings.fogMode;
-				sceneDensity = RenderSettings.fogDensity;
-				sceneStart = RenderSettings.fogStartDistance;
-				sceneEnd = RenderSettings.fogEndDistance;
-			} else {
-				sceneMode = fogMode;
-				sceneDensity = fogDensity;
-				sceneStart = fogStartDistance;
-				sceneEnd = fogEndDistance;
-			}
+            var sceneMode= RenderSettings.fogMode;
+            var sceneDensity= RenderSettings.fogDensity;
+            var sceneStart= RenderSettings.fogStartDistance;
+            var sceneEnd= RenderSettings.fogEndDistance;
             Vector4 sceneParams;
             bool  linear = (sceneMode == FogMode.Linear);
             float diff = linear ? sceneEnd - sceneStart : 0.0f;
