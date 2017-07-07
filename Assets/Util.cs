@@ -2,6 +2,7 @@
 using System.Collections;
 
 public class Util : MonoBehaviour {
+	
 	public static void DrawRigidbodyRay(Rigidbody rigidBody, Vector3 v1, Vector3 v2){
 		Debug.DrawRay (v1 + rigidBody.velocity * Time.fixedDeltaTime, v2);
 	}
