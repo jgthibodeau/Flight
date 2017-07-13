@@ -237,12 +237,11 @@ public class Player : MonoBehaviour {
 			rigidBody.velocity = Vector3.zero;
 			rigidBody.constraints = RigidbodyConstraints.FreezePosition;
 
-
 			grabScript.grab = false;
 
-//			if ((!perchScript.isPerching && Input.GetAxis ("Flap") != 0)) {
-//				perchScript.ResetPerch ();
-//			}
+			if ((perchScript.isPerching && Input.GetAxis ("Flap") != 0)) {
+				perchScript.ResetPerch ();
+			}
 		}
 
 		if(!perchScript.isPerching){
@@ -264,7 +263,6 @@ public class Player : MonoBehaviour {
 			}
 
 			rigidBody.constraints = RigidbodyConstraints.None;
-
 
 			grabScript.grab = (Input.GetAxis ("Grab") != 0);
 		}
