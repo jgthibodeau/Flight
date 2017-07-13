@@ -31,7 +31,7 @@ public class ControllableFollowCamera : MonoBehaviour {
 
 	public float freeCameraSpeed;
 	private bool freeCamera;
-	private Vector3 freeCameraPosition;
+	public Vector3 freeCameraPosition;
 
 	// Use this for initialization
 	void Start () {
@@ -39,7 +39,7 @@ public class ControllableFollowCamera : MonoBehaviour {
 	}
 
 	Vector3 CalcTargetPositionV1(float cameraX, float cameraY){
-		Vector3 targetPositon = target.position;
+		Vector3 targetPositon = Util.RigidBodyPosition (targetRigidbody);
 		//		if (lookAtVelocity && targetRigidbody.velocity.magnitude > minVelocity) {
 		//			targetPositon += targetRigidbody.velocity * forwardOffset;
 		//			if (adjustHeight) {
@@ -85,7 +85,7 @@ public class ControllableFollowCamera : MonoBehaviour {
 		if (resetCamera) {
 			freeCamera = false;
 		} else if (!freeCamera && (cameraX != 0 || cameraY != 0)) {
-			freeCameraPosition = (transform.position - target.position).normalized;
+			freeCameraPosition = (transform.position - Util.RigidBodyPosition (targetRigidbody));//.normalized * maxDistance;
 			freeCamera = true;
 		}
 
@@ -119,7 +119,7 @@ public class ControllableFollowCamera : MonoBehaviour {
 
 		//if not at a good distance, adjust
 		Vector3 desiredPosition = transform.position;
-		Vector3 targetPosition = target.position + target.up * height;
+		Vector3 targetPosition = Util.RigidBodyPosition (targetRigidbody) + target.up * height;
 
 		float cameraX = -Input.GetAxis ("Horizontal Right");
 		float cameraY = -Input.GetAxis ("Vertical Right");
@@ -141,7 +141,7 @@ public class ControllableFollowCamera : MonoBehaviour {
 		}
 		//
 		//		//set height
-		//		float targetHeight = target.position.y + height;
+		//		float targetHeight = Util.RigidBodyPosition (targetRigidbody).y + height;
 		//		float newHeight = Mathf.Lerp (transform.position.y, targetHeight, Time.fixedDeltaTime * heightDamping);
 		//		transform.position = new Vector3 (transform.position.x, newHeight, transform.position.z);
 
@@ -176,10 +176,14 @@ public class ControllableFollowCamera : MonoBehaviour {
 
 	void FreeCamera (float cameraX, float cameraY){
 		//rotate horizontal
-		Vector3 horiz = Vector3.Cross (freeCameraPosition, Vector3.up).normalized * cameraX * freeCameraSpeed * Time.fixedDeltaTime;
+		Vector3 horizDir = Vector3.Cross (freeCameraPosition, Vector3.up).normalized;
+		Vector3 horiz = horizDir * cameraX * freeCameraSpeed * Time.fixedDeltaTime;
+		Debug.DrawRay (Util.RigidBodyPosition (targetRigidbody) + freeCameraPosition, horizDir, Color.blue);
 
 		//rotate vertical
-		Vector3 vert = Vector3.Cross (freeCameraPosition, Vector3.right).normalized * cameraY * freeCameraSpeed * Time.fixedDeltaTime;
+		Vector3 vertDir = Vector3.Cross (freeCameraPosition, horizDir).normalized;
+		Vector3 vert = vertDir * cameraY * freeCameraSpeed * Time.fixedDeltaTime;
+		Debug.DrawRay (Util.RigidBodyPosition (targetRigidbody) + freeCameraPosition, vertDir, Color.red);
 
 		freeCameraPosition = (freeCameraPosition + horiz + vert).normalized;
 
@@ -209,7 +213,7 @@ public class ControllableFollowCamera : MonoBehaviour {
 	void FollowCamera(){
 		//if not at a good distance, adjust
 		Vector3 desiredPosition = transform.position;
-		Vector3 targetPosition = target.position + target.up * height;
+		Vector3 targetPosition = Util.RigidBodyPosition (targetRigidbody) + target.up * height;
 
 		if (Vector3.Distance (transform.position, targetPosition) > maxDistance) {
 			desiredPosition = targetPosition + (transform.position - targetPosition).normalized * maxDistance;
