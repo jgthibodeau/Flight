@@ -36,4 +36,20 @@ public class Util : MonoBehaviour {
 			yield return null;
 		} while(animation.isPlaying);
 	}
+
+	public static float GetWaterLevel(Vector3 position)
+	{
+		RaycastHit hit;
+//		Debug.DrawRay (position, Vector3.down*20, Color.yellow);
+//		Debug.DrawRay (position, Vector3.up*20, Color.yellow);
+		if (Physics.Raycast (position, Vector3.down, out hit, GameManager.instance.oceanCheckDistance, GameManager.instance.oceanLayer)) {
+			LPWAsset.LowPolyWaterScript waterScript = hit.transform.GetComponent<LPWAsset.LowPolyWaterScript> ();
+			return waterScript.WaterHeight (position);
+		} else if (Physics.Raycast (position, Vector3.up, out hit, GameManager.instance.oceanCheckDistance, GameManager.instance.oceanLayer)) {
+			LPWAsset.LowPolyWaterScript waterScript = hit.transform.GetComponent<LPWAsset.LowPolyWaterScript> ();
+			return waterScript.WaterHeight (position);
+		} else {
+			return GameManager.instance.oceanLevel;
+		}
+	}
 }

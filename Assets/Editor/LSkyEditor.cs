@@ -1,9 +1,14 @@
-﻿//using UnityEngine;
+﻿//
+//
+//
+//
+//using UnityEngine;
 //using UnityEditor;
 //using AC.EditorUtility;
 //
 //namespace AC.LSky
 //{
+//
 //	[CustomEditor(typeof(LSky))] 
 //	public class LSkyEditor : Editor
 //	{
@@ -684,8 +689,6 @@
 //				GUILayout.Button (new GUIContent ("?", EvaluateInfoSun), EditorStyles.miniLabel, GUILayout.Width (InfoWidth)); 
 //			}
 //			EditorGUILayout.EndHorizontal ();
-//
-//			EditorGUILayout.HelpBox("Reflection Probe configure in LSkyReflection", MessageType.Info);
 //
 //			AC_EditorUtility.Separator(SeparatorHeight);
 //			EditorGUILayout.Separator();

@@ -32,6 +32,7 @@ public class Player : MonoBehaviour {
 	public float gravityForwardDistance;
 	public float gravityDownDistance;
 	public Vector3 centerOfGravity;
+	public ForceMode gravityForceMode;
 	public bool keepUprightAlways;
 
 	public Vector3 centerOfMass = new Vector3 (0, 0, 0);
@@ -132,7 +133,8 @@ public class Player : MonoBehaviour {
 
 	void AirGravity(){
 		Vector3 gravityForce = Vector3.down * gravity;
-		rigidBody.AddForceAtPosition (gravityForce, transform.position + transform.up * centerOfGravity.y + transform.forward * centerOfGravity.z, ForceMode.Force);
+//		rigidBody.AddForceAtPosition (gravityForce, transform.position + transform.up * centerOfGravity.y + transform.forward * centerOfGravity.z, ForceMode.Force);
+		rigidBody.AddForceAtPosition (gravityForce, transform.position + transform.up * centerOfGravity.y + transform.forward * centerOfGravity.z, gravityForceMode);
 		Util.DrawRigidbodyRay(rigidBody, transform.position + transform.up * centerOfGravity.y + transform.forward * centerOfGravity.z, gravityForce, Color.gray);
 	}
 
