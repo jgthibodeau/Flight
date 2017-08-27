@@ -80,6 +80,7 @@ public class GlideV2 : MonoBehaviour {
 
 	public float pitchScale = 1.5f;
 	public float volumeScale = 0.7f;
+	public float minTrailSpeed = 10f;
 	public float trailScale = 0.3f;
 	public float trailStartWidth = 0f;
 	public float trailTime = 0.5f;
@@ -173,9 +174,13 @@ public class GlideV2 : MonoBehaviour {
 		airAudioSource.volume = speed * volumeScale;
 
 		foreach(TrailRenderer trail in trails){
-			trail.endWidth = speed * trailScale;
-			trail.startWidth = trailStartWidth;
-			trail.time = trailTime;
+			if (speed > minTrailSpeed) {
+				trail.endWidth = (speed - minTrailSpeed) * trailScale;
+				trail.startWidth = trailStartWidth;
+				trail.time = trailTime;
+			} else {
+				trail.endWidth = 0f;
+			}
 		}
 
 		birdAnimator.WingsOut = wingsOut;
@@ -325,8 +330,22 @@ public class GlideV2 : MonoBehaviour {
 			//			realLiftCoef *= (1f - 1*flapDirection);
 
 //			lift = 0.5f * airDensity * speed * speed * wingLiftSurfaceArea * realLiftCoef;
-			lift = 0.5f * airDensity * speed * speed * wingLiftSurfaceArea * realLiftCoef * (1 - pitch);
+//			float liftAmount = (1 - pitch); // from 0 to 2
+			float liftAmount = (Mathf.Sign (pitch) * Mathf.Clamp (Mathf.Sqrt ((pitch * pitch) + (roll * roll)), 0, 1));
+			if (Mathf.Abs (roll) > Mathf.Abs (pitch)) {
+				liftAmount *= Mathf.Abs (pitch / roll);
+			}
+			//as pointed up, defaultLift -> -1
+			//as leveled out, defaultLift -> 0
+			//as pointed down, defaultLift -> 1
+			float defaultLift = 1;
+//			float forwardAngle = Vector3.Angle (Vector3.up, transform.forward);
+//			float forwardAngle = Vector3.Angle (Vector3.up, rigidBody.velocity);
+//			defaultLift = (forwardAngle / 90f) - 0.25f;
 
+			liftAmount = defaultLift - liftAmount;
+
+			lift = 0.5f * airDensity * speed * speed * wingLiftSurfaceArea * realLiftCoef * liftAmount;
 			lift = Mathf.Clamp (lift, -maxLift, maxLift);
 
 			// only apply lift if not flapping

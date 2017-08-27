@@ -3,7 +3,7 @@ using System.Collections;
 
 public class BirdAnimator : MonoBehaviour {
 	public float FadeLength;
-	public bool Flapping, Grounded, WingsOut, Walking, Hopping;
+	public bool Flapping, Grounded, WingsOut, Walking, Hopping, InWater;
 	public float FlapSpeed;
 	public float MoveSpeed;
 	public float WalkSpeed;
@@ -42,7 +42,11 @@ public class BirdAnimator : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if (Grounded) {
-			if (Walking) {
+			if (InWater) {
+				if (!Animation.IsPlaying ("idle4")) {
+					Animation.CrossFade ("idle4", FadeLength, PlayMode.StopAll);
+				}
+			} else if (Walking) {
 				if (WalkSpeed <= 0f) {
 					Animation ["walk"].speed = WalkScale * MoveSpeed;
 				} else {

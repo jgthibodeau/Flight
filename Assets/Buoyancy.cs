@@ -272,7 +272,7 @@ public class Buoyancy : MonoBehaviour
 		{
 			var wp = transform.TransformPoint(point);
 //			float waterLevel = GetWaterLevel();
-			waterLevel = Util.GetWaterLevel (Util.RigidBodyPosition (rigidBody));
+			waterLevel = Util.GetWaterLevel (Util.RigidBodyPosition (rigidBody), false, true);
 
 			if (wp.y - voxelHalfHeight < waterLevel)
 			{

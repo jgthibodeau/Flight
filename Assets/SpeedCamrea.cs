@@ -4,6 +4,8 @@ using UnityEngine;
 
 namespace UnityStandardAssets.ImageEffects{
 	public class SpeedCamrea : MonoBehaviour {
+		public Camera[] cameras;
+
 		public VignetteAndChromaticAberration vignette;
 		public Rigidbody targetRigidBody;
 
@@ -19,9 +21,14 @@ namespace UnityStandardAssets.ImageEffects{
 		public float vignetteScale = 0f;
 		public float maxVignette = 0.75f;
 
+		public bool useFov;
+		public float fovScale = 0f;
+		public float minFov = 90f;
+		public float maxFov = 120;
+
 		// Use this for initialization
 		void Start () {
-			
+			cameras = GetComponentsInChildren<Camera> ();
 		}
 		
 		// Update is called once per frame
@@ -37,6 +44,13 @@ namespace UnityStandardAssets.ImageEffects{
 
 			if (useVignette) {
 				vignette.intensity = Mathf.Clamp (velocity * vignetteScale, 0, maxVignette);
+			}
+
+			if (useFov) {
+				float newFov = Mathf.Clamp (minFov + velocity * fovScale, minFov, maxFov);
+				foreach (Camera camera in cameras) {
+					camera.fieldOfView = newFov;
+				}
 			}
 		}
 	}

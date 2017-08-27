@@ -17,7 +17,7 @@ public class UnderwaterCamera : MonoBehaviour {
     }
  
     void LateUpdate () {
-		isUnderwater = transform.position.y < Util.GetWaterLevel (transform.position);
+		isUnderwater = transform.position.y < Util.GetWaterLevel (transform.position, false, false);
 		if (isUnderwater) {
 			SetUnderwater ();
 		}

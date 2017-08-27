@@ -15,8 +15,6 @@ public class Util : MonoBehaviour {
 		Debug.DrawRay (start + rigidBody.velocity * Time.fixedDeltaTime, dir, color);
 	}
 
-
-
 	public static float SignedVectorAngle(Vector3 referenceVector, Vector3 otherVector, Vector3 normal) {
 		Vector3 perpVector;
 		float angle;
@@ -37,17 +35,21 @@ public class Util : MonoBehaviour {
 		} while(animation.isPlaying);
 	}
 
-	public static float GetWaterLevel(Vector3 position)
+	public static float GetWaterLevel(Vector3 position, bool useLPW, bool useRandomness)
 	{
 		RaycastHit hit;
-//		Debug.DrawRay (position, Vector3.down*20, Color.yellow);
-//		Debug.DrawRay (position, Vector3.up*20, Color.yellow);
-		if (Physics.Raycast (position, Vector3.down, out hit, GameManager.instance.oceanCheckDistance, GameManager.instance.oceanLayer)) {
-			LPWAsset.LowPolyWaterScript waterScript = hit.transform.GetComponent<LPWAsset.LowPolyWaterScript> ();
-			return waterScript.WaterHeight (position);
-		} else if (Physics.Raycast (position, Vector3.up, out hit, GameManager.instance.oceanCheckDistance, GameManager.instance.oceanLayer)) {
-			LPWAsset.LowPolyWaterScript waterScript = hit.transform.GetComponent<LPWAsset.LowPolyWaterScript> ();
-			return waterScript.WaterHeight (position);
+		if (useLPW) {
+			if (Physics.Raycast (position, Vector3.down, out hit, GameManager.instance.oceanCheckDistance, GameManager.instance.oceanLayer)) {
+				LPWAsset.LowPolyWaterScript waterScript = hit.transform.GetComponent<LPWAsset.LowPolyWaterScript> ();
+				return waterScript.WaterHeight (position);
+			} else if (Physics.Raycast (position, Vector3.up, out hit, GameManager.instance.oceanCheckDistance, GameManager.instance.oceanLayer)) {
+				LPWAsset.LowPolyWaterScript waterScript = hit.transform.GetComponent<LPWAsset.LowPolyWaterScript> ();
+				return waterScript.WaterHeight (position);
+			} else {
+				return GameManager.instance.oceanLevel;
+			}
+		} else if (useRandomness) {
+			return GameManager.instance.oceanLevel + Random.Range (-0.01f, 0.01f);
 		} else {
 			return GameManager.instance.oceanLevel;
 		}

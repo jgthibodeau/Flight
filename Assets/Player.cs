@@ -15,6 +15,9 @@ public class Player : MonoBehaviour {
 	private int PreyLayer;
 
 	public LayerMask layerMaskForGround;
+	public LayerMask layerMaskForWater;
+	public float waterBobAmount, waterBobTime, timeSinceWaterBob;
+	public bool inWater;
 	public bool isGrounded;
 	public bool isUpright;
 	public float uprightThreshold;
@@ -162,10 +165,27 @@ public class Player : MonoBehaviour {
 			0.18f,
 			layerMaskForGround.value
 		);
+
 		if (isGrounded) {
 			RaycastHit hit;
 			if (Physics.Raycast (transform.position, -transform.up, out hit, 1.2f, layerMaskForGround)) {
 				groundNormal = hit.normal;
+			}
+		}
+
+		inWater = Physics.CheckCapsule (
+			characterCollider.bounds.center,
+			new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y-0.1f, characterCollider.bounds.center.z),
+			0.18f,
+			layerMaskForWater.value
+		);
+			
+		if (inWater) {
+			if (timeSinceWaterBob > 0) {
+				timeSinceWaterBob -= Time.deltaTime;
+			} else {
+				timeSinceWaterBob = Random.Range (0, waterBobTime);
+				groundNormal = Vector3.up + Vector3.forward * Random.Range (-waterBobAmount, waterBobAmount) + Vector3.right * Random.Range (-waterBobAmount, waterBobAmount);
 			}
 		}
 
@@ -207,6 +227,7 @@ public class Player : MonoBehaviour {
 			//			rightWing.localRotation = Quaternion.Euler (rightWingInitialRotation);
 		}
 
+		birdAnimator.InWater = inWater;
 		birdAnimator.Grounded = landed;//isGrounded && !isFlapping;
 	}
 
