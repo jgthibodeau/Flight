@@ -5,12 +5,15 @@ public class UnderwaterCamera : MonoBehaviour {
  
 	//This script enables underwater effects. Attach to main camera.
  
-    private bool isUnderwater;
-	public float underwaterFogDensity = 0.03f;
+	private bool isUnderwater;
 	public bool setHeightFog;
+	public bool setFog;
+	public float underwaterFogDensity = 0.03f;
 
 	public Material waterMaterial;
 	private UnityStandardAssets.ImageEffects.GlobalFog globalFog;
+
+	public GameObject underwaterFilter;
 
 	void Start () {
 		globalFog = GetComponent<UnityStandardAssets.ImageEffects.GlobalFog> ();
@@ -31,7 +34,12 @@ public class UnderwaterCamera : MonoBehaviour {
 			globalFog.heightFog = false;
 		}
 
-		globalFog.excludeFarPixels = true;
+		if (setFog) {
+			globalFog.excludeFarPixels = true;
+		}
+
+		underwaterFilter.SetActive (false);
+		waterMaterial.SetFloat ("_UnderwaterMode", 0);
 	}
 
 	private void SetUnderwater(){
@@ -41,9 +49,15 @@ public class UnderwaterCamera : MonoBehaviour {
 			globalFog.heightDensity = 10f;
 		}
 
-		globalFog.excludeFarPixels = false;
+		if (setFog) {
+			globalFog.excludeFarPixels = false;
 
-		RenderSettings.fogColor = RenderSettings.ambientSkyColor * waterMaterial.GetColor ("_Color");;
-		RenderSettings.fogDensity = underwaterFogDensity;
+			RenderSettings.fogColor = RenderSettings.ambientSkyColor * waterMaterial.GetColor ("_Color");
+			;
+			RenderSettings.fogDensity = underwaterFogDensity;
+		}
+
+		underwaterFilter.SetActive (true);
+		waterMaterial.SetFloat ("_UnderwaterMode", 1);
 	}
 }

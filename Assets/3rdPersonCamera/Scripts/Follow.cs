@@ -11,8 +11,10 @@ namespace ThirdPersonCamera
 		public float minSpeedToFollow = 0.05f;
 
         public float rotationSpeed = 1.0f;
-        public float rotationSpeedSlopes = 0.5f;
-        public bool lookBackwards = false;
+		public float rotationSpeedSlopes = 0.5f;
+		public bool lookBackwards = false;
+		public bool lookLeft = false;
+		public bool lookRight = false;
 
         public bool checkMotionForBackwards = true;
         public float backwardsMotionThreshold = 0.05f;
@@ -24,14 +26,18 @@ namespace ThirdPersonCamera
         private Vector3 prevPosition;
 
         CameraController cc;
+		Player player;
 
         void Start()
         {
             cc = GetComponent<CameraController>();
+			player = cc.target.GetComponent<Player> ();
         }
 
         void Update()
         {
+			alignOnSlopes = player.inWater;
+
 			if (follow)
 //			if (follow && Vector3.Distance (transform.position, cc.target.position) > cc.desiredDistance+0.1f)
             {
@@ -57,7 +63,29 @@ namespace ThirdPersonCamera
                     prevPosition = cc.target.transform.position;
                 }
 
-                Quaternion toRotation = Quaternion.LookRotation((!lookBackwards ? cc.target.transform.forward + tiltVector : -cc.target.transform.forward + tiltVector), Vector3.up);
+				Vector3 desiredRotation;
+				Vector3 up;
+
+
+				bool left = Input.GetButton ("Camera Left");
+				bool right = Input.GetButton ("Camera Right");
+				bool back = Input.GetButton ("Camera Back");
+
+				if (back || (left && right)) {
+					desiredRotation = -(cc.target.transform.forward + tiltVector);
+					up = Vector3.up;
+				} else if (left) {
+					desiredRotation = -(cc.target.transform.right + tiltVector);
+					up = cc.target.transform.up;
+				} else if (right) {
+					desiredRotation = cc.target.transform.right + tiltVector;
+					up = cc.target.transform.up;
+				} else {
+					desiredRotation = cc.target.transform.forward + tiltVector;
+					up = Vector3.up;
+				}
+
+				Quaternion toRotation = Quaternion.LookRotation(desiredRotation, up);
 
                 if (alignOnSlopes)
                 {

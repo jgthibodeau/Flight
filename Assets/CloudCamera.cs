@@ -6,46 +6,79 @@ public class CloudCamera : MonoBehaviour {
 	public ParticleSystem ps;
 	public LayerMask cloudLayer;
 	public int cloud = 0;
+	public float radius;
+	HashSet<GameObject> cloudObjects;
 
 	// Use this for initialization
 	void Start () {
 	}
-	
+
+//	void Update() {
+//		if (Physics.CheckSphere (transform.position, radius, cloudLayer)) {
+//			if (ps.isStopped) {
+//				ps.Play ();
+//			}
+//		} else if (ps.isPlaying) {
+//			ps.Stop ();
+//		}
+//	}
+
 	void OnCollisionEnter(Collision collision){
-		Debug.Log ("collision enter: " + collision);
-		if (collision.gameObject.layer == cloudLayer) {
-			ps.Play ();
+		if (cloudLayer == (cloudLayer | (1 << collision.gameObject.layer))) {
+			Debug.Log ("collision enter: " + collision);
+			if (cloud == 0) {
+				ps.Play ();
+			}
+			cloud++;
 		}
 	}
 
 	void OnCollisionExit(Collision collision){
-		Debug.Log ("collision exit: " + collision);
-		if (collision.gameObject.layer == cloudLayer) {
-			ps.Stop ();
-			ps.Clear ();
+		if (cloudLayer == (cloudLayer | (1 << collision.gameObject.layer))) {
+			Debug.Log ("collision exit: " + collision);
+			cloud--;
+			if (cloud == 0) {
+				ps.Stop ();
+			}
 		}
 	}
 
 	void OnTriggerEnter(Collider collision){
 		if (cloudLayer == (cloudLayer | (1 << collision.gameObject.layer))) {
-			Debug.Log ("trigger enter: " + collision);
+			Debug.Log ("trigger enter: " + collision+" "+cloud);
 			if (cloud == 0) {
 				ps.Play ();
 			}
 			cloud++;
-//			ps.gameObject.SetActive (true);
 		}
 	}
 
 	void OnTriggerExit(Collider collision){
 		if (cloudLayer == (cloudLayer | (1 << collision.gameObject.layer))) {
-			Debug.Log ("trigger exit: " + collision);
+			Debug.Log ("trigger exit: " + collision+" "+cloud);
 			cloud--;
 			if (cloud == 0) {
 				ps.Stop ();
-//				ps.Clear ();
-//				ps.gameObject.SetActive (false);
 			}
 		}
 	}
+
+//	bool inCloud;
+//	void Update(){
+//		if (!inCloud && ps.isPlaying) {
+//			ps.Stop ();
+//		} else if (inCloud) {
+//			inCloud = false;
+//
+//			if (ps.isStopped) {
+//				ps.Play ();
+//			}
+//		}
+//	}
+//
+//	void OnTriggerStay(Collider collision){
+//		if (cloudLayer == (cloudLayer | (1 << collision.gameObject.layer))) {
+//			inCloud = true;
+//		}
+//	}
 }

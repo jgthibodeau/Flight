@@ -2,6 +2,7 @@
 using System.Collections;
 
 public class Util : MonoBehaviour {
+	public static Color orange = new Color(1F, 0.5F, 0F);
 	
 	public static void DrawRigidbodyRay(Rigidbody rigidBody, Vector3 v1, Vector3 v2){
 		Debug.DrawRay (v1 + rigidBody.velocity * Time.fixedDeltaTime, v2);
@@ -53,5 +54,11 @@ public class Util : MonoBehaviour {
 		} else {
 			return GameManager.instance.oceanLevel;
 		}
+	}
+
+	public static Vector3 RotatePointAroundPivot(Vector3 point, Vector3 pivot, Vector3 angles) {
+		Vector3 direction = point - pivot; //get direction relative to pivot
+		direction = Quaternion.Euler (angles) * direction; // rotate
+		return direction + pivot; // calculate rotated point
 	}
 }

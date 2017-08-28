@@ -12,11 +12,19 @@ using UnityEngine;
 public class Buoyancy : MonoBehaviour
 {
 	public float waterLevel;
+	public bool useLpwWaterLevel;
+	public bool waterLevelRandomness;
 
 	public float density = 500;
 	public int slicesPerAxis = 2;
 	public bool isConcave = false;
 	public int voxelsLimit = 16;
+
+	public int randomVoxel;
+	public float maxTimeTillChange;
+	public float timeTillChange = 0f;
+	public float minFloatRandomness;
+	public float maxFloatRandomness;
 
 	private const float DAMPFER = 0.1f;
 	private const float WATER_DENSITY = 1000;
@@ -264,15 +272,25 @@ public class Buoyancy : MonoBehaviour
 	/// <summary>
 	/// Calculates physics.
 	/// </summary>
+
+
+
 	private void FixedUpdate()
 	{
 		forces.Clear(); // For drawing force gizmos
 
+		if (timeTillChange <= 0) {
+			randomVoxel = Random.Range (0, voxels.Count - 1);
+			timeTillChange = Random.Range (0, maxTimeTillChange);
+		} else {
+			timeTillChange -= Time.fixedDeltaTime;
+		}
+		int idx = 0;
 		foreach (var point in voxels)
 		{
 			var wp = transform.TransformPoint(point);
 //			float waterLevel = GetWaterLevel();
-			waterLevel = Util.GetWaterLevel (Util.RigidBodyPosition (rigidBody), false, true);
+			waterLevel = Util.GetWaterLevel (Util.RigidBodyPosition (rigidBody) + wp, useLpwWaterLevel, waterLevelRandomness);
 
 			if (wp.y - voxelHalfHeight < waterLevel)
 			{
@@ -288,11 +306,18 @@ public class Buoyancy : MonoBehaviour
 
 				var velocity = rigidBody.GetPointVelocity(wp);
 				var localDampingForce = -velocity * DAMPFER * rigidBody.mass;
-				var force = localDampingForce + Mathf.Sqrt(k) * localArchimedesForce;
+				var force = localDampingForce + Mathf.Sqrt (k) * localArchimedesForce;
+
+				if (idx == randomVoxel) {
+					force += Vector3.up * Random.Range (minFloatRandomness, maxFloatRandomness);
+				}
+
 				rigidBody.AddForceAtPosition(force, wp);
 
 				forces.Add(new[] { wp, force }); // For drawing force gizmos
 			}
+			
+			idx++;
 		}
 	}
 

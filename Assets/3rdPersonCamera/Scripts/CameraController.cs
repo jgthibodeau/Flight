@@ -17,8 +17,11 @@ namespace ThirdPersonCamera
     public class CameraController : MonoBehaviour
     {
         #region Public Unity Variables
-        public Transform target;
-        public Vector3 offsetVector;
+		public Transform target;
+		private Player player;
+		public Vector3 airOffsetVector;
+		public Vector3 groundOffsetVector;
+		public Vector3 waterOffsetVector;
 
         public bool smartPivot = true;
         public bool occlusionCheck = true;
@@ -109,6 +112,8 @@ namespace ThirdPersonCamera
             thicknessStarts = new Dictionary<string, RaycastHit>();
             thicknessEnds = new Dictionary<string, RaycastHit>();
 
+			player = target.GetComponent<Player> ();
+
             initDone = true;
         }
 
@@ -151,7 +156,16 @@ namespace ThirdPersonCamera
                 }
             }
 
-            Vector3 offsetVectorTransformed = target.transform.rotation * offsetVector;
+			Vector3 offsetVectorTransformed;// = target.transform.rotation;// * airOffsetVector;
+
+			if (player.inWater) {
+				offsetVectorTransformed = target.transform.rotation * waterOffsetVector;
+			} else if (player.isGrounded) {
+				offsetVectorTransformed = target.transform.rotation * groundOffsetVector;
+			} else {
+				offsetVectorTransformed = target.transform.rotation * airOffsetVector;
+			}
+
             transform.position += (target.position - prevTargetPos);
             targetPosWithOffset = (target.position + offsetVectorTransformed);
 

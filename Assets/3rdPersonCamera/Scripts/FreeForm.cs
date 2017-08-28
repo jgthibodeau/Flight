@@ -131,7 +131,7 @@ namespace ThirdPersonCamera
 					}
 				}
 
-				Vector3 offsetVectorTransformed = cameraController.target.transform.rotation * cameraController.offsetVector;
+				Vector3 offsetVectorTransformed = cameraController.target.transform.rotation * cameraController.airOffsetVector;
 
 				transform.RotateAround (cameraController.target.position + offsetVectorTransformed, upVector, x);
 
@@ -162,7 +162,7 @@ namespace ThirdPersonCamera
 //				}
 
 				if (!cameraController.smartPivot || cameraController.cameraNormalMode
-				    && (!cameraController.bGroundHit || (cameraController.bGroundHit && y < 0) || transform.position.y > (cameraController.target.position.y + cameraController.offsetVector.y))) {
+				    && (!cameraController.bGroundHit || (cameraController.bGroundHit && y < 0) || transform.position.y > (cameraController.target.position.y + cameraController.airOffsetVector.y))) {
 					// normal mode
 					transform.RotateAround (cameraController.target.position + offsetVectorTransformed, transform.right, yAngle);
 

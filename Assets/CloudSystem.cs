@@ -185,11 +185,11 @@ public class CloudSystem : MonoBehaviour {
 //			ps.Simulate (0, false, true);
 		}
 
-		if (newCloud.GetComponent<Collider> () != null) {
-			newCloud.GetComponent<Collider> ().isTrigger = true;
-		}
+//		if (newCloud.GetComponent<Collider> () != null) {
+//			newCloud.GetComponent<Collider> ().isTrigger = true;
+//		}
 
-		Cloud cloudScript = newCloud.AddComponent<Cloud> ();
+		Cloud cloudScript = newCloud.GetComponent <Cloud> ();
 		cloudScript.maxDistance = maxDistance;
 		cloudScript.speed = cloudSpeed;
 		cloudScript.flipDistance = maxDistance + 10;

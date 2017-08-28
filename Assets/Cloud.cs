@@ -3,26 +3,54 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Cloud : MonoBehaviour {
+	public GameObject colliders;
+
+	[HideInInspector]
+	public float toggleDistance;
+
+//	[HideInInspector]
 	public Transform player;
+//	[HideInInspector]
 	public Vector3 speed;
+	[HideInInspector]
 	public float maxDistance;
+	[HideInInspector]
 	public float lastDistance;
+	[HideInInspector]
 	public float flipDistance;
+	[HideInInspector]
 	public float checkDistance;
+	[HideInInspector]
 	Vector2 playerPos;
+	[HideInInspector]
 	Vector2 cloudPos;
+	[HideInInspector]
 	bool recentlyFlipped;
 
+	[HideInInspector]
 	public float minScale;
+	[HideInInspector]
 	public float maxScale;
+	[HideInInspector]
 	public float scale;
 
 	void Start () {
+		Mesh mesh = GetComponent<MeshFilter> ().mesh;
+		toggleDistance = mesh.bounds.size.magnitude/2 * transform.localScale.x;
 	}
 
 	void Update () {
 		//move cloud
 		transform.position += speed * Time.deltaTime;
+
+		Vector3 playerPos = Util.RigidBodyPosition (player.GetComponent<Rigidbody> ());
+		if (Vector3.Distance (playerPos, transform.position) < toggleDistance) {
+			if (!colliders.activeSelf) {
+				colliders.gameObject.SetActive (true);
+			}
+		} else if (colliders.activeSelf) {
+			colliders.gameObject.SetActive (true);
+		}
 	}
 
 	public void CalculateDistance() {

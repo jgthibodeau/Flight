@@ -14,9 +14,12 @@ public class Player : MonoBehaviour {
 	private int EnemyLayer;
 	private int PreyLayer;
 
+	public ThirdPersonCamera.Follow follow;
+
 	public LayerMask layerMaskForGround;
 	public LayerMask layerMaskForWater;
 	public float waterBobAmount, waterBobTime, timeSinceWaterBob;
+	public float groundDistance = 0.18f;
 	public bool inWater;
 	public bool isGrounded;
 	public bool isUpright;
@@ -162,7 +165,7 @@ public class Player : MonoBehaviour {
 		isGrounded = Physics.CheckCapsule (
 			characterCollider.bounds.center,
 			new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y-0.1f, characterCollider.bounds.center.z),
-			0.18f,
+			groundDistance,
 			layerMaskForGround.value
 		);
 
@@ -176,7 +179,7 @@ public class Player : MonoBehaviour {
 		inWater = Physics.CheckCapsule (
 			characterCollider.bounds.center,
 			new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y-0.1f, characterCollider.bounds.center.z),
-			0.18f,
+			groundDistance,
 			layerMaskForWater.value
 		);
 			
@@ -269,7 +272,7 @@ public class Player : MonoBehaviour {
 
 		if(!perchScript.isPerching){
 			glideV2Script.pitch = Input.GetAxis ("Vertical");
-			glideV2Script.roll = Input.GetAxis ("Horizontal");
+			glideV2Script.roll = -Input.GetAxis ("Horizontal");
 
 			glideV2Script.yaw = Input.GetAxis ("Horizontal Right");
 
