@@ -19,9 +19,11 @@ namespace ThirdPersonCamera
         #region Public Unity Variables
 		public Transform target;
 		private Player player;
+		public float offsetChangeSpeed;
 		public Vector3 airOffsetVector;
 		public Vector3 groundOffsetVector;
 		public Vector3 waterOffsetVector;
+		private Vector3 offsetVector;
 
         public bool smartPivot = true;
         public bool occlusionCheck = true;
@@ -159,12 +161,13 @@ namespace ThirdPersonCamera
 			Vector3 offsetVectorTransformed;// = target.transform.rotation;// * airOffsetVector;
 
 			if (player.inWater) {
-				offsetVectorTransformed = target.transform.rotation * waterOffsetVector;
+				offsetVector = Vector3.Slerp (offsetVector, waterOffsetVector, Time.deltaTime * offsetChangeSpeed);
 			} else if (player.isGrounded) {
-				offsetVectorTransformed = target.transform.rotation * groundOffsetVector;
+				offsetVector = Vector3.Slerp (offsetVector, groundOffsetVector, Time.deltaTime * offsetChangeSpeed);
 			} else {
-				offsetVectorTransformed = target.transform.rotation * airOffsetVector;
+				offsetVector = Vector3.Slerp (offsetVector, airOffsetVector, Time.deltaTime * offsetChangeSpeed);
 			}
+			offsetVectorTransformed = target.transform.rotation * offsetVector;
 
             transform.position += (target.position - prevTargetPos);
             targetPosWithOffset = (target.position + offsetVectorTransformed);

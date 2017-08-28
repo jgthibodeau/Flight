@@ -4,9 +4,6 @@ using System.Collections.Generic;
 
 [ExecuteInEditMode]
 public class CloudSystem : MonoBehaviour {
-	//	public GameObject cloud;
-	//	public GameObject cloudSphere;
-
 	public int numberClouds;
 	public float maxDistance,minHeight,maxHeight;
 	public int minCount;
@@ -199,6 +196,8 @@ public class CloudSystem : MonoBehaviour {
 		cloudScript.minScale = minScale;
 		cloudScript.maxScale = maxScale;
 		cloudScript.scale = scale;
+
+//		newCloud.GetComponent<Renderer> ().material.SetFloat("_MeshRadius", scale);
 
 		instancedClouds.Add (cloudScript);
 	}

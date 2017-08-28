@@ -14,6 +14,7 @@ public class Buoyancy : MonoBehaviour
 	public float waterLevel;
 	public bool useLpwWaterLevel;
 	public bool waterLevelRandomness;
+	public bool forceRandomness;
 
 	public float density = 500;
 	public int slicesPerAxis = 2;
@@ -279,11 +280,13 @@ public class Buoyancy : MonoBehaviour
 	{
 		forces.Clear(); // For drawing force gizmos
 
-		if (timeTillChange <= 0) {
-			randomVoxel = Random.Range (0, voxels.Count - 1);
-			timeTillChange = Random.Range (0, maxTimeTillChange);
-		} else {
-			timeTillChange -= Time.fixedDeltaTime;
+		if (forceRandomness) {
+			if (timeTillChange <= 0) {
+				randomVoxel = Random.Range (0, voxels.Count - 1);
+				timeTillChange = Random.Range (0, maxTimeTillChange);
+			} else {
+				timeTillChange -= Time.fixedDeltaTime;
+			}
 		}
 		int idx = 0;
 		foreach (var point in voxels)
@@ -308,16 +311,17 @@ public class Buoyancy : MonoBehaviour
 				var localDampingForce = -velocity * DAMPFER * rigidBody.mass;
 				var force = localDampingForce + Mathf.Sqrt (k) * localArchimedesForce;
 
-				if (idx == randomVoxel) {
-					force += Vector3.up * Random.Range (minFloatRandomness, maxFloatRandomness);
+				if (forceRandomness) {
+					if (idx == randomVoxel) {
+						force += Vector3.up * Random.Range (minFloatRandomness, maxFloatRandomness);
+					}
+					idx++;
 				}
 
 				rigidBody.AddForceAtPosition(force, wp);
 
 				forces.Add(new[] { wp, force }); // For drawing force gizmos
 			}
-			
-			idx++;
 		}
 	}
 

@@ -44,8 +44,8 @@ public class BirdAnimator : MonoBehaviour {
 	void Update () {
 		if (Grounded) {
 			if (InWater) {
-				if (!Animation.IsPlaying ("idle4")) {
-					Animation.CrossFade ("idle4", FadeLength, PlayMode.StopAll);
+				if (!Animation.IsPlaying ("water")) {
+					Animation.CrossFade ("water", FadeLength, PlayMode.StopAll);
 				}
 			} else if (Walking) {
 				if (WalkSpeed <= 0f) {

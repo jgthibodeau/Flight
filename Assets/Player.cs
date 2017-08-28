@@ -41,6 +41,13 @@ public class Player : MonoBehaviour {
 	public ForceMode gravityForceMode;
 	public bool keepUprightAlways;
 
+
+	public float minWaterPitch = 0.9f;
+	public float maxWaterPitch = 1.1f;
+	public float minWaterVolume = 0.25f;
+	public float maxWaterVolume = 1f;
+	public AudioSource waterAudioSource;
+
 	public Vector3 centerOfMass = new Vector3 (0, 0, 0);
 	public Vector3 inertiaTensor = new Vector3 (0, 0, 0);
 	public Quaternion inertiaTensorRotation = new Quaternion (0.3f, 0, 0, 1f);
@@ -135,6 +142,18 @@ public class Player : MonoBehaviour {
 		CheckGround ();
 
 		UpdateRendering ();
+
+		WaterSound ();
+	}
+
+	void WaterSound(){
+		if (inWater && !waterAudioSource.isPlaying) {
+			waterAudioSource.pitch = Random.Range (minWaterPitch, maxWaterPitch);
+			waterAudioSource.volume = Random.Range (minWaterVolume, maxWaterVolume);
+			if (!waterAudioSource.isPlaying) {
+				waterAudioSource.Play ();
+			}
+		}
 	}
 
 	void AirGravity(){
