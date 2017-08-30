@@ -147,13 +147,21 @@ public class Player : MonoBehaviour {
 	}
 
 	void WaterSound(){
-		if (inWater && !waterAudioSource.isPlaying) {
-			waterAudioSource.pitch = Random.Range (minWaterPitch, maxWaterPitch);
-			waterAudioSource.volume = Random.Range (minWaterVolume, maxWaterVolume);
-			if (!waterAudioSource.isPlaying) {
-				waterAudioSource.Play ();
-			}
-		}
+//		if ((inWater || NearWater()) && !waterAudioSource.isPlaying) {
+//			waterAudioSource.pitch = Random.Range (minWaterPitch, maxWaterPitch);
+//			waterAudioSource.volume = Random.Range (minWaterVolume, maxWaterVolume);
+//			if (!waterAudioSource.isPlaying) {
+//				waterAudioSource.Play ();
+//			}
+//		}
+	}
+
+	bool NearWater(){
+		//down
+		//foward down
+		//far forward down
+		//raycast back down, raycast far forward down
+		return false;
 	}
 
 	void AirGravity(){
