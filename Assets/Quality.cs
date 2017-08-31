@@ -24,7 +24,20 @@ public class Quality : MonoBehaviour {
 		waterMaterial.SetFloat ("_EnableReflections", reflectionValue);
 	}
 
+	public void SetFog(bool newFog) {
+		cameraQuality.SetFog(newFog);
+	}
+
 	public void SetDrawDistance (float newDrawDistance) {
-		cameraQuality.setDrawDistance (newDrawDistance);
+		cameraQuality.SetDrawDistance (newDrawDistance);
+//		PlayerPrefs.SetFloat (DRAW_DISTANCE, newDrawDistance);
+	}
+
+	public void SetFoliageDistance (float newFoliageDistance) {
+//		PlayerPrefs.SetFloat (FOLIAGE_DISTANCE, newFoliageDistance);
+	}
+
+	public void SetGrassDensity (float newGrassDensity) {
+//		PlayerPrefs.SetFloat (GRASS_DENSITY, newGrassDensity);
 	}
 }

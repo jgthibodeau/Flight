@@ -14,7 +14,9 @@ public class ShowPanels : MonoBehaviour {
 	}
 
 	public void Back() {
-		current.Back ();
-		current = current.previous;
+		if (current != null) {
+			current.Back ();
+			current = current.previous;
+		}
 	}
 }
