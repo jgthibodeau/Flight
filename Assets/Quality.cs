@@ -9,6 +9,12 @@ public class Quality : MonoBehaviour {
 	public CameraQuality cameraQuality;
 	public Material waterMaterial;
 
+	public int minFoliageDistance;
+	public int maxFoliageDistance;
+	public int minFoliageDensity;
+	public int maxFoliageDensity;
+	public GameObject parentTerrain;
+
 	void Awake(){
 		qualityDropdown.ClearOptions ();
 		qualityDropdown.AddOptions (QualitySettings.names.ToList ());
@@ -34,10 +40,18 @@ public class Quality : MonoBehaviour {
 	}
 
 	public void SetFoliageDistance (float newFoliageDistance) {
+		Terrain[] terrains = parentTerrain.GetComponentsInChildren<Terrain> ();
+		foreach (Terrain terrain in terrains) {
+			terrain.detailObjectDensity = newFoliageDistance;
+		}
 //		PlayerPrefs.SetFloat (FOLIAGE_DISTANCE, newFoliageDistance);
 	}
 
 	public void SetGrassDensity (float newGrassDensity) {
+		Terrain[] terrains = parentTerrain.GetComponentsInChildren<Terrain> ();
+		foreach (Terrain terrain in terrains) {
+			terrain.detailObjectDistance = newGrassDensity;
+		}
 //		PlayerPrefs.SetFloat (GRASS_DENSITY, newGrassDensity);
 	}
 }

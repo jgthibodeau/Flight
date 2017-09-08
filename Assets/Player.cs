@@ -298,26 +298,28 @@ public class Player : MonoBehaviour {
 		}
 
 		if(!perchScript.isPerching){
-			glideV2Script.pitch = Input.GetAxis ("Vertical");
-			glideV2Script.roll = -Input.GetAxis ("Horizontal");
+//			Util.Instance.inputConfigurations[0].axes
+//			Util.get
+			glideV2Script.pitch = Util.GetAxis ("Vertical");
+			glideV2Script.roll = -Util.GetAxis ("Horizontal");
 
-			glideV2Script.yaw = Input.GetAxis ("Horizontal Right");
+			glideV2Script.yaw = Util.GetAxis ("Horizontal Right");
 
-			walkScript.forward = Input.GetAxis ("Vertical");
-			walkScript.right = Input.GetAxis ("Horizontal");
+			walkScript.forward = Util.GetAxis ("Vertical");
+			walkScript.right = Util.GetAxis ("Horizontal");
 
-			glideV2Script.flapSpeed = Input.GetAxis ("Flap");
-			glideV2Script.flapDirection = Input.GetAxis ("Vertical Right");
+			glideV2Script.flapSpeed = Util.GetAxis ("Flap");
+			glideV2Script.flapDirection = Util.GetAxis ("Vertical Right");
 
 			if (glideV2Script.flapSpeed == 0) {
-				glideV2Script.wingsOut = Input.GetButtonDown ("Close Wings") ^ glideV2Script.wingsOut;
+				glideV2Script.wingsOut = Util.GetButtonDown ("Close Wings") ^ glideV2Script.wingsOut;
 			} else {
 				glideV2Script.wingsOut = true;
 			}
 
 			rigidBody.constraints = RigidbodyConstraints.None;
 
-			grabScript.grab = (Input.GetAxis ("Grab") != 0);
+			grabScript.grab = (Util.GetAxis ("Grab") != 0);
 		}
 	}
 

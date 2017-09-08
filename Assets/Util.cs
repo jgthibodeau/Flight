@@ -61,4 +61,17 @@ public class Util : MonoBehaviour {
 		direction = Quaternion.Euler (angles) * direction; // rotate
 		return direction + pivot; // calculate rotated point
 	}
+
+	public static float GetAxis(string axis){
+		return TeamUtility.IO.InputManager.GetAxis (axis);
+	}
+	public static bool GetButton(string button){
+		return TeamUtility.IO.InputManager.GetButton (button);
+	}
+	public static bool GetButtonDown(string button){
+		return TeamUtility.IO.InputManager.GetButtonDown (button);
+	}
+	public static bool GetButtonUp(string button){
+		return TeamUtility.IO.InputManager.GetButtonUp (button);
+	}
 }

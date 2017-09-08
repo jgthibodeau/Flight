@@ -67,9 +67,9 @@ namespace ThirdPersonCamera
 				Vector3 up;
 
 
-				bool left = Input.GetButton ("Camera Left");
-				bool right = Input.GetButton ("Camera Right");
-				bool back = Input.GetButton ("Camera Back");
+				bool left = Util.GetButton ("Camera Left");
+				bool right = Util.GetButton ("Camera Right");
+				bool back = Util.GetButton ("Camera Back");
 
 				if (back || (left && right)) {
 					desiredRotation = -(cc.target.transform.forward + tiltVector);
