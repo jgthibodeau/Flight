@@ -422,7 +422,6 @@ namespace DynamicShadowProjector {
 			m_camera.backgroundColor = new Color(1,1,1,0);
 			m_camera.useOcclusionCulling = false;
 			m_camera.renderingPath = RenderingPath.Forward;
-			m_camera.nearClipPlane = 0.01f;
 #if UNITY_5_6_OR_NEWER
 			m_camera.forceIntoRenderTexture = true;
 #endif

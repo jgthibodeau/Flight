@@ -28,7 +28,7 @@ namespace TeamUtility.IO.Examples
 
 		[SerializeField]
 		[FormerlySerializedAs("m_inputConfigName")]
-		private string _inputConfigName;
+		public string _inputConfigName;
 
 		[SerializeField]
 		[FormerlySerializedAs("m_axisConfigName")]
@@ -66,7 +66,15 @@ namespace TeamUtility.IO.Examples
 		private AxisConfiguration _axisConfig;
 		private Image _image;
 		public static string[] _axisNames = new string[] { "X", "Y", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th" };
-		
+
+		public RebindInput(RebindType rebindType, string inputConfigName, string axisConfigName, bool allowAnalogButton, bool changePositiveKey) {
+			_rebindType = rebindType;
+			_inputConfigName = inputConfigName;
+			_axisConfigName = axisConfigName;
+			_allowAnalogButton = allowAnalogButton;
+			_changePositiveKey = changePositiveKey;
+		}
+
 		private void Awake()
 		{
 			_image = GetComponent<Image>();
@@ -88,7 +96,7 @@ namespace TeamUtility.IO.Examples
 			}
 		}
 		
-		private void InitializeAxisConfig()
+		public void InitializeAxisConfig()
 		{
 			_axisConfig = InputManager.GetAxisConfiguration(_inputConfigName, _axisConfigName);
 			if(_axisConfig != null)

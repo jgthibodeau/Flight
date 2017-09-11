@@ -7,6 +7,7 @@ public class CameraQuality : MonoBehaviour {
 	public AC.LSky.LSky lSky;
 	public float minFarClip, maxFarClip;
 	public float minFog, maxFog;
+	private float drawDistance;
 
 	// Use this for initialization
 	void Start () {
@@ -14,6 +15,7 @@ public class CameraQuality : MonoBehaviour {
 	}
 	
 	public void SetDrawDistance(float percent){
+		drawDistance = percent;
 		float newFarClip = minFarClip + (maxFarClip - minFarClip) * percent;
 		foreach (Camera camera in cameras) {
 			camera.farClipPlane = newFarClip;
@@ -23,7 +25,15 @@ public class CameraQuality : MonoBehaviour {
 		lSky.unityFogDensity.inputValue = newFog;
 	}
 
+	public float GetDrawDistance(){
+		return drawDistance;
+	}
+
 	public void SetFog(bool fog){
 		lSky.enableUnityFog = fog;
+	}
+
+	public bool GetFog(){
+		return lSky.enableUnityFog;
 	}
 }

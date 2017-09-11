@@ -47,6 +47,7 @@ public class SetControlButtons : MonoBehaviour {
 
 				InstanceKeyMapping (
 					content,
+					keyboard.name,
 					keyboardAxis.name,
 					descriptionTokens[0] + descriptionTokens[1],
 					keyboardAxis.positive.ToString (),
@@ -62,6 +63,7 @@ public class SetControlButtons : MonoBehaviour {
 				if (doubleAxis) {
 					InstanceKeyMapping (
 						content,
+						keyboard.name,
 						keyboardAxis.name,
 						descriptionTokens [0] + descriptionTokens [2],
 						keyboardAxis.negative.ToString (),
@@ -77,6 +79,7 @@ public class SetControlButtons : MonoBehaviour {
 			} else {
 				InstanceKeyMapping (
 					content,
+					keyboard.name,
 					keyboardAxis.name,
 					keyboardAxis.description,
 					keyboardAxis.positive.ToString (),
@@ -115,6 +118,7 @@ public class SetControlButtons : MonoBehaviour {
 			if (isAxis) {
 				InstanceKeyMapping (
 					content,
+					gamepad.name,
 					gamepadAxis.name,
 					gamepadAxis.description,
 					TeamUtility.IO.Examples.RebindInput._axisNames [gamepadAxis.axis],
@@ -129,6 +133,7 @@ public class SetControlButtons : MonoBehaviour {
 			} else {
 				InstanceKeyMapping (
 					content,
+					gamepad.name,
 					gamepadAxis.name,
 					gamepadAxis.description,
 					gamepadAxis.positive.ToString (),
@@ -146,7 +151,8 @@ public class SetControlButtons : MonoBehaviour {
 
 	void InstanceKeyMapping(
 		Transform parent,
-		string name,
+		string configName,
+		string axisName,
 		string descriptionText,
 		string inputText,
 		bool allowAlt,
@@ -181,9 +187,11 @@ public class SetControlButtons : MonoBehaviour {
 		//input rebind variables
 		TeamUtility.IO.Examples.RebindInput inputRebind = inputTransform.GetComponentInChildren <TeamUtility.IO.Examples.RebindInput> ();
 		inputRebind._rebindType = rebindType;
-		inputRebind._axisConfigName = name;
+		inputRebind._inputConfigName = configName;
+		inputRebind._axisConfigName = axisName;
 		inputRebind._allowAnalogButton = allowAnalogButton;
 		inputRebind._changePositiveKey = positiveButton;
+		inputRebind.InitializeAxisConfig ();
 
 		//alt rebind variables
 		if (allowAlt) {
