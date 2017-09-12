@@ -66,6 +66,7 @@ namespace TeamUtility.IO.Examples
 		private AxisConfiguration _axisConfig;
 		private Image _image;
 		public static string[] _axisNames = new string[] { "X", "Y", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th" };
+		public GamepadButtons gamepadButtons;
 
 		public RebindInput(RebindType rebindType, string inputConfigName, string axisConfigName, bool allowAnalogButton, bool changePositiveKey) {
 			_rebindType = rebindType;
@@ -101,26 +102,37 @@ namespace TeamUtility.IO.Examples
 			_axisConfig = InputManager.GetAxisConfiguration(_inputConfigName, _axisConfigName);
 			if(_axisConfig != null)
 			{
-				if(_rebindType == RebindType.Keyboard || _rebindType == RebindType.GamepadButton)
-				{
-					if(_changePositiveKey)
-					{
-						if(_changeAltKey)
-							_keyDescription.text = _axisConfig.altPositive == KeyCode.None ? "" : _axisConfig.altPositive.ToString();
+				if (_rebindType == RebindType.Keyboard) {
+					if (_changePositiveKey) {
+						if (_changeAltKey)
+							_keyDescription.text = _axisConfig.altPositive == KeyCode.None ? "" : _axisConfig.altPositive.ToString ();
 						else
-							_keyDescription.text = _axisConfig.positive == KeyCode.None ? "" : _axisConfig.positive.ToString();
-					}
-					else
-					{
-						if(_changeAltKey)
-							_keyDescription.text = _axisConfig.altNegative == KeyCode.None ? "" : _axisConfig.altNegative.ToString();
+							_keyDescription.text = _axisConfig.positive == KeyCode.None ? "" : _axisConfig.positive.ToString ();
+					} else {
+						if (_changeAltKey)
+							_keyDescription.text = _axisConfig.altNegative == KeyCode.None ? "" : _axisConfig.altNegative.ToString ();
 						else
-							_keyDescription.text = _axisConfig.negative == KeyCode.None ? "" : _axisConfig.negative.ToString();
+							_keyDescription.text = _axisConfig.negative == KeyCode.None ? "" : _axisConfig.negative.ToString ();
 					}
+				} else if (_rebindType == RebindType.GamepadButton) {
+					string keycode = "";
+					if (_changePositiveKey) {
+						if (_changeAltKey)
+							keycode = _axisConfig.altPositive == KeyCode.None ? "" : _axisConfig.altPositive.ToString ();
+						else
+							keycode = _axisConfig.positive == KeyCode.None ? "" : _axisConfig.positive.ToString ();
+					} else {
+						if (_changeAltKey)
+							keycode = _axisConfig.altNegative == KeyCode.None ? "" : _axisConfig.altNegative.ToString ();
+						else
+							keycode = _axisConfig.negative == KeyCode.None ? "" : _axisConfig.negative.ToString ();
+					}
+					_keyDescription.text = gamepadButtons.GetMapping (keycode);
+				} else if (_rebindType == RebindType.GamepadAxis) {
+					_keyDescription.text = gamepadButtons.GetMapping (_axisConfig.axis.ToString ());
 				}
-				else
-				{
-					_keyDescription.text = _axisNames[_axisConfig.axis];
+				else {
+					_keyDescription.text = _axisConfig.axis.ToString ();
 				}
 			}
 			else
@@ -335,18 +347,18 @@ namespace TeamUtility.IO.Examples
 						else
 							_axisConfig.negative = result.key;
 					}
-					_keyDescription.text = (result.key == KeyCode.None) ? "" : result.key.ToString();
+					_keyDescription.text = gamepadButtons.GetMapping((result.key == KeyCode.None) ? "" : result.key.ToString());
 				}
 				else
 				{
 					if(_axisConfig.type == InputType.Button)
 					{
 						KeyCode currentKey = GetCurrentKeyCode();
-						_keyDescription.text = (currentKey == KeyCode.None) ? "" : currentKey.ToString();
+						_keyDescription.text = gamepadButtons.GetMapping((currentKey == KeyCode.None) ? "" : currentKey.ToString());
 					}
 					else
 					{
-						_keyDescription.text = (_axisConfig.invert ? "-" : "+") + _axisNames[_axisConfig.axis];
+						_keyDescription.text = gamepadButtons.GetMapping((_axisConfig.invert ? "-" : "+") + gamepadButtons.GetMapping(_axisConfig.axis.ToString ()));
 					}
 				}
 				_image.overrideSprite = _normalState;
@@ -359,18 +371,18 @@ namespace TeamUtility.IO.Examples
 					_axisConfig.type = InputType.AnalogButton;
 					_axisConfig.invert = result.joystickAxisValue < 0.0f;
 					_axisConfig.SetAnalogButton(_joystick, result.joystickAxis);
-					_keyDescription.text = (_axisConfig.invert ? "-" : "+") + _axisNames[_axisConfig.axis];
+					_keyDescription.text = (_axisConfig.invert ? "-" : "+") + gamepadButtons.GetMapping(_axisConfig.axis.ToString ());
 				}
 				else
 				{
 					if(_axisConfig.type == InputType.AnalogButton)
 					{
-						_keyDescription.text = (_axisConfig.invert ? "-" : "+") + _axisNames[_axisConfig.axis];
+						_keyDescription.text = (_axisConfig.invert ? "-" : "+") + gamepadButtons.GetMapping(_axisConfig.axis.ToString ());
 					}
 					else
 					{
 						KeyCode currentKey = GetCurrentKeyCode();
-						_keyDescription.text = (currentKey == KeyCode.None) ? "" : currentKey.ToString();
+						_keyDescription.text = gamepadButtons.GetMapping((currentKey == KeyCode.None) ? "" : currentKey.ToString());
 					}
 				}
 				_image.overrideSprite = _normalState;
@@ -405,7 +417,7 @@ namespace TeamUtility.IO.Examples
 				_axisConfig.SetAnalogAxis(_joystick, result.joystickAxis);
 
 			_image.overrideSprite = _normalState;
-			_keyDescription.text = _axisNames[_axisConfig.axis];
+			_keyDescription.text = gamepadButtons.GetMapping(_axisConfig.axis.ToString ());
 			return true;
 		}
 

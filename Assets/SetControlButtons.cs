@@ -4,13 +4,17 @@ using UnityEngine;
 using UnityEngine.UI;
 
 //[ExecuteInEditMode]
+[RequireComponent(typeof(GamepadButtons))]
 public class SetControlButtons : MonoBehaviour {
 	public GameObject inputMappingPrefab;
 	public GameObject keyboardMenu;
 	public GameObject gamepadMenu;
 
+	private GamepadButtons gamepadButtons;
+
 	// Use this for initialization
 	void Start () {
+		gamepadButtons = transform.GetComponent<GamepadButtons> ();
 		ResetKeyboard ();
 		ResetGamepad ();
 	}
@@ -49,7 +53,7 @@ public class SetControlButtons : MonoBehaviour {
 					content,
 					keyboard.name,
 					keyboardAxis.name,
-					descriptionTokens[0] + descriptionTokens[1],
+					descriptionTokens [0] + descriptionTokens [1],
 					keyboardAxis.positive.ToString (),
 					true,
 					keyboardAxis.altPositive.ToString (),
@@ -121,14 +125,14 @@ public class SetControlButtons : MonoBehaviour {
 					gamepad.name,
 					gamepadAxis.name,
 					gamepadAxis.description,
-					TeamUtility.IO.Examples.RebindInput._axisNames [gamepadAxis.axis],
+					gamepadButtons.GetMapping (gamepadAxis.axis.ToString ()),
 					false,
-					gamepadAxis.altPositive.ToString (),
+					null,
 					true,
 					false,
 					true,
 					gamepadAxis.invert,
-					TeamUtility.IO.Examples.RebindInput.RebindType.Keyboard
+					TeamUtility.IO.Examples.RebindInput.RebindType.GamepadAxis
 				);
 			} else {
 				InstanceKeyMapping (
@@ -136,14 +140,14 @@ public class SetControlButtons : MonoBehaviour {
 					gamepad.name,
 					gamepadAxis.name,
 					gamepadAxis.description,
-					gamepadAxis.positive.ToString (),
+					gamepadButtons.GetMapping (gamepadAxis.positive.ToString ()),
 					false,
-					gamepadAxis.altPositive.ToString (),
+					null,
 					true,
 					true,
 					false,
 					gamepadAxis.invert,
-					TeamUtility.IO.Examples.RebindInput.RebindType.Keyboard
+					TeamUtility.IO.Examples.RebindInput.RebindType.GamepadButton
 				);
 			}
 		}
@@ -191,6 +195,7 @@ public class SetControlButtons : MonoBehaviour {
 		inputRebind._axisConfigName = axisName;
 		inputRebind._allowAnalogButton = allowAnalogButton;
 		inputRebind._changePositiveKey = positiveButton;
+		inputRebind.gamepadButtons = gamepadButtons;
 		inputRebind.InitializeAxisConfig ();
 
 		//alt rebind variables
