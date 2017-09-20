@@ -64,6 +64,7 @@ public class GlideV2 : MonoBehaviour {
 	private bool isBraking = false;
 	public float wingOutDistance = 0.5f;
 	public float wingForwardDistance = 0.5f;
+	public float wingUpDistance = 0.5f;
 
 	public bool staticAngleOffset;
 	public float angleOffset = 0.015f;
@@ -399,7 +400,7 @@ public class GlideV2 : MonoBehaviour {
 				leftPosition += transform.up * rollAbs * rollScale + transform.right * rollAbs * rollScale;
 //				leftPosition = Util.RotatePointAroundPivot (leftPosition, Vector3.zero, new Vector3());
 			}
-			leftPosition = leftPosition.normalized * wingOutDistance + transform.forward * wingForwardDistance;
+			leftPosition = leftPosition.normalized * wingOutDistance + transform.forward * wingForwardDistance + transform.up * wingUpDistance;
 			leftPosition += transform.position;
 			Vector3 leftForce = leftDirection * lift;
 			rigidBody.AddForceAtPosition (leftForce, leftPosition, ForceMode.Force);
@@ -417,7 +418,7 @@ public class GlideV2 : MonoBehaviour {
 
 				rightPosition += transform.up * rollAbs * rollScale - transform.right * rollAbs * rollScale;
 			}
-			rightPosition = rightPosition.normalized * wingOutDistance + transform.forward * wingForwardDistance;
+			rightPosition = rightPosition.normalized * wingOutDistance + transform.forward * wingForwardDistance + transform.up * wingUpDistance;
 			rightPosition += transform.position;
 			Vector3 rightForce = rightDirection * lift;
 			rigidBody.AddForceAtPosition (rightForce, rightPosition, ForceMode.Force);
