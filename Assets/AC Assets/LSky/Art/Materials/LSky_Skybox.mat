@@ -8,7 +8,7 @@ Material:
   m_PrefabInternal: {fileID: 0}
   m_Name: LSky_Skybox
   m_Shader: {fileID: 4800000, guid: 6ccacabd882e6a64fa33727793a2cad9, type: 3}
-  m_ShaderKeywords: LSKY_ENABLE_MOON LSKY_ENABLE_NEBULA LSKY_ENABLE_STARS LSKY_ENABLE_SUN_DISC
+  m_ShaderKeywords: LSKY_ENABLE_MOON LSKY_ENABLE_STARS LSKY_ENABLE_SUN_DISC
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_CustomRenderQueue: -1
