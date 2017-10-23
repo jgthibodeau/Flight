@@ -12,6 +12,7 @@ using UnityEngine;
 public class Buoyancy : MonoBehaviour
 {
 	public float waterLevel;
+	public float waterLevelOffset;
 	public bool useLpwWaterLevel;
 	public bool waterLevelRandomness;
 	public bool forceRandomness;
@@ -293,7 +294,7 @@ public class Buoyancy : MonoBehaviour
 		{
 			var wp = transform.TransformPoint(point);
 //			float waterLevel = GetWaterLevel();
-			waterLevel = Util.GetWaterLevel (Util.RigidBodyPosition (rigidBody) + wp, useLpwWaterLevel, waterLevelRandomness);
+			waterLevel = Util.GetWaterLevel (Util.RigidBodyPosition (rigidBody) + wp, useLpwWaterLevel, waterLevelRandomness) + waterLevelOffset;
 
 			if (wp.y - voxelHalfHeight < waterLevel)
 			{

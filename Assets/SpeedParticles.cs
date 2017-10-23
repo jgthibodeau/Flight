@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class SpeedParticles : MonoBehaviour {
-	Rigidbody parentRigidBody;
+	public Rigidbody parentRigidBody;
 	ParticleSystem.EmissionModule emissionModule;
 	ParticleSystem particles;
 	public float emissionScale;
@@ -15,7 +15,6 @@ public class SpeedParticles : MonoBehaviour {
 	void Start () {
 		particles = GetComponent<ParticleSystem> ();
 		emissionModule = particles.emission;
-		parentRigidBody = this.transform.parent.GetComponentInChildren<Rigidbody> ();
 	}
 	
 	// Update is called once per frame
