@@ -10,7 +10,8 @@ public class Stamina : MonoBehaviour {
 	public bool usingStamina;
 	public float staminaUseRate;
 
-	public bool delayOnlyWhenDepleated;
+	public bool delayOnlyWhenMainDepleted;
+	public bool delayOnlyWhenAllDepleted;
 	public float staminaRegainRate;
 	public float staminaRegainDelay;
 	public float staminaRegainCurrentDelay;
@@ -23,18 +24,26 @@ public class Stamina : MonoBehaviour {
 				UseStamina ();
 				staminaRegainCurrentDelay = staminaRegainDelay;
 //			}
-		} else if (staminaRegainCurrentDelay <= 0 || (delayOnlyWhenDepleated && HasStamina ())) {
+		} else if (staminaRegainCurrentDelay <= 0 || (delayOnlyWhenMainDepleted && HasMainStamina ()) || (delayOnlyWhenAllDepleted && HasStamina ())) {
 			RegainStamina ();
 		} else {
 			staminaRegainCurrentDelay -= Time.deltaTime;
 		}
 	}
 
-	public bool HasStamina (){
+	public bool HasStamina () {
 		return (currentStamina > 0 || extraStamina > 0);
 	}
 
-	private void UseStamina (){
+	public bool HasMainStamina () {
+		return currentStamina > 0;
+	}
+
+	public bool HasExtraStamina () {
+		return extraStamina > 0;
+	}
+
+	private void UseStamina () {
 		float drainedStamina = staminaUseRate * Time.deltaTime;
 
 		if (drainedStamina > currentStamina) {
