@@ -1,14 +1,19 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-//[RequireComponent(typeof(Rigidbody))]
-//[RequireComponent(typeof(GlideV2))]
+[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(GlideV2))]
+[RequireComponent(typeof(Grab))]
+[RequireComponent(typeof(Perch))]
+[RequireComponent(typeof(Walk))]
+[RequireComponent(typeof(Stamina))]
 
 public class Player : MonoBehaviour {
 	private GlideV2 glideV2Script;
 	private Grab grabScript;
 	private Perch perchScript;
 	private Walk walkScript;
+	private Stamina staminaScript;
 
 	private int PerchableLayer;
 	private int EnemyLayer;
@@ -66,6 +71,7 @@ public class Player : MonoBehaviour {
 		grabScript = transform.GetComponent<Grab> ();
 		perchScript = transform.GetComponent<Perch> ();
 		walkScript = transform.GetComponent<Walk> ();
+		staminaScript = transform.GetComponent<Stamina> ();
 
 		glideV2Script.birdAnimator = birdAnimator;
 		walkScript.birdAnimator = birdAnimator;
@@ -274,7 +280,6 @@ public class Player : MonoBehaviour {
 			grabScript.ResetGrabbedObject();
 		}
 
-		//as long as we aren't perched, do normal controls
 		if (perchScript.isPerching) {
 			glideV2Script.pitch = 0;
 			glideV2Script.yaw = 0;
@@ -297,6 +302,7 @@ public class Player : MonoBehaviour {
 			}
 		}
 
+		//as long as we aren't perched, do normal controls
 		if(!perchScript.isPerching){
 //			Util.Instance.inputConfigurations[0].axes
 //			Util.get
@@ -308,7 +314,14 @@ public class Player : MonoBehaviour {
 			walkScript.forward = Util.GetAxis ("Vertical");
 			walkScript.right = Util.GetAxis ("Horizontal");
 
-			glideV2Script.flapSpeed = Util.GetAxis ("Flap");
+			float flapSpeed = Util.GetAxis ("Flap");
+			if (staminaScript.HasStamina ()) {
+				glideV2Script.flapSpeed = Util.GetAxis ("Flap");
+			} else {
+				glideV2Script.flapSpeed = 0;
+			}
+			staminaScript.usingStamina = flapSpeed != 0;
+
 			glideV2Script.flapDirection = Util.GetAxis ("Vertical Right");
 
 			if (glideV2Script.flapSpeed == 0) {
