@@ -9,6 +9,7 @@ TagManager:
   - Cloud
   - dirt
   - Floor
+  - Edible
   layers:
   - Default
   - TransparentFX
@@ -29,9 +30,9 @@ TagManager:
   - Trail
   - ToggleableCollider
   - Camera
-  - 
-  - 
-  - 
+  - Pickupable
+  - Interactable
+  - Dispenser
   - 
   - 
   - 

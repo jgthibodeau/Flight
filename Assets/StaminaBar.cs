@@ -27,7 +27,6 @@ public class StaminaBar : MonoBehaviour {
 		if (stamina.extraStamina > 0) {
 			extraStamina.SetActive (true);
 			float extraFill = (stamina.extraStamina % staminaPerExtraBar) / staminaPerExtraBar;
-			Debug.Log (extraFill);
 			if (extraFill == 0) {
 				extraFill = 1;
 			}

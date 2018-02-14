@@ -6,6 +6,7 @@ public class Stamina : MonoBehaviour {
 	public float currentStamina;
 	public float maxStamina;
 	public float extraStamina;
+	public float maxExtraStamina;
 
 	public bool usingStamina;
 	public float staminaUseRate;
@@ -66,6 +67,13 @@ public class Stamina : MonoBehaviour {
 
 		if (currentStamina > maxStamina) {
 			currentStamina = maxStamina;
+		}
+	}
+
+	public void AddStamina (float newStamina){
+		extraStamina += newStamina;
+		if (extraStamina > maxExtraStamina) {
+			extraStamina = maxExtraStamina;
 		}
 	}
 }

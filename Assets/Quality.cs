@@ -17,17 +17,34 @@ public class Quality : MonoBehaviour {
 
 	public GameObject parentTerrain;
 
-	void Awake(){
+	public bool doReflection;
+	public bool doFog;
+	[Range(0,1)]
+	public float drawDistance;
+	[Range(0,250)]
+	public float foliageDistance;
+	[Range(0,1)]
+	public float grassDensity;
+
+	void Start(){
 		qualityDropdown.ClearOptions ();
 		qualityDropdown.AddOptions (QualitySettings.names.ToList ());
 		qualityDropdown.value = QualitySettings.GetQualityLevel ();
 
-		reflectionToggle.isOn = waterMaterial.GetFloat ("_EnableReflections") == 1;
-		fogToggle.isOn = cameraQuality.GetFog ();
-		drawDistanceSlider.value = cameraQuality.GetDrawDistance ();
+		reflectionToggle.isOn = doReflection;
+		SetReflections (doReflection);
 
-		foliageDistanceSlider.value = parentTerrain.GetComponentInChildren<Terrain> ().detailObjectDistance;
-		grassDensitySlider.value = parentTerrain.GetComponentInChildren<Terrain> ().detailObjectDensity;
+		fogToggle.isOn = doFog;
+		SetFog (doFog);
+
+		drawDistanceSlider.value = drawDistance;
+		SetDrawDistance (drawDistance);
+
+		foliageDistanceSlider.value = foliageDistance;
+		SetFoliageDistance (foliageDistance);
+
+		grassDensitySlider.value = grassDensity;
+		SetGrassDensity (grassDensity);
 	}
 
 	public void SetQuality (int newQuality) {
@@ -35,20 +52,24 @@ public class Quality : MonoBehaviour {
 	}
 
 	public void SetReflections(bool newReflections) {
+		doReflection = newReflections;
 		float reflectionValue = newReflections ? 1 : 0;
 		waterMaterial.SetFloat ("_EnableReflections", reflectionValue);
 	}
 
 	public void SetFog(bool newFog) {
+		doFog = newFog;
 		cameraQuality.SetFog(newFog);
 	}
 
 	public void SetDrawDistance (float newDrawDistance) {
+		drawDistance = newDrawDistance;
 		cameraQuality.SetDrawDistance (newDrawDistance);
 //		PlayerPrefs.SetFloat (DRAW_DISTANCE, newDrawDistance);
 	}
 
 	public void SetFoliageDistance (float newFoliageDistance) {
+		foliageDistance = newFoliageDistance;
 		Terrain[] terrains = parentTerrain.GetComponentsInChildren<Terrain> ();
 		foreach (Terrain terrain in terrains) {
 			terrain.detailObjectDistance = newFoliageDistance;
@@ -57,6 +78,7 @@ public class Quality : MonoBehaviour {
 	}
 
 	public void SetGrassDensity (float newGrassDensity) {
+		grassDensity = newGrassDensity;
 		Terrain[] terrains = parentTerrain.GetComponentsInChildren<Terrain> ();
 		foreach (Terrain terrain in terrains) {
 			terrain.detailObjectDensity = newGrassDensity;

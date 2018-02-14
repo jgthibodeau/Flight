@@ -14,6 +14,7 @@ public class Player : MonoBehaviour {
 	private Perch perchScript;
 	private Walk walkScript;
 	private Stamina staminaScript;
+	private Interactor interactorScript;
 
 	private int PerchableLayer;
 	private int EnemyLayer;
@@ -72,6 +73,7 @@ public class Player : MonoBehaviour {
 		perchScript = transform.GetComponent<Perch> ();
 		walkScript = transform.GetComponent<Walk> ();
 		staminaScript = transform.GetComponent<Stamina> ();
+		interactorScript = transform.GetComponent<Interactor> ();
 
 		glideV2Script.birdAnimator = birdAnimator;
 		walkScript.birdAnimator = birdAnimator;
@@ -332,15 +334,20 @@ public class Player : MonoBehaviour {
 
 			rigidBody.constraints = RigidbodyConstraints.None;
 
-			grabScript.grab = (Util.GetAxis ("Grab") != 0);
+			grabScript.grab = Util.GetButtonDown ("Grab");
+			if (grabScript.grab) {
+				interactorScript.Pickup ();
+			}
 		}
 	}
 
 
 	void OnTriggerEnter(Collider collisionInfo) {
-//		Debug.Log (collisionInfo);
-		if (collisionInfo.gameObject.CompareTag ("Fish")) {
-			GameObject.Destroy (collisionInfo.gameObject);
+		Debug.Log (collisionInfo+" "+collisionInfo.gameObject.tag);
+		if (collisionInfo.gameObject.CompareTag ("Edible")) {
+			Edible edible = collisionInfo.gameObject.GetComponent<Edible> ();
+			float newStamina = edible.Eat ();
+			staminaScript.AddStamina (newStamina);
 		}
 
 		//TODO handle crashing: close wings and tumble, slowing down if on ground

@@ -116,9 +116,10 @@ GameObject:
   - component: {fileID: 54840699789843084}
   - component: {fileID: 114335375996150916}
   - component: {fileID: 136070861869223810}
+  - component: {fileID: 114777147135371688}
   m_Layer: 0
   m_Name: Jumping Fish
-  m_TagString: Untagged
+  m_TagString: Edible
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -449,8 +450,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1179651697258306}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 777.26, y: 312.188, z: 455.47}
+  m_LocalRotation: {x: 0.80870056, y: 0.12602077, z: -0.56049114, w: 0.12638034}
+  m_LocalPosition: {x: 9.432678, y: -4.951477, z: -4.9203796}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children:
   - {fileID: 4384972484170932}
@@ -626,16 +627,31 @@ MonoBehaviour:
   deathTime: 0
   minSwimTime: 10
   maxSwimTime: 20
-  remainingSwimTime: 10.566268
+  remainingSwimTime: 12.069997
   minJumpTime: 5
   maxJumpTime: 15
-  remainingJumpTime: 7.3936315
+  remainingJumpTime: 4.4046454
   underwaterDistance: 3
-  forwardDirection: {x: -0.30390704, y: 0, z: 0.35286424}
+  forwardDirection: {x: -0.25511467, y: -0, z: -0.0673157}
   forwardDistance: 2
   jumping: 0
   inWater: 1
   atDesiredDepth: 1
+--- !u!114 &114777147135371688
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1179651697258306}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4fe0a41ce9a3664bad81222ef7d859f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  staminaRegain: 6
+  eaten: 0
+  deathTime: 5
+  deathObject: {fileID: 180128, guid: e3fc18f0e28a01041b5acf652216fc03, type: 2}
 --- !u!136 &136070861869223810
 CapsuleCollider:
   m_ObjectHideFlags: 1
@@ -675,7 +691,7 @@ SkinnedMeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: 947492d739fc6ce4b87e54bedc38ed2a, type: 2}
+  - {fileID: 2100000, guid: 186391d0d2e187547bbe5217acca3eeb, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -716,8 +732,8 @@ SkinnedMeshRenderer:
   - {fileID: 4869757363648768}
   - {fileID: 4455318685474398}
   m_BlendShapeWeights:
-  - 70.80389
-  - 70.636925
+  - 142.55878
+  - 142.90862
   m_RootBone: {fileID: 4562293765876338}
   m_AABB:
     m_Center: {x: -0.006854117, y: -0.00063544326, z: 0.012835376}

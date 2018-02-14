@@ -31,6 +31,8 @@ public class GlideV2 : MonoBehaviour {
 	public float rollScale;
 	public float maxRoll;
 
+	public bool useYaw;
+
 	public float maxTailDrag;
 //	public float dragCoef;
 	public float inducedDragCoef;
@@ -63,6 +65,7 @@ public class GlideV2 : MonoBehaviour {
 	private bool brake = false;
 	private bool isBraking = false;
 	public float wingOutDistance = 0.5f;
+	public float wingOutDragDistance = 0.5f;
 	public float wingForwardDistance = 0.5f;
 	public float wingUpDistance = 0.5f;
 
@@ -318,6 +321,9 @@ public class GlideV2 : MonoBehaviour {
 		//get angle of attack realistically by comparing velocity to forward direction
 		float angleOfAttack;
 
+		Vector3 leftPosition = Vector3.zero;
+		Vector3 rightPosition = Vector3.zero;
+
 		if (wingsOut) {
 			float wingUpDirectionScale = 0.5f;
 			float pitchAbs = Mathf.Abs (pitch);
@@ -389,7 +395,7 @@ public class GlideV2 : MonoBehaviour {
 
 //			Vector3 leftDirection = (transform.up * (1 - liftAngle) + transform.forward * liftAngle).normalized;//transform.up;
 			Vector3 leftDirection = liftDirection;
-			Vector3 leftPosition = -transform.right;
+			leftPosition = -transform.right;
 			//			if (roll > 0) {
 			if ((roll > 0 && lift > 0) || (roll < 0 && lift < 0)) {
 //			if ((roll < 0 && lift > 0) || (roll > 0 && lift < 0)) {
@@ -408,7 +414,7 @@ public class GlideV2 : MonoBehaviour {
 
 //			Vector3 rightDirection = (transform.up * (1 - liftAngle) + transform.forward * liftAngle).normalized;//transform.up;
 			Vector3 rightDirection = liftDirection;
-			Vector3 rightPosition = transform.right;
+			rightPosition = transform.right;
 			//			if (roll < 0) {
 			if ((roll < 0 && lift > 0) || (roll > 0 && lift < 0)) {
 //			if ((roll > 0 && lift > 0) || (roll < 0 && lift < 0)) {
@@ -444,7 +450,11 @@ public class GlideV2 : MonoBehaviour {
 //		}
 
 //		Drag (realLiftCoef, angleOfAttack, Mathf.Abs (lift));
-		SeparateDragWithAreas (realLiftCoef, angleOfAttack, Mathf.Abs (lift));
+		if (useYaw) {
+			SeparateDragWithYaw (realLiftCoef, angleOfAttack, Mathf.Abs (lift), leftPosition, rightPosition);
+		} else {
+			SeparateDragWithAreas (realLiftCoef, angleOfAttack, Mathf.Abs (lift));
+		}
 
 //		//induced drag
 //		float aspectRatio = 1f/wingLiftSurfaceArea;
@@ -471,6 +481,56 @@ public class GlideV2 : MonoBehaviour {
 
 		//velocity
 		Util.DrawRigidbodyRay(rigidBody, transform.position, rigidBody.velocity, Color.cyan);
+	}
+
+	public void SeparateDragWithYaw (float liftCoef, float angleOfAttack, float lift, Vector3 leftPosition, Vector3 rightPosition){
+		if (rigidBody.velocity.magnitude > 0) {
+			float dragScale = pitch * (-0.75f) + 1;
+
+			//parasitic
+			float parasiticDragMagnitude = 0.25f * airDensity * speed * speed * wingDragSurfaceArea * parasiticDragCoef;
+			parasiticDragMagnitude *= dragScale;
+//			Vector3 parasiticDirection = (rigidBody.velocity.normalized * (-1) + transform.right * yaw * yawScale).normalized;
+			Vector3 parasiticDirection = rigidBody.velocity.normalized * (-1);
+
+			//left
+			leftPosition = transform.position - transform.right * wingOutDragDistance + transform.forward * wingForwardDistance + transform.up * wingUpDistance;
+			Vector3 leftParasiticDirection = parasiticDirection;
+			Vector3 leftParasiticDragForce = parasiticDragMagnitude * leftParasiticDirection * (yaw * yawScale + 1);
+			Vector3 leftParasiticPosition = leftPosition - transform.forward * dragForwardDistance;
+			rigidBody.AddForceAtPosition (leftParasiticDragForce, leftParasiticPosition, ForceMode.Force);
+			Util.DrawRigidbodyRay (rigidBody, leftParasiticPosition, leftParasiticDragForce, Color.red);
+
+			//right
+			rightPosition = transform.position + transform.right * wingOutDragDistance + transform.forward * wingForwardDistance + transform.up * wingUpDistance;
+			Vector3 rightParasiticDirection = parasiticDirection;
+			Vector3 rightParasiticDragForce = parasiticDragMagnitude * rightParasiticDirection * (-yaw * yawScale + 1);
+			Vector3 rightParasiticPosition = rightPosition - transform.forward * dragForwardDistance;
+			rigidBody.AddForceAtPosition (rightParasiticDragForce, rightParasiticPosition, ForceMode.Force);
+			Util.DrawRigidbodyRay (rigidBody, rightParasiticPosition, rightParasiticDragForce, Color.red);
+
+
+			//induced
+			float aspectRatio = 1f / wingLiftSurfaceArea;
+			float inducedDragMagnitude = lift * lift * inducedDragCoef / (airDensity * speed * speed * wingLiftSurfaceArea * Mathf.PI * aspectRatio);
+			inducedDragMagnitude *= dragScale;
+//			Vector3 inducedDirection = (rigidBody.velocity.normalized * (-1) + transform.right * yaw * yawScale).normalized;
+			Vector3 inducedDirection = rigidBody.velocity.normalized * (-1);
+
+			//left
+			Vector3 leftInducedDirection = inducedDirection;
+			Vector3 leftInducedDragForce = inducedDragMagnitude * leftInducedDirection;// * (yaw * yawScale + 1);
+			Vector3 leftInducedPosition = leftPosition;
+			rigidBody.AddForceAtPosition (leftInducedDragForce, leftInducedPosition, ForceMode.Force);
+			Util.DrawRigidbodyRay (rigidBody, leftInducedPosition, leftInducedDragForce, Color.blue);
+
+			//right
+			Vector3 rightInducedDirection = inducedDirection;
+			Vector3 rightInducedDragForce = inducedDragMagnitude * rightInducedDirection;// * (-yaw * yawScale + 1);
+			Vector3 rightInducedPosition = rightPosition;
+			rigidBody.AddForceAtPosition (rightInducedDragForce, rightInducedPosition, ForceMode.Force);
+			Util.DrawRigidbodyRay (rigidBody, rightInducedPosition, rightInducedDragForce, Color.blue);
+		}
 	}
 
 	public void SeparateDragWithAreas (float liftCoef, float angleOfAttack, float lift){
