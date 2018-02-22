@@ -16,7 +16,7 @@ public class BirdAnimator : MonoBehaviour {
 	public Transform leftWing, rightWing, leftTail, rightTail, middleTail;
 
 	[HideInInspector]
-	public float pitch, roll, tailPitch, lift;
+	public float pitchLeft, pitchRight, rollLeft, rollRight, tailPitch, liftLeft, liftRight;
 
 	public float lerpSpeed;
 	public float pitchUpScale, pitchDownScale, pitchUpSizeScale, pitchDownSizeScale;
@@ -101,84 +101,90 @@ public class BirdAnimator : MonoBehaviour {
 	}
 
 	void UpdateWings(){
-		Vector3 leftRotation = defaultLeftWingRotation;
-		Vector3 rightRotation = defaultRightWingRotation;
-		Vector3 leftScale = defaultLeftWingScale;
-		Vector3 rightScale = defaultRightWingScale;
+		UpdateLeftWing ();
+		UpdateRightWing ();
+	}
 
-		bool pointedDown = (pitch > 0);
+	void UpdateLeftWing() {
+		Vector3 leftRotation = defaultLeftWingRotation;
+		Vector3 leftScale = defaultLeftWingScale;
+
+		bool pointedDown = (pitchLeft > 0);
 		bool pointedUp = !pointedDown;
 
-		bool rollRight = roll > 0;
-		bool rollLeft = roll < 0;
-
-		bool wingsIn = lift < 0;
-		bool wingsOut = lift > 0;
+		bool wingsIn = liftLeft < 0;
+		bool wingsOut = liftLeft > 0;
 
 		//if pitch > 0, rotate back and scale down both wings
 		if (pointedDown) {
-//			leftRotation.y += pitchDownScale * pitch;
-//			rightRotation.y -= pitchDownScale * pitch;
-			leftRotation.x -= pitchUpScale * pitch;
-			rightRotation.x += pitchUpScale * pitch;
-
-//			leftScale.z -= pitchDownSizeScale * pitch;
-//			rightScale.z -= pitchDownSizeScale * pitch;
-
-//			//if roll > 0, rotate up left wing
-//			if (rollRight) {
-//				leftRotation.z -= rollScale * roll * (1f - pitch);
-//			}
-//			//if roll < 0, rotate up right wing
-//			else if (rollLeft) {
-//				rightRotation.z += rollScale * roll * (1f - pitch);
-//			}
+			leftRotation.x -= pitchUpScale * pitchLeft;
 		}
 		//if pitch < 0, rotate forward and scale up both wings
 		else if (pointedUp) {
-			leftRotation.x -= pitchUpScale * pitch;
-			rightRotation.x += pitchUpScale * pitch;
-
-//			leftScale.z -= pitchUpSizeScale * pitch;
-//			rightScale.z -= pitchUpSizeScale * pitch;
+			leftRotation.x -= pitchUpScale * pitchLeft;
 		}
 
 		float liftRollScale = 1f;
 		if (wingsIn) {
-			leftRotation.y -= wingsInScale * lift;
-			rightRotation.y += wingsInScale * lift;
+			leftRotation.y -= wingsInScale * liftLeft;
 
-			leftScale.z += wingsInSizeScale * lift;
-			rightScale.z += wingsInSizeScale * lift;
+			leftScale.z += wingsInSizeScale * liftLeft;
 
-			leftScale.x += wingsInLengthScale * lift;
-			rightScale.x += wingsInLengthScale * lift;
+			leftScale.x += wingsInLengthScale * liftLeft;
 
-			liftRollScale += lift;
+			liftRollScale += liftLeft;
 		} else if (wingsOut) {
-			leftRotation.y -= wingsOutScale * lift;
-			rightRotation.y += wingsOutScale * lift;
+			leftRotation.y -= wingsOutScale * liftLeft;
 
-			leftScale.z += wingsOutSizeScale * lift;
-			rightScale.z += wingsOutSizeScale * lift;
+			leftScale.z += wingsOutSizeScale * liftLeft;
 
-			leftScale.x += wingsOutLengthScale * lift;
-			rightScale.x += wingsOutLengthScale * lift;
+			leftScale.x += wingsOutLengthScale * liftLeft;
 		}
 
-		//if roll > 0, rotate up left wing
-		if (rollRight) {
-			leftRotation.z -= rollScale * roll * liftRollScale;
-		}
-		//if roll < 0, rotate up right wing
-		else if (rollLeft) {
-			rightRotation.z += rollScale * roll * liftRollScale;
-		}
+		leftRotation.z -= rollScale * rollLeft * liftRollScale;
 
 		//set left/right clavicle rotation and scale based on player input
 		float lerpAmount = Time.deltaTime * lerpSpeed;
 		leftWing.localRotation = Quaternion.Lerp (leftWing.localRotation, Quaternion.Euler (leftRotation), lerpAmount);
-		leftWing.localScale = Vector3.Lerp (leftWing.localScale, leftScale, lerpAmount);;
+		leftWing.localScale = Vector3.Lerp (leftWing.localScale, leftScale, lerpAmount);
+	}
+
+	void UpdateRightWing() {
+		Vector3 rightRotation = defaultRightWingRotation;
+		Vector3 rightScale = defaultRightWingScale;
+
+		bool pointedDown = (pitchRight > 0);
+		bool pointedUp = !pointedDown;
+
+		bool wingsIn = liftRight < 0;
+		bool wingsOut = liftRight > 0;
+
+		//if pitch > 0, rotate back and scale down both wings
+		if (pointedDown) {
+			rightRotation.x += pitchUpScale * pitchRight;
+		}
+		//if pitch < 0, rotate forward and scale up both wings
+		else if (pointedUp) {
+			rightRotation.x += pitchUpScale * pitchRight;
+		}
+
+		float liftRollScale = 1f;
+		if (wingsIn) {
+			rightRotation.y += wingsInScale * liftRight;
+			rightScale.z += wingsInSizeScale * liftRight;
+			rightScale.x += wingsInLengthScale * liftRight;
+
+			liftRollScale += liftRight;
+		} else if (wingsOut) {
+			rightRotation.y += wingsOutScale * liftRight;
+			rightScale.z += wingsOutSizeScale * liftRight;
+			rightScale.x += wingsOutLengthScale * liftRight;
+		}
+
+		rightRotation.z -= rollScale * rollRight * liftRollScale;
+
+		//set left/right clavicle rotation and scale based on player input
+		float lerpAmount = Time.deltaTime * lerpSpeed;
 		rightWing.localRotation = Quaternion.Lerp (rightWing.localRotation, Quaternion.Euler (rightRotation), lerpAmount);
 		rightWing.localScale = Vector3.Lerp (rightWing.localScale, rightScale, lerpAmount);
 	}
@@ -216,13 +222,13 @@ public class BirdAnimator : MonoBehaviour {
 //		}
 //		//if roll < 0, rotate right tail
 //		else if (roll < 0) {
-			leftTailRotation.z += tailPitchUpScale * roll;
-			rightTailRotation.z += tailPitchUpScale * roll;
+			leftTailRotation.z += tailPitchUpScale * rollLeft;
+			rightTailRotation.z -= tailPitchUpScale * rollRight;
 //		}
 
 //		if (pitch > 0) {
-			leftTailRotation.y += tailPitchDownScale * pitch;
-			rightTailRotation.y -= tailPitchDownScale * pitch;
+			leftTailRotation.y += tailPitchDownScale * pitchLeft;
+			rightTailRotation.y -= tailPitchDownScale * pitchRight;
 //		}
 //		if pitch < 0, rotate forward and scale up both wings
 //		else if (pitch <= 0) {

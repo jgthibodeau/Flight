@@ -33,7 +33,6 @@ public class Player : MonoBehaviour {
 	public float speed;
 	public float ragdollSpeed;
 	public Vector3 groundNormal;
-	public Vector3 up;
 	private Collider characterCollider;
 	public BirdAnimator birdAnimator;
 	private Rigidbody rigidBody;
@@ -57,6 +56,9 @@ public class Player : MonoBehaviour {
 	public Vector3 centerOfMass = new Vector3 (0, 0, 0);
 	public Vector3 inertiaTensor = new Vector3 (0, 0, 0);
 	public Quaternion inertiaTensorRotation = new Quaternion (0.3f, 0, 0, 1f);
+
+	[Range(0, 1)]
+	public float leftRightWiggle = 0.01f;
 
 	// Use this for initialization
 	void Start () {
@@ -176,6 +178,7 @@ public class Player : MonoBehaviour {
 		Vector3 gravityForce = Vector3.down * gravity;
 //		rigidBody.AddForceAtPosition (gravityForce, transform.position + transform.up * centerOfGravity.y + transform.forward * centerOfGravity.z, ForceMode.Force);
 		rigidBody.AddForceAtPosition (gravityForce, transform.position + transform.up * centerOfGravity.y + transform.forward * centerOfGravity.z, gravityForceMode);
+//		rigidBody.AddForce (gravityForce, gravityForceMode);
 		Util.DrawRigidbodyRay(rigidBody, transform.position + transform.up * centerOfGravity.y + transform.forward * centerOfGravity.z, gravityForce, Color.gray);
 	}
 
@@ -229,10 +232,6 @@ public class Player : MonoBehaviour {
 
 		float uprightAngle = Vector3.Angle (transform.up, groundNormal);
 		isUpright = uprightAngle < uprightThreshold;
-		up = transform.up;
-//		Debug.Log (uprightAngle);
-
-		glideV2Script.groundNormal = groundNormal;
 		walkScript.groundNormal = groundNormal;
 	}
 
@@ -283,9 +282,11 @@ public class Player : MonoBehaviour {
 		}
 
 		if (perchScript.isPerching) {
-			glideV2Script.pitch = 0;
+			glideV2Script.pitchLeft = 0;
+			glideV2Script.pitchRight = 0;
 			glideV2Script.yaw = 0;
-			glideV2Script.roll = 0;
+			glideV2Script.rollLeft = 0;
+			glideV2Script.rollRight = 0;
 			glideV2Script.forward = 0;
 			glideV2Script.right = 0;
 			glideV2Script.flapSpeed = 0;
@@ -306,12 +307,26 @@ public class Player : MonoBehaviour {
 
 		//as long as we aren't perched, do normal controls
 		if(!perchScript.isPerching){
-//			Util.Instance.inputConfigurations[0].axes
-//			Util.get
-			glideV2Script.pitch = Util.GetAxis ("Vertical");
-			glideV2Script.roll = -Util.GetAxis ("Horizontal");
+			glideV2Script.pitchLeft = Util.GetAxis ("Vertical");
+			glideV2Script.rollLeft = -Util.GetAxis ("Horizontal");
 
-			glideV2Script.yaw = Util.GetAxis ("Horizontal Right");
+			glideV2Script.pitchRight = Util.GetAxis ("Vertical Right");
+			glideV2Script.rollRight = -Util.GetAxis ("Horizontal Right");
+
+			float pitchDiff = glideV2Script.pitchLeft - glideV2Script.pitchRight;
+			if (pitchDiff > -leftRightWiggle && pitchDiff < leftRightWiggle) {
+				float halfDiff = pitchDiff / 2;
+				glideV2Script.pitchLeft -= halfDiff;
+				glideV2Script.pitchRight += halfDiff;
+			}
+
+			float rollDiff = glideV2Script.rollLeft - glideV2Script.rollRight;
+			if (rollDiff > -leftRightWiggle && rollDiff < leftRightWiggle) {
+				float halfDiff = rollDiff / 2;
+				glideV2Script.rollLeft -= halfDiff;
+				glideV2Script.rollRight += halfDiff;
+			}
+			glideV2Script.rollRight *= -1;
 
 			walkScript.forward = Util.GetAxis ("Vertical");
 			walkScript.right = Util.GetAxis ("Horizontal");
@@ -324,7 +339,6 @@ public class Player : MonoBehaviour {
 			}
 			staminaScript.usingStamina = flapSpeed != 0;
 
-			glideV2Script.flapDirection = Util.GetAxis ("Vertical Right");
 
 			if (glideV2Script.flapSpeed == 0) {
 				glideV2Script.wingsOut = Util.GetButtonDown ("Close Wings") ^ glideV2Script.wingsOut;

@@ -1,12 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Menu : MonoBehaviour {
 	public Menu previous;
+	public Selectable firstSelected;
 
 	private void Show() {
 		this.gameObject.SetActive (true);
+		firstSelected.Select ();
 	}
 
 	public void Show(Menu current) {

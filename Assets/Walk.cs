@@ -32,7 +32,7 @@ public class Walk : MonoBehaviour {
 //			rigidBody.constraints = RigidbodyConstraints.FreezeRotation;
 			rigidBody.drag = 1;
 
-			Vector3 inputVector = new Vector3 (right, 0, forward);
+			Vector3 inputVector = new Vector3 (right, 0, forward).normalized;
 			float inputSpeed = inputVector.magnitude;
 			float speed = rigidBody.velocity.magnitude;
 
