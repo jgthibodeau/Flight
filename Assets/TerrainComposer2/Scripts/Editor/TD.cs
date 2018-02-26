@@ -881,7 +881,7 @@ namespace TerrainComposer2
 
             if (node != null)
             {
-                if (eventCurrent.type == EventType.dragPerform)
+                if (eventCurrent.type == EventType.DragPerform)
                 {
                     node.inputKind = InputKind.File;
                     node.inputFile = InputFile.RawImage;
@@ -899,7 +899,7 @@ namespace TerrainComposer2
 
             if (selectItem != null && itemReceive.outputId == TC.objectOutput)
             {
-                if (eventCurrent.type == EventType.dragPerform)
+                if (eventCurrent.type == EventType.DragPerform)
                 {
                     selectItem.spawnObject.go = spawnGO;
                     selectItem.Refresh();
@@ -1685,7 +1685,7 @@ namespace TerrainComposer2
                 // item.ResetOffset();
             }
 
-            if (key.type == EventType.scrollWheel)
+            if (key.type == EventType.ScrollWheel)
             {
                 Vector3 scale = item.t.localScale;
 

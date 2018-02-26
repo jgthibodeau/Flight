@@ -17,20 +17,19 @@ namespace ThirdPersonCamera
     public class CameraController : MonoBehaviour
     {
         #region Public Unity Variables
-		public Transform target;
-		private Player player;
-		public float offsetChangeSpeed;
-		public Vector3 airOffsetVector;
-		public Vector3 groundOffsetVector;
-		public Vector3 waterOffsetVector;
-		private Vector3 offsetVector;
+        public Transform target;
+        public Vector3 offsetVector;
 
         public bool smartPivot = true;
         public bool occlusionCheck = true;
         public bool thicknessCheck = true;
 
-		public float minDistance = 5.0f;
-        public float desiredDistance = 5.0f;
+		public float desiredDistance = 5.0f;
+		public float maxDistance = 7.0f;
+		public float minMoveDistance = 0.02f;
+		public float moveSpeed = 2.0f;
+		public bool slerpPosition = false;
+
         public float collisionDistance = 0.5f;
         public float maxThickness = 0.3f;
         public int maxThicknessIterations = 5;
@@ -114,12 +113,10 @@ namespace ThirdPersonCamera
             thicknessStarts = new Dictionary<string, RaycastHit>();
             thicknessEnds = new Dictionary<string, RaycastHit>();
 
-			player = target.GetComponent<Player> ();
-
             initDone = true;
         }
 
-        void Update()
+        void FixedUpdate()
         {
             if (!initDone)
                 return;
@@ -158,18 +155,8 @@ namespace ThirdPersonCamera
                 }
             }
 
-			Vector3 offsetVectorTransformed;// = target.transform.rotation;// * airOffsetVector;
-
-			if (player.inWater) {
-				offsetVector = Vector3.Slerp (offsetVector, waterOffsetVector, Time.deltaTime * offsetChangeSpeed);
-			} else if (player.isGrounded) {
-				offsetVector = Vector3.Slerp (offsetVector, groundOffsetVector, Time.deltaTime * offsetChangeSpeed);
-			} else {
-				offsetVector = Vector3.Slerp (offsetVector, airOffsetVector, Time.deltaTime * offsetChangeSpeed);
-			}
-			offsetVectorTransformed = target.transform.rotation * offsetVector;
-
-            transform.position += (target.position - prevTargetPos);
+            Vector3 offsetVectorTransformed = target.transform.rotation * offsetVector;
+			Vector3 desiredPosition = transform.position + (target.position - prevTargetPos);
             targetPosWithOffset = (target.position + offsetVectorTransformed);
 
             Vector3 dirToTargetOffset = targetPosWithOffset - target.position;
@@ -245,10 +232,10 @@ namespace ThirdPersonCamera
                     thicknessStarts.Clear();
                     thicknessEnds.Clear();
 
-                    Vector3 dirToHit = (transform.position - targetPosWithOffset).normalized;
+					Vector3 dirToHit = (desiredPosition - targetPosWithOffset).normalized;
 
                     Vector3 hitVector = (targetPosWithOffset - occlusionHit.Value.point);
-                    Vector3 targetVector = targetPosWithOffset - transform.position;
+					Vector3 targetVector = targetPosWithOffset - desiredPosition;
 
                     float dotProd = Vector3.Dot(hitVector, targetVector) / targetVector.magnitude;
                     Vector3 unknownPoint = occlusionHit.Value.point + targetVector.normalized * dotProd;
@@ -312,18 +299,22 @@ namespace ThirdPersonCamera
                     if (thickness > maxThickness)
                     {
                         distance = Mathf.Clamp(occlusionHit.Value.distance, 0, desiredDistance);                       
-                        transform.position = occlusionHit.Value.point + occlusionHit.Value.normal.normalized * collisionDistance;
+						desiredPosition = occlusionHit.Value.point + occlusionHit.Value.normal.normalized * collisionDistance;
                     }
                     else
-                        transform.position = transform.rotation * new Vector3(0, 0, -distance) + offsetVectorTransformed + target.position;
+						desiredPosition = transform.rotation * new Vector3(0, 0, -distance) + offsetVectorTransformed + target.position;
                 }
             }
             else if (cameraNormalMode)
-            {
-                transform.position = transform.rotation * new Vector3(0, 0, -distance) + offsetVectorTransformed + target.position;
+			{
+//				Debug.Log (desiredPosition+" "+transform.position+" "+transform.rotation +" "+ new Vector3(0, 0, -distance) +" "+ offsetVectorTransformed +" "+ target.position);
+//				Debug.Log (transform.rotation * new Vector3(0, 0, -distance));
+//				Debug.Log (transform.rotation * new Vector3(0, 0, -distance));
+//				Debug.Log (transform.rotation * new Vector3(0, 0, -distance) + offsetVectorTransformed + target.position);
+				desiredPosition = transform.rotation * new Vector3(0, 0, -distance) + offsetVectorTransformed + target.position;
+//				Debug.Log (desiredPosition + " "+Vector3.Distance(transform.position, desiredPosition));
+				Debug.DrawLine (transform.position, desiredPosition, Color.red);
             }
-
-            
 
             // smart pivot mode collision check
             if (smartPivot && (!cameraNormalMode))
@@ -348,27 +339,47 @@ namespace ThirdPersonCamera
 
                     if (dot > 0.1f)
                     {
-                        if ((transform.position - targetPosWithOffset).magnitude + zoomOutStepValuePerFrame < newAlignVector.magnitude)
+						if ((desiredPosition - targetPosWithOffset).magnitude + zoomOutStepValuePerFrame < newAlignVector.magnitude)
                         {
-                            transform.position += newAlignVector.normalized * zoomOutStepValuePerFrame;
+							desiredPosition += newAlignVector.normalized * zoomOutStepValuePerFrame;
                         }
                         else
                         {
-                            transform.position = targetPosWithOffset + newAlignVector;
+							desiredPosition = targetPosWithOffset + newAlignVector;
                         }
                     }
                 }
                 else
                 {
                     // no clipping, transition to max distance                
-                    if ((transform.position - targetPosWithOffset).magnitude + zoomOutStepValuePerFrame < dirToTargetSmartPivot.magnitude)
+					if ((desiredPosition - targetPosWithOffset).magnitude + zoomOutStepValuePerFrame < dirToTargetSmartPivot.magnitude)
                     {
-                        transform.position += dirToTargetSmartPivot.normalized * zoomOutStepValuePerFrame;
+						desiredPosition += dirToTargetSmartPivot.normalized * zoomOutStepValuePerFrame;
                     }
                 }
             }
 
             prevTargetPos = target.position;
+
+			Debug.DrawRay (transform.position, transform.rotation.eulerAngles, Color.blue);
+
+			Vector3 directionFromTargetToCamera = transform.position - target.position;
+			if (directionFromTargetToCamera.magnitude > maxDistance) {
+				Vector3 directionFromTargetToDesired = desiredPosition - target.position;
+				Vector3 maxPosition = target.position + directionFromTargetToDesired.normalized * maxDistance;
+//				Vector3 maxPosition = target.position + directionFromTargetToCamera.normalized * maxDistance;
+//				transform.position = maxPosition;
+				transform.position = Vector3.Slerp (transform.position, maxPosition, Time.fixedDeltaTime * 2 * moveSpeed);
+			} else if (Vector3.Distance (transform.position, desiredPosition) > minMoveDistance) {
+				transform.position = Vector3.Slerp (transform.position, desiredPosition, Time.fixedDeltaTime * moveSpeed);
+			}
+
+//			if (slerpPosition) {
+//				transform.position = Vector3.Slerp (transform.position, desiredPosition, Time.fixedDeltaTime * moveSpeed);
+//			} else {
+//				transform.position = desiredPosition;
+//			}
+
             prevPosition = transform.position;
         }
 

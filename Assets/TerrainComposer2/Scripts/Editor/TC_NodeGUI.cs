@@ -169,7 +169,7 @@ namespace TerrainComposer2
                     if (posMouse.x < rect.x + ((TD.texCardHeader.width / 2) * TD.scale)) item.dropPosition = DropPosition.Left;
                     else item.dropPosition = DropPosition.Right;
 
-                    if (eventCurrent.type == EventType.mouseDown && eventCurrent.button == 0 && eventCurrent.clickCount == 2)
+                    if (eventCurrent.type == EventType.MouseDown && eventCurrent.button == 0 && eventCurrent.clickCount == 2)
                     {
                         AddItem(item, eventCurrent.shift);
                         eventCurrent.Use();

@@ -52,6 +52,6 @@ public class TC_AnimateTransform : MonoBehaviour {
         // Gizmos.Lab
         Event eventCurrent = Event.current;
         // if (eventCurrent.keyCode == KeyCode.Space) Debug.Log(eventCurrent);
-        if (eventCurrent.shift && eventCurrent.type == EventType.keyUp) animate = !animate;
+        if (eventCurrent.shift && eventCurrent.type == EventType.KeyUp) animate = !animate;
     }
 }

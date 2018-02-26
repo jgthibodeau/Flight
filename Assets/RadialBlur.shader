@@ -1,3 +1,6 @@
+// Upgrade NOTE: replaced 'samplerRECT' with 'sampler2D'
+// Upgrade NOTE: replaced 'texRECT' with 'tex2D'
+
 Shader "Hidden/radialBlur" {
 Properties {
     _MainTex ("Input", RECT) = "white" {}
@@ -10,6 +13,8 @@ Properties {
             Fog { Mode off }
        
     CGPROGRAM
+// Upgrade NOTE: excluded shader from DX11, OpenGL ES 2.0 because it uses unsized arrays
+#pragma exclude_renderers d3d11 gles
    
     #pragma vertex vert_img
     #pragma fragment frag
@@ -17,14 +22,14 @@ Properties {
  
     #include "UnityCG.cginc"
  
-    uniform samplerRECT _MainTex;
+    uniform sampler2D _MainTex;
     uniform half _BlurStrength;
     uniform half _BlurWidth;
     uniform half _iWidth;
     uniform half _iHeight;
  
     half4 frag (v2f_img i) : COLOR {
-        half4 color = texRECT(_MainTex, i.uv);
+        half4 color = tex2D(_MainTex, i.uv);
        
         // some sample positions
         half samples[10] = half[](-0.08,-0.05,-0.03,-0.02,-0.01,0.01,0.02,0.03,0.05,0.08);
@@ -42,7 +47,7 @@ Properties {
         half4 sum = color;
         for(int n = 0; n < 10; n++)
         {
-            sum += texRECT(_MainTex, i.uv + dir * samples[n] * _BlurWidth * _iWidth);
+            sum += tex2D(_MainTex, i.uv + dir * samples[n] * _BlurWidth * _iWidth);
         }
        
         //eleven samples...

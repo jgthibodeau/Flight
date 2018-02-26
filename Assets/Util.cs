@@ -40,19 +40,19 @@ public class Util : MonoBehaviour {
 	{
 		RaycastHit hit;
 		if (useLPW) {
-			if (Physics.Raycast (position, Vector3.down, out hit, GameManager.instance.oceanCheckDistance, GameManager.instance.oceanLayer)) {
+			if (Physics.Raycast (position, Vector3.down, out hit, MyGameManager.instance.oceanCheckDistance, MyGameManager.instance.oceanLayer)) {
 				LPWAsset.LowPolyWaterScript waterScript = hit.transform.GetComponent<LPWAsset.LowPolyWaterScript> ();
 				return waterScript.WaterHeight (position);
-			} else if (Physics.Raycast (position, Vector3.up, out hit, GameManager.instance.oceanCheckDistance, GameManager.instance.oceanLayer)) {
+			} else if (Physics.Raycast (position, Vector3.up, out hit, MyGameManager.instance.oceanCheckDistance, MyGameManager.instance.oceanLayer)) {
 				LPWAsset.LowPolyWaterScript waterScript = hit.transform.GetComponent<LPWAsset.LowPolyWaterScript> ();
 				return waterScript.WaterHeight (position);
 			} else {
-				return GameManager.instance.oceanLevel;
+				return MyGameManager.instance.oceanLevel;
 			}
 		} else if (useRandomness) {
-			return GameManager.instance.oceanLevel + Random.Range (-0.01f, 0.01f);
+			return MyGameManager.instance.oceanLevel + Random.Range (-0.01f, 0.01f);
 		} else {
-			return GameManager.instance.oceanLevel;
+			return MyGameManager.instance.oceanLevel;
 		}
 	}
 

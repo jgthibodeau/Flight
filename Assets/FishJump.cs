@@ -31,7 +31,7 @@ public class FishJump : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		waterLevel = GameManager.instance.oceanLevel;
+		waterLevel = MyGameManager.instance.oceanLevel;
 		rigidBody = GetComponent<Rigidbody> ();
 		if (deathTime > 0) {
 			Invoke ("Die", deathTime);

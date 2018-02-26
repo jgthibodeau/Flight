@@ -64,11 +64,11 @@ Camera:
   m_TargetEye: 3
   m_HDR: 0
   m_AllowMSAA: 1
+  m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
-  m_StereoMirrorMode: 0
 --- !u!81 &8197658
 AudioListener:
   m_ObjectHideFlags: 1
@@ -95,14 +95,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 0}
-  offsetChangeSpeed: 0
-  airOffsetVector: {x: 0, y: 0, z: 0}
-  groundOffsetVector: {x: 0, y: 0, z: 0}
-  waterOffsetVector: {x: 0, y: 0, z: 0}
+  offsetVector: {x: 0, y: 1.5, z: 0}
   smartPivot: 1
   occlusionCheck: 1
   thicknessCheck: 1
-  minDistance: 5
   desiredDistance: 5
   collisionDistance: 0.2
   maxThickness: 0.5
@@ -110,7 +106,6 @@ MonoBehaviour:
   zoomOutStepValue: 1
   zoomOutStepValuePerFrame: 0.1
   collisionLayer:
-    serializedVersion: 2
     m_Bits: 0
   playerLayer: 8
   playerCollision: 0

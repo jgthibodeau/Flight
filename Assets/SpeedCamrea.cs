@@ -9,6 +9,8 @@ namespace UnityStandardAssets.ImageEffects{
 		public VignetteAndChromaticAberration vignette;
 		public Rigidbody targetRigidBody;
 
+		public float effectChangeSpeed = 1f;
+
 		public bool useBlur;
 		public float blurScale = 0f;
 		public float maxBlur = 0.75f;
@@ -35,19 +37,23 @@ namespace UnityStandardAssets.ImageEffects{
 		void Update () {
 			float velocity = targetRigidBody.velocity.magnitude;
 			if (useBlur) {
-				vignette.blur = Mathf.Clamp (velocity * blurScale, 0, maxBlur);
+				float newBlur = Mathf.Clamp (velocity * blurScale, 0, maxBlur);
+				vignette.blur = Mathf.Lerp (vignette.blur, newBlur, Time.deltaTime * effectChangeSpeed);
 			}
 
 			if (useChromatic) {
-				vignette.chromaticAberration = Mathf.Clamp (velocity * chromaticScale, 0, maxChromatic);
+				float newChromatic = Mathf.Clamp (velocity * chromaticScale, 0, maxChromatic);
+				vignette.chromaticAberration = Mathf.Lerp (vignette.chromaticAberration, newChromatic, Time.deltaTime * effectChangeSpeed);
 			}
 
 			if (useVignette) {
-				vignette.intensity = Mathf.Clamp (velocity * vignetteScale, 0, maxVignette);
+				float newIntensity = Mathf.Clamp (velocity * vignetteScale, 0, maxVignette);
+				vignette.intensity = Mathf.Lerp (vignette.intensity, newIntensity, Time.deltaTime * effectChangeSpeed);
 			}
 
 			if (useFov) {
 				float newFov = Mathf.Clamp (minFov + velocity * fovScale, minFov, maxFov);
+				newFov = Mathf.Lerp (cameras[0].fieldOfView, newFov, Time.deltaTime * effectChangeSpeed);
 				foreach (Camera camera in cameras) {
 					camera.fieldOfView = newFov;
 				}

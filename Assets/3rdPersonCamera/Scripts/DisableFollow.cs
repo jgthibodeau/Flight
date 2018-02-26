@@ -21,13 +21,15 @@ namespace ThirdPersonCamera
         private bool followDisabled;
         private Vector3 prevPosition;
 
+		private FOLLOW_TYPE previousFollowType = FOLLOW_TYPE.TIGHT;
+
         // Use this for initialization
         void Start()
         {
             cameraController = GetComponent<CameraController>();
             follow = GetComponent<Follow>();
             freeForm = GetComponent<FreeForm>();
-            followDisabled = !follow.follow;
+			followDisabled = (follow.followType == FOLLOW_TYPE.NONE);
         }
 
         // Update is called once per frame
@@ -35,7 +37,10 @@ namespace ThirdPersonCamera
         {
             if (freeForm.x != 0 || freeForm.y != 0)
             {
-                follow.follow = false;
+				if (follow.followType != FOLLOW_TYPE.NONE) {
+					previousFollowType = follow.followType;
+				}
+				follow.followType = FOLLOW_TYPE.NONE;
                 followDisabled = true;
             }
 
@@ -46,8 +51,8 @@ namespace ThirdPersonCamera
                     Vector3 motionVector = cameraController.target.transform.position - prevPosition;
 
                     if (motionVector.magnitude > motionThreshold)
-                    {
-                        follow.follow = true;
+					{
+						follow.followType = previousFollowType;
                         followDisabled = false;
                     }
                 }
@@ -56,8 +61,8 @@ namespace ThirdPersonCamera
                     Invoke("ActivateFollow", timeToActivate);
 
                 if (activateMouseCheck && (Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1)))
-                {                    
-                    follow.follow = true;
+				{                    
+					follow.followType = previousFollowType;
                     followDisabled = false;
                 }
             }
@@ -68,8 +73,8 @@ namespace ThirdPersonCamera
         public void ActivateFollow()
         {
             if (freeForm.x == 0 && freeForm.y == 0)
-            {
-                follow.follow = true;
+			{
+				follow.followType = previousFollowType;
                 followDisabled = false;
             }
             else

@@ -89,7 +89,7 @@ namespace TerrainComposer2
                 TD.posClickMouseDown = new Vector2(-1000, -1000);
             }
 
-            if (eventCurrent.type == EventType.mouseDown) { TD.posClickMouseDown = eventCurrent.mousePosition; TD.mouseDownButton = eventCurrent.button; }
+            if (eventCurrent.type == EventType.MouseDown) { TD.posClickMouseDown = eventCurrent.mousePosition; TD.mouseDownButton = eventCurrent.button; }
             else if (eventCurrent.type == EventType.MouseUp) { TD.posClickMouseDown = new Vector2(-1000, -1000); TD.mouseDownButton = -1; }
         }
 
@@ -286,13 +286,13 @@ namespace TerrainComposer2
         {
             eventCurrent = Event.current;
 
-            if (eventCurrent.type == EventType.keyUp)
+            if (eventCurrent.type == EventType.KeyUp)
             {
                 if (eventCurrent.keyCode == KeyCode.D && eventCurrent.control) DuplicateKey();
                 if (eventCurrent.keyCode == KeyCode.Delete) DeleteKey();
                 keyDown = false;
             }
-            else if (eventCurrent.type == EventType.keyDown)
+            else if (eventCurrent.type == EventType.KeyDown)
             { 
                 if (eventCurrent.control && eventCurrent.shift)
                 {
@@ -331,7 +331,7 @@ namespace TerrainComposer2
                 eventCurrent.Use();
             }
 
-            if (eventCurrent.alt && eventCurrent.control && eventCurrent.type == EventType.mouseDown) eventCurrent.Use();
+            if (eventCurrent.alt && eventCurrent.control && eventCurrent.type == EventType.MouseDown) eventCurrent.Use();
             
             // Debug.Log(TD.scrollOffset.y + " " + TD.scrollMax.y);
             
@@ -358,7 +358,7 @@ namespace TerrainComposer2
                 TC.repaintNodeWindow = true;
             }
 
-            if (eventCurrent.type == EventType.keyDown)
+            if (eventCurrent.type == EventType.KeyDown)
             {
                 if (eventCurrent.keyCode == g.keyZoomIn) TD.scale *= 1.5f;
                 else if (eventCurrent.keyCode == g.keyZoomOut) TD.scale /= 1.5f;

@@ -156,6 +156,8 @@ If you need other names you can change them in the script.
 -----------------
  Version History
 -----------------
+1.0.4.1
+	- compatibility update for Unity 2017
 1.0.4
 	- added smart DisableFollow script to utilize FreeForm + Follow
 	- added Ball demo scene

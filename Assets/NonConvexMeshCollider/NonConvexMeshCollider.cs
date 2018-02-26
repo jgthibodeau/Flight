@@ -24,11 +24,9 @@ public class NonConvexMeshCollider : MonoBehaviour
     [Tooltip("Takes a bit more time to compute, but leads to more performance optimized colliders (less boxes).")]
     public bool avoidGapsInside = false;
     [Tooltip("Makes sure all box colliders are generated completely on the inside of the mesh. More expensive to compute, but desireable if you need to avoid false collisions of objects very close to another, like rings of a chain for example.")]
-	public bool avoidExceedingMesh = false;
-	[Tooltip("Should the colliders be a trigger.")]
-	public bool trigger = false;
+    public bool avoidExceedingMesh = false;
     [Tooltip("The number of boxes your mesh will be segmented into, on each axis (x, y and z). \n\rHigher values lead to more accurate colliders but on the other hand makes computation and collision checks more expensive.")]
-	public int boxesPerEdge = 20;
+    public int boxesPerEdge = 20;
     [Tooltip("The physics material to apply to the generated compound colliders.")]
     public PhysicMaterial physicsMaterialForColliders;
 
@@ -64,9 +62,8 @@ public class NonConvexMeshCollider : MonoBehaviour
         }
         if (!createChildGameObject)
         {
-			foreach (var bc in go.GetComponents<BoxCollider>()) {
-				DestroyImmediate (bc);
-			}
+            foreach (var bc in go.GetComponents<BoxCollider>())
+                DestroyImmediate(bc);
         }
         var originalLayer = go.layer;
         var collisionLayer = GetFirstEmptyLayer();
@@ -101,12 +98,8 @@ public class NonConvexMeshCollider : MonoBehaviour
                 var bc = (createChildGameObject ? collidersGo : go).AddComponent<BoxCollider>();
                 bc.size = b.Size;
                 bc.center = b.Center;
-				if (physicsMaterialForColliders != null) {
+                if (physicsMaterialForColliders != null)
                     bc.material = physicsMaterialForColliders;
-				}
-				if (trigger) {
-					bc.isTrigger = true;
-				}
             }
             Debug.Log("NonConvexMeshCollider: " + mergedBoxes.Length + " box colliders created");
 
