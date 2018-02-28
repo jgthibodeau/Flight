@@ -348,8 +348,11 @@ public class Player : MonoBehaviour {
 
 			rigidBody.constraints = RigidbodyConstraints.None;
 
-			grabScript.grab = Util.GetButtonDown ("Grab");
-			if (grabScript.grab) {
+			bool grabHeld = Util.GetButton ("Grab");
+			bool grab = Util.GetButtonDown ("Grab");
+			grabScript.grab = grab;
+
+			if (grab && interactorScript.itemHolder.HasItem () || grabHeld && !interactorScript.itemHolder.HasItem ()) {
 				interactorScript.Pickup ();
 			}
 		}
