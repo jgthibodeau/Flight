@@ -57,6 +57,8 @@ public class Player : MonoBehaviour {
 	public Vector3 inertiaTensor = new Vector3 (0, 0, 0);
 	public Quaternion inertiaTensorRotation = new Quaternion (0.3f, 0, 0, 1f);
 
+	public ParticleSystem flameParticles;
+
 	[Range(0, 1)]
 	public float leftRightWiggle = 0.01f;
 
@@ -269,6 +271,12 @@ public class Player : MonoBehaviour {
 	}
 
 	public void GetInput () {
+		if (Util.GetButton ("Flame")) {
+			flameParticles.Play ();
+		} else if (flameParticles.isPlaying) {
+			flameParticles.Stop ();
+		}
+
 		//handle if have grabbed object
 		if (grabScript.hasObject) {
 			int grabbedLayer = grabScript.grabbedObject.gameObject.layer;
