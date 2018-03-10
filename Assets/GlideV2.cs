@@ -5,6 +5,8 @@ public class GlideV2 : MonoBehaviour {
 	[HideInInspector]
 	public BirdAnimator birdAnimator;
 	[HideInInspector]
+	public DragonAnimator dragonAnimator;
+	[HideInInspector]
 	public Rigidbody rigidBody;
 	[HideInInspector]
 	private TrailRenderer[] trails;
@@ -25,6 +27,7 @@ public class GlideV2 : MonoBehaviour {
 	public float rollScale;
 
 //	public float dragCoef;
+	public float rigidBodyDrag = 0f;
 	public float inducedDragCoef;
 	public float parasiticDragCoef;
 	public float dragForwardDistance;
@@ -52,6 +55,8 @@ public class GlideV2 : MonoBehaviour {
 	public float wingUpDistance = 0.5f;
 
 	public float angleOffset = 0.015f;
+	public float angleOfAttackScale = 1f;
+	public float wingUpDirectionScale = 0.5f;
 	public float angleScale = 0.05f;
 	public float liftAngle = 0;
 
@@ -70,6 +75,10 @@ public class GlideV2 : MonoBehaviour {
 
 	public float angleOfAttackLeft;
 	public float angleOfAttackRight;
+	public float realLiftCoefLeft = 0f;
+	public float realLiftCoefRight = 0f;
+	public float liftLeft = 0f;
+	public float liftRight = 0f;
 
 	public Transform leftWing;
 	private Vector3 leftWingInitialRotation;
@@ -104,9 +113,16 @@ public class GlideV2 : MonoBehaviour {
 			isFlapping = true;
 			birdAnimator.FlapSpeed = 2f;// + flapAnimationScale * flapSpeed;
 			birdAnimator.Flapping = true;
+
+			dragonAnimator.FlapSpeed = 2f;
+			dragonAnimator.Flapping = true;
 		} else {
 			isFlapping = false;
+			dragonAnimator.FlapSpeed = 0;
 			birdAnimator.Flapping = false;
+
+			dragonAnimator.FlapSpeed = 0;
+			dragonAnimator.Flapping = false;
 		}
 
 		//audio based on speed
@@ -130,6 +146,14 @@ public class GlideV2 : MonoBehaviour {
 		birdAnimator.rollLeft = -rollLeft;
 		birdAnimator.rollRight = -rollRight;
 		birdAnimator.tailPitch = flapDirection;
+
+
+		dragonAnimator.WingsOut = wingsOut;
+		dragonAnimator.pitchLeft = pitchLeft;
+		dragonAnimator.pitchRight = pitchRight;
+		dragonAnimator.rollLeft = -rollLeft;
+		dragonAnimator.rollRight = -rollRight;
+		dragonAnimator.tailPitch = flapDirection;
 	}
 
 	IEnumerator PlayFlapSound(float wait){
@@ -143,15 +167,15 @@ public class GlideV2 : MonoBehaviour {
 		WingFlap ();
 
 		if (!isGrounded) {
-			rigidBody.drag = 0;
+			rigidBody.drag = rigidBodyDrag;
 
 			//rotate towards motion
-			if (rotateTowardsMotion) {
+			if (rotateTowardsMotion && flapSpeed == 0) {
 				Vector3 rotation = Quaternion.LookRotation (rigidBody.velocity, transform.up).eulerAngles;
 				transform.rotation = Quaternion.Euler (rotation);
 			}
 
-			rigidBody.drag = 0;
+			rigidBody.drag = rigidBodyDrag;
 			AngledDragLift ();
 		} else {
 			drag = 0;
@@ -274,21 +298,10 @@ public class GlideV2 : MonoBehaviour {
 	}
 
 	void AngledDragLift(){
-		float realLiftCoefLeft = 0f;
-		float realLiftCoefRight = 0f;
-		float liftLeft = 0f;
-		float liftRight = 0f;
-
-		//get angle of attack realistically by comparing velocity to forward direction
-		float angleOfAttackLeft;
-		float angleOfAttackRight;
-
 		Vector3 leftPosition = Vector3.zero;
 		Vector3 rightPosition = Vector3.zero;
 
 		float defaultLift = 1;
-
-		float wingUpDirectionScale = 0.5f;
 
 		Vector3 liftDirection = (transform.up * (1 - liftAngle) + transform.forward * liftAngle).normalized;
 
@@ -297,10 +310,10 @@ public class GlideV2 : MonoBehaviour {
 			 * Left
 			*/
 			float pitchAbsLeft = Mathf.Abs (pitchLeft);
-			Vector3 wingUpDirectionLeft = (transform.forward * (pitchLeft) * wingUpDirectionScale + transform.up * (1 - pitchAbsLeft * wingUpDirectionScale)).normalized;
+//			Vector3 wingUpDirectionLeft = (transform.forward * (pitchLeft) * wingUpDirectionScale + transform.up * (1 - pitchAbsLeft * wingUpDirectionScale)).normalized;
 			Vector3 wingForwardDirectionLeft = (transform.forward * (1 - pitchAbsLeft * wingUpDirectionScale) - transform.up * (pitchLeft) * wingUpDirectionScale).normalized;
 
-			angleOfAttackLeft = angleOffset + Util.SignedVectorAngle (wingForwardDirectionLeft, rigidBody.velocity, transform.right);// - pitch*angleScale;
+			angleOfAttackLeft = angleOffset + angleOfAttackScale * Util.SignedVectorAngle (wingForwardDirectionLeft, rigidBody.velocity, transform.right);// - pitch*angleScale;
 			if (angleOfAttackLeft > 180)
 				angleOfAttackLeft -= 360;
 			if (angleOfAttackLeft < -180)
@@ -311,6 +324,7 @@ public class GlideV2 : MonoBehaviour {
 			float liftAmountLeft = rollLeft;
 //			float liftAmountLeft = -pitchLeft;
 			birdAnimator.liftLeft = liftAmountLeft;
+			dragonAnimator.liftLeft = liftAmountLeft;
 //			liftAmountLeft = 0.5f * (1 + liftAmountLeft);
 			liftAmountLeft = (1 + liftAmountLeft);
 
@@ -333,10 +347,10 @@ public class GlideV2 : MonoBehaviour {
 			 * Right
 			*/
 			float pitchAbsRight = Mathf.Abs (pitchRight);
-			Vector3 wingUpDirectionRight = (transform.forward * (pitchRight) * wingUpDirectionScale + transform.up * (1 - pitchAbsRight * wingUpDirectionScale)).normalized;
+//			Vector3 wingUpDirectionRight = (transform.forward * (pitchRight) * wingUpDirectionScale + transform.up * (1 - pitchAbsRight * wingUpDirectionScale)).normalized;
 			Vector3 wingForwardDirectionRight = (transform.forward * (1 - pitchAbsRight * wingUpDirectionScale) - transform.up * (pitchRight) * wingUpDirectionScale).normalized;
 
-			angleOfAttackRight = angleOffset + Util.SignedVectorAngle (wingForwardDirectionRight, rigidBody.velocity, transform.right);// - pitch*angleScale;
+			angleOfAttackRight = angleOffset + angleOfAttackScale * Util.SignedVectorAngle (wingForwardDirectionRight, rigidBody.velocity, transform.right);// - pitch*angleScale;
 			if (angleOfAttackRight > 180)
 				angleOfAttackRight -= 360;
 			if (angleOfAttackRight < -180)
@@ -347,6 +361,7 @@ public class GlideV2 : MonoBehaviour {
 			float liftAmountRight = rollRight;
 //			float liftAmountRight = -pitchRight;
 			birdAnimator.liftRight = liftAmountRight;
+			dragonAnimator.liftRight = liftAmountRight;
 //			liftAmountRight = 0.5f * (1 + liftAmountRight);
 			liftAmountRight = (1 + liftAmountRight);
 

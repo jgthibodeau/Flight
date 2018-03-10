@@ -10,6 +10,10 @@ TagManager:
   - dirt
   - Floor
   - Edible
+  - Fire
+  - Destructible
+  - Enemy
+  - Waypoint
   layers:
   - Default
   - TransparentFX
@@ -33,9 +37,9 @@ TagManager:
   - Pickupable
   - Interactable
   - Dispenser
-  - 
-  - 
-  - 
+  - Fire
+  - Ragdoll
+  - Arrow
   - 
   - 
   - 

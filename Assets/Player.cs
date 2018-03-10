@@ -15,6 +15,7 @@ public class Player : MonoBehaviour {
 	private Walk walkScript;
 	private Stamina staminaScript;
 	private Interactor interactorScript;
+	private FlameBreath flameBreathScript;
 
 	private int PerchableLayer;
 	private int EnemyLayer;
@@ -25,7 +26,8 @@ public class Player : MonoBehaviour {
 	public LayerMask layerMaskForGround;
 	public LayerMask layerMaskForWater;
 	public float waterBobAmount, waterBobTime, timeSinceWaterBob;
-	public float groundDistance = 0.18f;
+	public float airGroundDistance = 0.1f;
+	public float groundDistance = 0.15f;
 	public bool inWater;
 	public bool isGrounded;
 	public bool isUpright;
@@ -35,6 +37,7 @@ public class Player : MonoBehaviour {
 	public Vector3 groundNormal;
 	private Collider characterCollider;
 	public BirdAnimator birdAnimator;
+	public DragonAnimator dragonAnimator;
 	private Rigidbody rigidBody;
 	private bool isFlapping;
 	private Vector3 center;
@@ -57,8 +60,6 @@ public class Player : MonoBehaviour {
 	public Vector3 inertiaTensor = new Vector3 (0, 0, 0);
 	public Quaternion inertiaTensorRotation = new Quaternion (0.3f, 0, 0, 1f);
 
-	public ParticleSystem flameParticles;
-
 	[Range(0, 1)]
 	public float leftRightWiggle = 0.01f;
 
@@ -78,9 +79,13 @@ public class Player : MonoBehaviour {
 		walkScript = transform.GetComponent<Walk> ();
 		staminaScript = transform.GetComponent<Stamina> ();
 		interactorScript = transform.GetComponent<Interactor> ();
+		flameBreathScript = transform.GetComponent<FlameBreath> ();
 
 		glideV2Script.birdAnimator = birdAnimator;
+		glideV2Script.dragonAnimator = dragonAnimator;
+
 		walkScript.birdAnimator = birdAnimator;
+		walkScript.dragonAnimator = dragonAnimator;
 
 		glideV2Script.rigidBody = rigidBody;
 		walkScript.rigidBody = rigidBody;
@@ -127,9 +132,9 @@ public class Player : MonoBehaviour {
 			AirGravity ();
 		}
 		//TODO on ground, but moving fast
-		else if (speed > ragdollSpeed) {
-			RagdollGravity ();
-		}
+//		else if (speed > ragdollSpeed) {
+//			RagdollGravity ();
+//		}
 		//on ground and not upright
 		else if (!isUpright) {
 			GroundGravity ();
@@ -142,8 +147,8 @@ public class Player : MonoBehaviour {
 //			}
 		}
 
-		glideV2Script.isGrounded = landed;
-		walkScript.isGrounded = landed;
+		glideV2Script.isGrounded = isGrounded && !isFlapping;
+		walkScript.isGrounded = isGrounded && !isFlapping;
 	}
 
 
@@ -185,10 +190,11 @@ public class Player : MonoBehaviour {
 	}
 
 	void GroundGravity(){
-		Vector3 gravityForce = -groundNormal * gravity;
-		//		rigidBody.AddForceAtPosition (gravityForce, transform.position - transform.up * 1 + transform.forward * centerOfGravity.z, ForceMode.Force);
-		rigidBody.AddForceAtPosition (gravityForce/2, transform.position - transform.up * 1 + transform.forward, ForceMode.Force);
-		rigidBody.AddForceAtPosition (gravityForce/2, transform.position - transform.up * 1 - transform.forward, ForceMode.Force);
+//				Vector3 gravityForce = -groundNormal * gravity;
+		Vector3 gravityForce = Vector3.down * gravity;
+		rigidBody.AddForceAtPosition (gravityForce, transform.position - transform.up, ForceMode.Acceleration);
+//		rigidBody.AddForceAtPosition (gravityForce/2, transform.position - transform.up * 1 + transform.forward, ForceMode.Force);
+//		rigidBody.AddForceAtPosition (gravityForce/2, transform.position - transform.up * 1 - transform.forward, ForceMode.Force);
 
 		Util.DrawRigidbodyRay(rigidBody, transform.position + transform.up * centerOfGravity.y + transform.forward * centerOfGravity.z, gravityForce, Color.gray);
 	}
@@ -200,37 +206,63 @@ public class Player : MonoBehaviour {
 	}
 
 	void CheckGround(){
-		Debug.DrawLine (characterCollider.bounds.center, new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y-0.1f, characterCollider.bounds.center.z), Color.red);
+		//if flapping, not grounded
+		if (isFlapping) {
+			isGrounded = false;
+		} else {
+			float groundCheckDistance = 0;
 
-		isGrounded = Physics.CheckCapsule (
-			characterCollider.bounds.center,
-			new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y-0.1f, characterCollider.bounds.center.z),
-			groundDistance,
-			layerMaskForGround.value
-		);
-
-		if (isGrounded) {
-			RaycastHit hit;
-			if (Physics.Raycast (transform.position, -transform.up, out hit, 1.2f, layerMaskForGround)) {
-				groundNormal = hit.normal;
+			//if in air
+			if (!isGrounded) {
+				//check for ground with small distance below player
+				//if found, set grounded
+				groundCheckDistance = airGroundDistance;
 			}
+			//if grounded
+			else {
+				//check for ground with more generous distance
+				groundCheckDistance = groundDistance;
+				//if found, set grounded
+			}
+
+			Debug.DrawLine (characterCollider.bounds.center, new Vector3 (characterCollider.bounds.center.x, characterCollider.bounds.min.y - groundCheckDistance, characterCollider.bounds.center.z), Color.red);
+
+			isGrounded = Physics.CheckCapsule (
+				characterCollider.bounds.center,
+				new Vector3 (characterCollider.bounds.center.x, characterCollider.bounds.min.y - groundCheckDistance, characterCollider.bounds.center.z),
+				1f,
+				layerMaskForGround.value
+			);
+
+			if (isGrounded) {
+				RaycastHit hit;
+				if (Physics.Raycast (transform.position, -transform.up, out hit, 5f, layerMaskForGround)) {
+					groundNormal = hit.normal;
+				}
+			}
+
+			inWater = Physics.CheckCapsule (
+				characterCollider.bounds.center,
+				new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y-0.1f, characterCollider.bounds.center.z),
+				groundCheckDistance,
+				layerMaskForWater.value
+			);
+
+			//maybe?
+			//if grounded and not upright, use ragdoll gravity and forces (don't let walk script take over yet)
+			//else, use ground gravity and let walk script take over
 		}
 
-		inWater = Physics.CheckCapsule (
-			characterCollider.bounds.center,
-			new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y-0.1f, characterCollider.bounds.center.z),
-			groundDistance,
-			layerMaskForWater.value
-		);
+
 			
-		if (inWater) {
-			if (timeSinceWaterBob > 0) {
-				timeSinceWaterBob -= Time.deltaTime;
-			} else {
-				timeSinceWaterBob = Random.Range (0, waterBobTime);
-				groundNormal = Vector3.up + Vector3.forward * Random.Range (-waterBobAmount, waterBobAmount) + Vector3.right * Random.Range (-waterBobAmount, waterBobAmount);
-			}
-		}
+//		if (inWater) {
+//			if (timeSinceWaterBob > 0) {
+//				timeSinceWaterBob -= Time.deltaTime;
+//			} else {
+//				timeSinceWaterBob = Random.Range (0, waterBobTime);
+//				groundNormal = Vector3.up + Vector3.forward * Random.Range (-waterBobAmount, waterBobAmount) + Vector3.right * Random.Range (-waterBobAmount, waterBobAmount);
+//			}
+//		}
 
 		float uprightAngle = Vector3.Angle (transform.up, groundNormal);
 		isUpright = uprightAngle < uprightThreshold;
@@ -238,44 +270,24 @@ public class Player : MonoBehaviour {
 	}
 
 	void UpdateRendering(){
-//		//flap wings
-//		if (glideV2Script.flapSpeed != 0) {
-//			isFlapping = true;
-//			birdAnimator.FlapSpeed = 2f;// + flapAnimationScale * flapSpeed;
-//			birdAnimator.Flapping = true;
-//
-//			//			if(!playingFlapSound){
-//			//				StartCoroutine(PlayFlapSound(flapSoundRate*(1-flapSpeed) + minFlapRate));
-//			//				playingFlapSound = true;
-//			//				flapAudioSource.pitch = Random.Range (flapMinPitch, flapMaxPitch);
-//			//			}
-//		} else {
-//			isFlapping = false;
-//			birdAnimator.Flapping = false;
-//		}
-
-
 		birdAnimator.WingsOut = glideV2Script.wingsOut;
-
-		//rotate wings
-		if (!isGrounded) {
-			//			leftWing.localRotation = Quaternion.Euler (leftWingInitialRotation + new Vector3 ((flapDirection) * 15, -(flapDirection) * 20, 0));
-			//			rightWing.localRotation = Quaternion.Euler (rightWingInitialRotation + new Vector3 ((flapDirection) * 15, (flapDirection) * 20, 0));
-		} else {
-			//			leftWing.localRotation = Quaternion.Euler (leftWingInitialRotation);
-			//			rightWing.localRotation = Quaternion.Euler (rightWingInitialRotation);
-		}
+		dragonAnimator.WingsOut = glideV2Script.wingsOut;
 
 		birdAnimator.InWater = inWater;
 		birdAnimator.Grounded = landed;//isGrounded && !isFlapping;
+
+		dragonAnimator.InWater = inWater;
+		dragonAnimator.Grounded = isGrounded;
 	}
 
 	public void GetInput () {
-		if (Util.GetButton ("Flame")) {
-			flameParticles.Play ();
-		} else if (flameParticles.isPlaying) {
-			flameParticles.Stop ();
-		}
+		bool flame = Util.GetButton ("Flame");
+		flameBreathScript.flameOn = flame;
+		dragonAnimator.Flame = flame;
+		walkScript.isFlaming = flame;
+
+		bool attack = Util.GetButton ("Attack");
+		dragonAnimator.Attack = attack;
 
 		//handle if have grabbed object
 		if (grabScript.hasObject) {
@@ -347,12 +359,13 @@ public class Player : MonoBehaviour {
 			}
 			staminaScript.usingStamina = flapSpeed != 0;
 
-
 			if (glideV2Script.flapSpeed == 0) {
 				glideV2Script.wingsOut = Util.GetButtonDown ("Close Wings") ^ glideV2Script.wingsOut;
 			} else {
 				glideV2Script.wingsOut = true;
 			}
+
+			isFlapping = flapSpeed > 0;
 
 			rigidBody.constraints = RigidbodyConstraints.None;
 
@@ -360,7 +373,8 @@ public class Player : MonoBehaviour {
 			bool grab = Util.GetButtonDown ("Grab");
 			grabScript.grab = grab;
 
-			if (grab && interactorScript.itemHolder.HasItem () || grabHeld && !interactorScript.itemHolder.HasItem ()) {
+//			if (grab && interactorScript.itemHolder.HasItem () || grabHeld && !interactorScript.itemHolder.HasItem ()) {
+			if (grab) {
 				interactorScript.Pickup ();
 			}
 		}
