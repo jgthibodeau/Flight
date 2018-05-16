@@ -12,9 +12,11 @@ public class DragonAnimator : MonoBehaviour {
 	public float HopSpeed;
 	public float RunScale;
 	private string idle = "CB_Dragon Stand";
-	private Animator animator;
+	public Animator animator;
 
 	public Transform baseObj, leftWing, rightWing;
+
+	public bool manuallyAdjustWings = true;
 
 	[HideInInspector]
 	public float pitchLeft, pitchRight, rollLeft, rollRight, tailPitch, liftLeft, liftRight;
@@ -60,14 +62,17 @@ public class DragonAnimator : MonoBehaviour {
 		animator.SetFloat ("RunSpeed", RunScale * MoveSpeed);
 		animator.SetFloat ("FlapSpeed", FlapSpeed);
 
-		if (!Grounded && WingsOut && !Flapping) {
-			UpdateWings ();
-		} else {
-			if (Grounded) {
-				leftWing.localScale = defaultRightWingScale;
-				rightWing.localScale = defaultLeftWingScale;
+		if (manuallyAdjustWings) {
+			if (!Grounded && WingsOut && !Flapping) {
+//			if (!Grounded && WingsOut) {
+				UpdateWings ();
+			} else {
+//				if (Grounded) {
+					leftWing.localScale = defaultRightWingScale;
+					rightWing.localScale = defaultLeftWingScale;
+//				}
+				ResetWings ();
 			}
-			ResetWings ();
 		}
 	}
 

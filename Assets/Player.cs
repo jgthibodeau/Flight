@@ -21,6 +21,8 @@ public class Player : MonoBehaviour {
 	private int EnemyLayer;
 	private int PreyLayer;
 
+	public bool twoStickFlight = true;
+
 	public ThirdPersonCamera.Follow follow;
 
 	public LayerMask layerMaskForGround;
@@ -94,8 +96,8 @@ public class Player : MonoBehaviour {
 
 //		rigidBody.ResetCenterOfMass ();
 //		rigidBody.ResetInertiaTensor ();
-		rigidBody.centerOfMass = centerOfMass;
-		rigidBody.inertiaTensorRotation = inertiaTensorRotation;
+//		rigidBody.centerOfMass = centerOfMass;
+//		rigidBody.inertiaTensorRotation = inertiaTensorRotation;
 //		Debug.Log ("centerOfMass: "+rigidBody.centerOfMass);
 //		Debug.Log ("inertiaTensor: "+rigidBody.inertiaTensor);
 //		Debug.Log ("inertiaTensorRotation: "+rigidBody.inertiaTensorRotation);
@@ -109,8 +111,10 @@ public class Player : MonoBehaviour {
 	}
 
 	void FixedUpdate () {
-		rigidBody.centerOfMass = centerOfMass;
-		rigidBody.inertiaTensorRotation = inertiaTensorRotation;
+		CheckGround ();
+
+//		rigidBody.centerOfMass = centerOfMass;
+//		rigidBody.inertiaTensorRotation = inertiaTensorRotation;
 //		Debug.Log ("centerOfMass: "+rigidBody.centerOfMass);
 //		Debug.Log ("inertiaTensor: "+rigidBody.inertiaTensor);
 //		Debug.Log ("inertiaTensorRotation: "+rigidBody.inertiaTensorRotation);
@@ -122,14 +126,10 @@ public class Player : MonoBehaviour {
 		speed = rigidBody.velocity.magnitude;
 
 		//not on ground
-		if (!isGrounded) {
+		if (!isGrounded || isFlapping) {
 //			if (keepUprightAlways) {
 			AirGravity ();
 //			}
-		}
-		//trying to get off ground
-		else if (glideV2Script.flapSpeed != 0) {
-			AirGravity ();
 		}
 		//TODO on ground, but moving fast
 //		else if (speed > ragdollSpeed) {
@@ -156,11 +156,11 @@ public class Player : MonoBehaviour {
 	void Update () {
 		GetInput ();
 
-		CheckGround ();
-
 		UpdateRendering ();
 
 		WaterSound ();
+
+		rigidBody.freezeRotation = isGrounded;
 	}
 
 	void WaterSound(){
@@ -278,6 +278,8 @@ public class Player : MonoBehaviour {
 
 		dragonAnimator.InWater = inWater;
 		dragonAnimator.Grounded = isGrounded;
+
+//		RotateHead ();
 	}
 
 	public void GetInput () {
@@ -285,6 +287,9 @@ public class Player : MonoBehaviour {
 		flameBreathScript.flameOn = flame;
 		dragonAnimator.Flame = flame;
 		walkScript.isFlaming = flame;
+
+		bool run = Util.GetButton ("Run");
+		walkScript.isRunning = run;
 
 		bool attack = Util.GetButton ("Attack");
 		dragonAnimator.Attack = attack;
@@ -316,7 +321,7 @@ public class Player : MonoBehaviour {
 			walkScript.right = 0;
 
 			rigidBody.velocity = Vector3.zero;
-			rigidBody.constraints = RigidbodyConstraints.FreezePosition;
+//			rigidBody.constraints = RigidbodyConstraints.FreezePosition;
 
 			grabScript.grab = false;
 
@@ -327,26 +332,11 @@ public class Player : MonoBehaviour {
 
 		//as long as we aren't perched, do normal controls
 		if(!perchScript.isPerching){
-			glideV2Script.pitchLeft = Util.GetAxis ("Vertical");
-			glideV2Script.rollLeft = -Util.GetAxis ("Horizontal");
-
-			glideV2Script.pitchRight = Util.GetAxis ("Vertical Right");
-			glideV2Script.rollRight = -Util.GetAxis ("Horizontal Right");
-
-			float pitchDiff = glideV2Script.pitchLeft - glideV2Script.pitchRight;
-			if (pitchDiff > -leftRightWiggle && pitchDiff < leftRightWiggle) {
-				float halfDiff = pitchDiff / 2;
-				glideV2Script.pitchLeft -= halfDiff;
-				glideV2Script.pitchRight += halfDiff;
+			if (twoStickFlight) {
+				TwoStickFlight ();
+			} else {
+				OneStickFlight ();
 			}
-
-			float rollDiff = glideV2Script.rollLeft - glideV2Script.rollRight;
-			if (rollDiff > -leftRightWiggle && rollDiff < leftRightWiggle) {
-				float halfDiff = rollDiff / 2;
-				glideV2Script.rollLeft -= halfDiff;
-				glideV2Script.rollRight += halfDiff;
-			}
-			glideV2Script.rollRight *= -1;
 
 			walkScript.forward = Util.GetAxis ("Vertical");
 			walkScript.right = Util.GetAxis ("Horizontal");
@@ -367,7 +357,7 @@ public class Player : MonoBehaviour {
 
 			isFlapping = flapSpeed > 0;
 
-			rigidBody.constraints = RigidbodyConstraints.None;
+//			rigidBody.constraints = RigidbodyConstraints.None;
 
 			bool grabHeld = Util.GetButton ("Grab");
 			bool grab = Util.GetButtonDown ("Grab");
@@ -380,6 +370,83 @@ public class Player : MonoBehaviour {
 		}
 	}
 
+	void TwoStickFlight() {
+		glideV2Script.pitchLeft = Util.GetAxis ("Vertical");
+		glideV2Script.rollLeft = -Util.GetAxis ("Horizontal");
+
+		glideV2Script.pitchRight = Util.GetAxis ("Vertical Right");
+		glideV2Script.rollRight = -Util.GetAxis ("Horizontal Right");
+
+		float pitchDiff = glideV2Script.pitchLeft - glideV2Script.pitchRight;
+		if (pitchDiff > -leftRightWiggle && pitchDiff < leftRightWiggle) {
+			float halfDiff = pitchDiff / 2;
+			glideV2Script.pitchLeft -= halfDiff;
+			glideV2Script.pitchRight += halfDiff;
+		}
+
+		float rollDiff = glideV2Script.rollLeft - glideV2Script.rollRight;
+		if (rollDiff > -leftRightWiggle && rollDiff < leftRightWiggle) {
+			float halfDiff = rollDiff / 2;
+			glideV2Script.rollLeft -= halfDiff;
+			glideV2Script.rollRight += halfDiff;
+		}
+		glideV2Script.rollRight *= -1;
+	}
+
+	public float oneStickRollScale = 0.5f;
+	public float oneStickForwardPitchScale = 1f;
+	public float oneStickBackwardPitchScale = 1f;
+	public float oneStickWingInScale = 0.5f;
+	public float oneStickWingMinYToPointDown = -0.75f;
+	public float oneStickWingInScalePointingDown = 1f;
+	public float oneStickWingOutScale = 1f;
+
+	public float minPitch = -1f;
+	public float maxPitch = 0.75f;
+
+	void OneStickFlight() {
+		Vector2 input = new Vector2 (Util.GetAxis ("Horizontal"), Util.GetAxis ("Vertical"));
+		input = Vector2.ClampMagnitude (input, 1);
+		float vert = input.y;
+		float horiz = -input.x;
+
+		//left/right -> more lift on that side and less on the opposite side
+		if (horiz > 0) {
+			glideV2Script.pitchLeft = 0;
+			glideV2Script.pitchRight = -horiz * oneStickRollScale;
+		} else if (horiz < 0) {
+			glideV2Script.pitchLeft = horiz * oneStickRollScale;
+			glideV2Script.pitchRight = 0;
+		} else {
+			glideV2Script.pitchLeft = 0;
+			glideV2Script.pitchRight = 0;
+		}
+
+		//forward/back -> wings in/out
+		if (vert > 0) {
+			glideV2Script.pitchLeft += vert * oneStickForwardPitchScale;
+			glideV2Script.pitchRight += vert * oneStickForwardPitchScale;
+
+			float wingScale = oneStickWingInScale;
+			float percent = 0;
+			if (transform.forward.y < oneStickWingMinYToPointDown) {
+				percent = (1 + transform.forward.y) / (1 + oneStickWingMinYToPointDown);
+				wingScale = Mathf.Lerp (oneStickWingInScale, oneStickWingInScalePointingDown, 1-percent);
+			}
+
+			glideV2Script.rollLeft = -vert * wingScale;
+			glideV2Script.rollRight = -vert * wingScale;
+		} else {
+			glideV2Script.pitchLeft += vert * oneStickBackwardPitchScale;
+			glideV2Script.pitchRight += vert * oneStickBackwardPitchScale;
+
+			glideV2Script.rollLeft = -vert * oneStickWingOutScale;
+			glideV2Script.rollRight = -vert * oneStickWingOutScale;
+		}
+
+		glideV2Script.pitchLeft = Mathf.Clamp (glideV2Script.pitchLeft, minPitch, maxPitch);
+		glideV2Script.pitchRight = Mathf.Clamp (glideV2Script.pitchRight, minPitch, maxPitch);
+	}
 
 	void OnTriggerEnter(Collider collisionInfo) {
 		Debug.Log (collisionInfo+" "+collisionInfo.gameObject.tag);
@@ -392,4 +459,28 @@ public class Player : MonoBehaviour {
 		//TODO handle crashing: close wings and tumble, slowing down if on ground
 	}
 
+	public Transform[] headComponents;
+	public float rotateScale;
+	public float rotateSpeed;
+	private float headHoriz = 0;
+	private float headVert = 0;
+	void LateUpdate() {
+		RotateHead ();
+	}
+
+	void RotateHead(){
+		float desiredHeadHoriz = Util.GetAxis ("Horizontal Right") * rotateScale;
+		float desiredHeadVert = Util.GetAxis ("Vertical Right") * rotateScale;
+
+		headHoriz = Mathf.Lerp (headHoriz, desiredHeadHoriz, rotateSpeed * Time.deltaTime);
+//		headHoriz = Mathf.SmoothDamp(headHoriz, desiredHeadHoriz, ref yVelocity, smoothTime)
+		headVert = Mathf.Lerp (headVert, desiredHeadVert, rotateSpeed * Time.deltaTime);
+
+		foreach (Transform t in headComponents) {
+			Vector3 rot = t.eulerAngles;
+			rot.y += headHoriz;
+			rot.z += headVert;
+			t.eulerAngles = rot;
+		}
+	}
 }

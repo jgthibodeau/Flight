@@ -8,6 +8,8 @@ using UnityEngine.Networking;
 public class Missile : MonoBehaviour {
 	public int damage = 10;
 
+	public LayerMask instantKillLayerMask;
+	public float stickDepth = 1f;
 	public bool accelerate = false;
 	public int acceleration = 10;
 	public int accelerationTime = 10;
@@ -43,7 +45,12 @@ public class Missile : MonoBehaviour {
 	}
 
 	void OnCollisionEnter(Collision collision) {
-		collision.rigidbody.AddForce (collision.impulse, ForceMode.Impulse);
+		//destroy if collided with fire
+		if (Util.InLayerMask (collision.gameObject.layer, instantKillLayerMask)) {
+			GetComponent<Kill> ().Die ();
+		}
+
+//		collision.rigidbody.AddForce (collision.impulse, ForceMode.Impulse);
 		if (collided) {
 			return;
 		}
@@ -54,12 +61,44 @@ public class Missile : MonoBehaviour {
 		if (hittable != null) {
 			Debug.Log ("hitting " + hittable);
 			hittable.Hit (damage, this.gameObject);
-			GetComponent<Kill> ().Die ();
 		}
+
+		Halt (collision);
 
 //		Debug.Log ("calling explosion " + collision + " " + collision.contacts.Length);
 //		CmdExplode (collision.contacts[0].point);
 //		CmdExplode (transform.position, hit);
+	}
+
+	private void Halt(Collision collision) {
+		Debug.Log ("halting");
+
+		//adjust to be within collider a little bit more
+		transform.position += transform.forward * stickDepth;
+
+		//remove collider
+		GetComponent<Collider> ().enabled = false;
+		rigidBody.velocity = Vector3.zero;
+		rigidBody.constraints = RigidbodyConstraints.FreezeAll;
+		rigidBody.isKinematic = true;
+
+		//parent to collision
+		transform.parent = collision.transform;
+
+		//turn off this script
+		this.enabled = false;
+
+		//remove the trail renderer
+		StartCoroutine (SlowTrailDisable (GetComponent<TrailRenderer> ()));
+	}
+
+
+	IEnumerator SlowTrailDisable (TrailRenderer trail) {
+		float rate = trail.time / 15f;
+		while (trail.time > 0) {
+			trail.time -= rate;
+			yield return 0;
+		}
 	}
 
 //	[Command]

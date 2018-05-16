@@ -19,7 +19,7 @@ namespace BreadcrumbAi{
 					_IsGround, _IsAir,
 					_IsInvincible;
 					
-		public float followSpeed, wanderSpeed, patrolSpeed, rotationSpeed, avoidSpeed,
+		public float followSpeed, wanderSpeed, patrolSpeed, rotationSpeed, avoidSpeed, currentSpeed,
 					 jumpDistance, jumpForce, longJumpForce,
 					 followDistance, wanderDistance, attackDistance, visionDistance, avoidDistance, edgeDistance, otherAiDistance,
 					 wanderTimeLimit, wanderTimeRate,
@@ -94,12 +94,14 @@ namespace BreadcrumbAi{
 		private Vector3 wanderPos;				// Sets next random wander position
 		private float wanderTimer, wanderNext;	// Used for timing the wander time limit
 		private RaycastHit hit;
-		
-		
+		private Vector3 prevPosition;
 	
+
 		void Start(){
 			StartCoroutine(this.Ai_Lists());
 			StartCoroutine(this.Ai_Layers());
+
+			prevPosition = GetComponent<Rigidbody> ().position;
 		}
 	
 		void Update(){
@@ -113,6 +115,10 @@ namespace BreadcrumbAi{
 			Ai_Controller(); 	// Controls Ai Movement & Attack States
 			Ai_Avoidance(~(breadcrumbLayer | enemyLayer | playerLayer | waypointLayer));	// Controls Ai wall avoidance
 			Ai_Hover();
+
+			Vector3 position = GetComponent<Rigidbody> ().position;
+			currentSpeed = Vector3.Distance (position, prevPosition) / Time.fixedDeltaTime;
+			prevPosition = position;
 		}
 				
 		private void Ai_Controller(){

@@ -28,6 +28,7 @@ public class GlideV2 : MonoBehaviour {
 
 //	public float dragCoef;
 	public float rigidBodyDrag = 0f;
+	public float rigidBodyAngularDrag = 4f;
 	public float inducedDragCoef;
 	public float parasiticDragCoef;
 	public float dragForwardDistance;
@@ -168,6 +169,7 @@ public class GlideV2 : MonoBehaviour {
 
 		if (!isGrounded) {
 			rigidBody.drag = rigidBodyDrag;
+			rigidBody.angularDrag = rigidBodyAngularDrag;
 
 			//rotate towards motion
 			if (rotateTowardsMotion && flapSpeed == 0) {

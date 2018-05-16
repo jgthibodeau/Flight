@@ -15,6 +15,7 @@ TagManager:
   - Enemy
   - Waypoint
   - Gold
+  - Breadcrumb
   layers:
   - Default
   - TransparentFX
@@ -42,7 +43,7 @@ TagManager:
   - Ragdoll
   - Arrow
   - Gold
-  - 
+  - Breadcrumb
   - 
   - 
   - 

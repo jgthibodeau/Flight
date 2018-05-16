@@ -31,7 +31,7 @@ public class ParticleVelocity : MonoBehaviour {
 		mm.startSpeed = particleSpeed;
 //		ps.main = mm;
 
-		Debug.Log (ps+" particle speed: " + particleSpeed.constant);
+//		Debug.Log (ps+" particle speed: " + particleSpeed.constant);
 	}
 	
 	void OnParticleCollision(GameObject other) {

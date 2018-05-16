@@ -26,7 +26,6 @@
 //    int SolveCubic(double c0, double c1, double c2, double c3, out double s0, out double s1, out double s2);
 //    int SolveQuartic(double c0, double c1, double c2, double c3, double c4, out double s0, out double s1, out double s2, out double s3);
 
-
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -341,7 +340,13 @@ public class BallisticTrajectory {
 	//
 	// return (int): number of unique solutions found: 0, 1, 2, 3, or 4.
 	public static int solve_ballistic_arc(Vector3 proj_pos, float proj_speed, Vector3 target_pos, Vector3 target_velocity, float gravity, out Vector3 s0, out Vector3 s1) {
-
+		Debug.Log ("BallisticTrajectory.solve_ballistic_arc params:\n" +
+			"proj_pos        " + proj_pos + "\n" +
+			"proj_speed      " + proj_speed + "\n" +
+			"target_pos      " + target_pos + "\n" +
+			"target_velocity " + target_velocity + "\n" +
+			"gravity         " + gravity
+		);
 		// Initialize output parameters
 		s0 = Vector3.zero;
 		s1 = Vector3.zero;
@@ -397,8 +402,24 @@ public class BallisticTrajectory {
 		double c4 = K*K + H*H + J*J;
 
 		// Solve quartic
+		Debug.Log ("BallisticTrajectory.solve_ballistic_arc quartic:\n" +
+			"c0        " + c0 + "\n" +
+			"c1        " + c1 + "\n" +
+			"c2        " + c2 + "\n" +
+			"c3        " + c3 + "\n" +
+			"c4        " + c4
+		);
+
 		double[] times = new double[4];
 		int numTimes = SolveQuartic(c0, c1, c2, c3, c4, out times[0], out times[1], out times[2], out times[3]);
+
+		Debug.Log ("BallisticTrajectory.solve_ballistic_arc quartic:\n" +
+			"numTimes        " + numTimes + "\n" +
+			"times[0]        " + times[0] + "\n" +
+			"times[1]        " + times[1] + "\n" +
+			"times[2]        " + times[2] + "\n" +
+			"times[3]        " + times[3]
+		);
 
 		// Sort so faster collision is found first
 		System.Array.Sort(times);
@@ -422,6 +443,12 @@ public class BallisticTrajectory {
 		// Write out solutions
 		if (numSolutions > 0)   s0 = solutions[0];
 		if (numSolutions > 1)   s1 = solutions[1];
+
+		Debug.Log ("BallisticTrajectory.solve_ballistic_arc solutions:\n" +
+			"numSolutions " + numSolutions + "\n" +
+			"s0           " + s0 + "\n" +
+			"s1           " + s1
+		);
 
 		return numSolutions;
 	}

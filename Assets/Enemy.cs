@@ -7,35 +7,50 @@ public class Enemy : MonoBehaviour {
 	private Ai ai;
 	public GameObject arrow;
 	public float arrowForce = 10f;
-	public float fireOffset = 1.5f;
+	public Transform firePosition;
 
 	public float fireRate;
 	private float lastFireTime;
 
-	// Use this for initialization
+	private Rigidbody rigidBody;
+	public Animator animator;
+
 	void Start () {
 		ai = GetComponent<Ai> ();
+		rigidBody = GetComponent<Rigidbody> ();
+		animator = GetComponentInChildren<Animator> ();
 	}
-	
-	// Update is called once per frame
+
 	void Update () {
+		animator.SetFloat ("Speed", ai.currentSpeed);
+//		Debug.Log (rigidBody.velocity+" "+rigidBody.velocity.magnitude);
+
 		if (ai.attackState == Ai.ATTACK_STATE.CanAttackPlayer) {
 			if (Time.time > lastFireTime + fireRate) {
-				lastFireTime = Time.time;
-
-				GameObject newArrow = GameObject.Instantiate (arrow);
-
-				Vector3 targetPosition = ai.Player.position;
-				Vector3 position = transform.position + transform.forward * fireOffset;
+				Vector3 position = firePosition.position;
+				Vector3 targetPosition = ai.Player.GetComponent<Rigidbody>().position;
 
 				Vector3 s0, s1;
 				BallisticTrajectory.solve_ballistic_arc(position, arrowForce, targetPosition, ai.Player.GetComponent<Rigidbody>().velocity, -Physics.gravity.y, out s0, out s1);
 
-				newArrow.transform.position = position;
-				newArrow.transform.rotation = Quaternion.LookRotation (s0, Vector3.up);
+				Vector3 trajectory;
+				if (s0.y < s1.y) {
+					trajectory = s0;
+				} else {
+					trajectory = s1;
+				}
 
-				newArrow.GetComponent<Rigidbody> ().AddForce (newArrow.transform.forward * arrowForce, ForceMode.Impulse);
+				if (trajectory != Vector3.zero) {
+					Fire (position, trajectory);
+				}
 			}
 		}
+	}
+
+	void Fire(Vector3 position, Vector3 trajectory) {
+		Quaternion rotation = Quaternion.LookRotation (trajectory);
+		lastFireTime = Time.time;
+		GameObject newArrow = GameObject.Instantiate (arrow, position, rotation);
+		newArrow.GetComponent<Rigidbody> ().AddForce (newArrow.transform.forward * arrowForce, ForceMode.VelocityChange);
 	}
 }

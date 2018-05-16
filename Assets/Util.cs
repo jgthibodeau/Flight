@@ -74,4 +74,8 @@ public class Util : MonoBehaviour {
 	public static bool GetButtonUp(string button){
 		return TeamUtility.IO.InputManager.GetButtonUp (button);
 	}
+
+	public static bool InLayerMask(int layer, LayerMask layermask) {
+		return layermask == (layermask | (1 << layer));
+	}
 }

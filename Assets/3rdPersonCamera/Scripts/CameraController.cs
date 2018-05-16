@@ -19,6 +19,7 @@ namespace ThirdPersonCamera
         #region Public Unity Variables
         public Transform target;
         public Vector3 offsetVector;
+		public Vector3 cameraRecenterOffset;
 
         public bool smartPivot = true;
         public bool occlusionCheck = true;
@@ -28,6 +29,7 @@ namespace ThirdPersonCamera
 		public float maxDistance = 7.0f;
 		public float minMoveDistance = 0.02f;
 		public float moveSpeed = 2.0f;
+		public float recenterSpeed = 5f;
 		public bool slerpPosition = false;
 
         public float collisionDistance = 0.5f;
@@ -364,15 +366,24 @@ namespace ThirdPersonCamera
 			Debug.DrawRay (transform.position, transform.rotation.eulerAngles, Color.blue);
 
 			Vector3 directionFromTargetToCamera = transform.position - target.position;
-			if (directionFromTargetToCamera.magnitude > maxDistance) {
-				Vector3 directionFromTargetToDesired = desiredPosition - target.position;
-				Vector3 maxPosition = target.position + directionFromTargetToDesired.normalized * maxDistance;
-//				Vector3 maxPosition = target.position + directionFromTargetToCamera.normalized * maxDistance;
-//				transform.position = maxPosition;
-				transform.position = Vector3.Slerp (transform.position, maxPosition, Time.fixedDeltaTime * 2 * moveSpeed);
-			} else if (Vector3.Distance (transform.position, desiredPosition) > minMoveDistance) {
-				transform.position = Vector3.Slerp (transform.position, desiredPosition, Time.fixedDeltaTime * moveSpeed);
+			if (Util.GetButton ("Center Camera")) {
+				Vector3 cameraRecenterOffsetTransformed = (target.transform.rotation * cameraRecenterOffset).normalized * desiredDistance;
+				desiredPosition = target.position + offsetVectorTransformed + cameraRecenterOffsetTransformed;
+				transform.position = Vector3.Slerp (transform.position, desiredPosition, Time.fixedDeltaTime * recenterSpeed);
+
+				transform.LookAt (target.position + offsetVectorTransformed);
+			} else {
+				if (directionFromTargetToCamera.magnitude > maxDistance) {
+					Vector3 directionFromTargetToDesired = desiredPosition - target.position;
+					Vector3 maxPosition = target.position + directionFromTargetToDesired.normalized * maxDistance;
+//					Vector3 maxPosition = target.position + directionFromTargetToCamera.normalized * maxDistance;
+//					transform.position = maxPosition;
+					transform.position = Vector3.Slerp (transform.position, maxPosition, Time.fixedDeltaTime * 2 * moveSpeed);
+				} else if (Vector3.Distance (transform.position, desiredPosition) > minMoveDistance) {
+					transform.position = Vector3.Slerp (transform.position, desiredPosition, Time.fixedDeltaTime * moveSpeed);
+				}
 			}
+
 
 //			if (slerpPosition) {
 //				transform.position = Vector3.Slerp (transform.position, desiredPosition, Time.fixedDeltaTime * moveSpeed);

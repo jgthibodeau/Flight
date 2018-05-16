@@ -37,6 +37,7 @@ namespace ThirdPersonCamera
         void FixedUpdate()
 		{
 			movementDirection = transform.position - prevTargetPosition;
+//			movementDirection = targetRb.velocity;
 			prevTargetPosition = transform.position;
 
 			RaycastHit raycastHit;
@@ -54,9 +55,13 @@ namespace ThirdPersonCamera
 
 			switch(followType) {
 			case FOLLOW_TYPE.TIGHT:
-				cc.slerpPosition = false;
+				cc.slerpPosition = true;
 
-				toRotation = Quaternion.LookRotation ((Vector3.ClampMagnitude (movementDirection, 1) + tiltVector), upVector);
+				if (movementDirection.magnitude > 0) {
+					toRotation = Quaternion.LookRotation ((Vector3.ClampMagnitude (movementDirection, 1).normalized + tiltVector), upVector);
+				} else {
+					toRotation = Quaternion.LookRotation (cc.target.forward + tiltVector, upVector);
+				}
 
 				if (alignOnSlopes) {
 					if (Physics.Raycast (cc.target.transform.position, Vector3.down, out raycastHit, 25.0f, layerMask)) { // if the range of 15.0 is not enough, increase the value
@@ -77,7 +82,11 @@ namespace ThirdPersonCamera
 				cc.slerpPosition = true;
 
 				Vector3 targetDirection = cc.target.transform.position - cc.transform.position;
-				targetDirection = Vector3.ProjectOnPlane (targetDirection + Vector3.ClampMagnitude (movementDirection, 1), cc.target.transform.up);
+				if (movementDirection.magnitude > 0.1f) {
+					targetDirection += Vector3.ClampMagnitude(movementDirection, 1);
+				}
+				targetDirection = Vector3.ProjectOnPlane (targetDirection, cc.target.transform.up);
+
 				targetDirection += tiltVector;
 
 				toRotation = Quaternion.LookRotation (targetDirection, upVector);

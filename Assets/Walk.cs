@@ -9,18 +9,28 @@ public class Walk : MonoBehaviour {
 	[HideInInspector]
 	public Rigidbody rigidBody;
 	[HideInInspector]
-	public CharacterController characterController;
-	[HideInInspector]
 	public Vector3 groundNormal;
 	[HideInInspector]
 	public bool isGrounded;
 	[HideInInspector]
 	public bool isFlaming;
+	[HideInInspector]
+	public bool isRunning;
+	[HideInInspector]
+	public bool isAttacking;
 
-	public bool useRigidbody = true;
 	public float rigidBodyDrag = 1f;
+	public float rigidBodyAngularDrag = 20f;
 	public float walkSpeed;
 	public float flameWalkSpeed;
+	public float runSpeed;
+
+	public bool gradualRun = true;
+	public float currentSpeedIncreaseDelay;
+	public float currentSpeed;
+	public float speedIncreaseDelay;
+	public float speedIncreaseRate;
+
 	public float maxSpeed = 10f;
 	public float hopTransitionSpeed;
 	public float animationSpeedScale;
@@ -38,79 +48,30 @@ public class Walk : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		characterController = GetComponent<CharacterController> ();
 	}
 
 	void FixedUpdate () {
 		if (isGrounded) {
-			if (useRigidbody) {
-				rigidBody.isKinematic = false;
-				characterController.enabled = false;
-				RigidbodyWalk ();
-			} else {
-				rigidBody.isKinematic = true;
-				characterController.enabled = true;
-				CharacterControllerWalk ();
-
-				rigidBody.velocity = currentMoveDirection;
-			}
-		} else {
-			rigidBody.isKinematic = false;
-			characterController.enabled = false;
-			currentMoveDirection = Vector3.ClampMagnitude(rigidBody.velocity, 0) * walkSpeed;
+			RigidbodyWalk ();
 		}
-	}
-
-	Vector3 currentMoveDirection = Vector3.zero;
-	Vector3 lastMoveDirection = Vector3.zero;
-	void CharacterControllerWalk() {
-		Vector3 inputVector = new Vector3 (right, 0, forward).normalized;
-		float inputSpeed = inputVector.magnitude;
-
-		Vector3 moveDirection = CalculateDesiredMovementDirection (inputVector);
-		moveDirection = Vector3.ProjectOnPlane (moveDirection, groundNormal).normalized * inputSpeed;
-		moveDirection *= walkSpeed;
-
-		currentMoveDirection = Vector3.Slerp (currentMoveDirection, moveDirection, walkTurnSpeed * Time.fixedDeltaTime);
-		if (currentMoveDirection.magnitude < 0.01f) {
-			currentMoveDirection = Vector3.zero;
-		}
-
-		Vector3 moveWithGravity = currentMoveDirection;
-		if (!characterController.isGrounded) {
-			moveWithGravity.y = -10f * Time.fixedDeltaTime;
-		}
-//		transform.up = groundNormal;
-		characterController.Move (moveWithGravity);
-
-		Quaternion targetRotation;
-		if (inputSpeed > 0) {
-			targetRotation = Quaternion.LookRotation (moveDirection, groundNormal);
-		} else {
-			targetRotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(transform.forward, groundNormal));
-		}
-		transform.rotation = Quaternion.Slerp (transform.rotation, targetRotation, walkTurnSpeed * Time.fixedDeltaTime);
-
-//		birdAnimator.Walking = walking && !running;
-//		birdAnimator.Hopping = running;
-		birdAnimator.MoveSpeed = currentMoveDirection.magnitude * animationSpeedScale;
-
-//		dragonAnimator.Walking = walking && !running;
-//		dragonAnimator.Hopping = running;
-		dragonAnimator.MoveSpeed = currentMoveDirection.magnitude;
-		dragonAnimator.Grounded = characterController.isGrounded;
-		dragonAnimator.Walking = currentMoveDirection.magnitude > 0;
 	}
 
 	void RigidbodyWalk() {
 		//			rigidBody.constraints = RigidbodyConstraints.FreezeRotation;
 		rigidBody.drag = rigidBodyDrag;
+		rigidBody.angularDrag = rigidBodyAngularDrag;
 
 		Vector3 inputVector = new Vector3 (right, 0, forward).normalized;
 		float inputSpeed = inputVector.magnitude;
 		float speed = rigidBody.velocity.magnitude;
 
-		if (inputSpeed >= minWalkInput) {
+		Quaternion targetRotation;
+
+		AnimatorStateInfo asi = dragonAnimator.animator.GetCurrentAnimatorStateInfo (0);
+		asi.IsName ("Attack");
+
+		if (inputSpeed >= minWalkInput && !isAttacking && !asi.IsName ("Attack")) {
+//			Debug.Break ();
 			//				Vector3 direction = rigidBody.velocity;
 			//				Vector3 surfaceParallel = direction - groundNormal * Vector3.Dot (direction, groundNormal);
 			//				Quaternion lookDirection = Quaternion.LookRotation (surfaceParallel, groundNormal);
@@ -125,15 +86,37 @@ public class Walk : MonoBehaviour {
 			moveDirection = Vector3.ProjectOnPlane (moveDirection, groundNormal).normalized * inputSpeed;
 			if (isFlaming) {
 				moveDirection *= flameWalkSpeed;
+			} else if (gradualRun) {
+				//if holding down movement, currentSpeed = walkSpeed
+				//if holding down movement > .95, start counting down delay
+				if (inputSpeed >= 0.95f) {
+					if (currentSpeed > walkSpeed || currentSpeedIncreaseDelay <= 0) {
+						currentSpeed += speedIncreaseRate * Time.fixedDeltaTime;
+					} else {
+						currentSpeedIncreaseDelay -= Time.fixedDeltaTime;
+					}
+				} else {
+					currentSpeedIncreaseDelay = speedIncreaseDelay;
+					currentSpeed -= speedIncreaseRate * Time.fixedDeltaTime;
+				}
+
+				currentSpeed = Mathf.Clamp (currentSpeed, walkSpeed, runSpeed);
+				moveDirection *= currentSpeed;
 			} else {
-				moveDirection *= walkSpeed;
+				if (isRunning) {
+					moveDirection *= runSpeed;
+				} else {
+					moveDirection *= walkSpeed;
+				}
 			}
 
-			Util.DrawRigidbodyRay (rigidBody, transform.position, moveDirection, Color.red);
+			Util.DrawRigidbodyRay (rigidBody, transform.position + rigidBody.centerOfMass, moveDirection, Color.red);
 			Util.DrawRigidbodyRay (rigidBody, transform.position, groundNormal, Color.red);
-			//				rigidBody.AddForce (moveDirection, walkForceMode);
-			rigidBody.AddForceAtPosition (moveDirection, transform.position, walkForceMode);
+//			Debug.Break ();
+			rigidBody.AddForce (moveDirection, walkForceMode);
+//			rigidBody.AddForceAtPosition (moveDirection, transform.position, walkForceMode);
 
+//			Debug.Break ();
 
 			Vector3 lookAt = transform.position;
 			//				if (rigidBody.velocity.magnitude > maxDirectTurnVelocity) {
@@ -144,17 +127,25 @@ public class Walk : MonoBehaviour {
 			//				lookAt = Vector3.ProjectOnPlane(lookAt, groundNormal);
 			//				lookAt = Vector3.Slerp(transform.forward, lookAt, walkTurnSpeed * Time.fixedDeltaTime);
 
-			//				Quaternion targetRotation = Quaternion.LookRotation(rigidBody.velocity, groundNormal);
-			Quaternion targetRotation = Quaternion.LookRotation(rigidBody.velocity);
-
+//			Quaternion targetRotation = Quaternion.LookRotation(rigidBody.velocity, groundNormal);
+//			Quaternion targetRotation = Quaternion.LookRotation(rigidBody.velocity);
+			targetRotation = Quaternion.LookRotation (moveDirection, groundNormal);
+//			Debug.Break ();
 			//				Vector3 velocity = rigidBody.velocity;
 			//				transform.LookAt (lookAt, groundNormal);
-			if (isFlaming) {
-				transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, flameTurnSpeed * Time.fixedDeltaTime);
-			} else {
-				transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, walkTurnSpeed * Time.fixedDeltaTime);
-			}
-			//				rigidBody.velocity = velocity;
+
+//				rigidBody.velocity = velocity;
+		} else {
+			targetRotation = Quaternion.LookRotation(transform.forward, groundNormal);
+
+			currentSpeedIncreaseDelay = speedIncreaseDelay;
+			currentSpeed = walkSpeed;
+		}
+
+		if (isFlaming) {
+			transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, flameTurnSpeed * Time.fixedDeltaTime);
+		} else {
+			transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, walkTurnSpeed * Time.fixedDeltaTime);
 		}
 
 
