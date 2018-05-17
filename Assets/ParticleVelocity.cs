@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class ParticleVelocity : MonoBehaviour {
 	public GameObject particleSpawned;
+	public float damage;
 
 	private ParticleSystem ps;
 	private ParticleSystem.MainModule mm;
@@ -46,5 +47,9 @@ public class ParticleVelocity : MonoBehaviour {
 			i++;
 		}
 
+		Burnable burnable = other.GetComponentInParent<Burnable> ();
+		if (burnable != null) {
+			burnable.SetOnFire (damage);
+		}
 	}
 }

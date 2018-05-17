@@ -45,6 +45,7 @@ public class Player : MonoBehaviour {
 	private Vector3 center;
 	private bool landed;
 	public float gravity;
+	public float groundGravity;
 	public float gravityForwardDistance;
 	public float gravityDownDistance;
 	public Vector3 centerOfGravity;
@@ -149,6 +150,16 @@ public class Player : MonoBehaviour {
 
 		glideV2Script.isGrounded = isGrounded && !isFlapping;
 		walkScript.isGrounded = isGrounded && !isFlapping;
+
+//		walkScript.isGrounded = isGrounded && !isFlapping;
+//		if (isFlapping) {
+//			glideV2Script.isGrounded = false;
+//		} else if (isGrounded) {
+//			glideV2Script.isGrounded = true;
+//		}
+		if (isGrounded) {
+			glideV2Script.wingsOut = false;
+		}
 	}
 
 
@@ -191,7 +202,7 @@ public class Player : MonoBehaviour {
 
 	void GroundGravity(){
 //				Vector3 gravityForce = -groundNormal * gravity;
-		Vector3 gravityForce = Vector3.down * gravity;
+		Vector3 gravityForce = Vector3.down * groundGravity;
 		rigidBody.AddForceAtPosition (gravityForce, transform.position - transform.up, ForceMode.Acceleration);
 //		rigidBody.AddForceAtPosition (gravityForce/2, transform.position - transform.up * 1 + transform.forward, ForceMode.Force);
 //		rigidBody.AddForceAtPosition (gravityForce/2, transform.position - transform.up * 1 - transform.forward, ForceMode.Force);
@@ -238,6 +249,10 @@ public class Player : MonoBehaviour {
 				RaycastHit hit;
 				if (Physics.Raycast (transform.position, -transform.up, out hit, 5f, layerMaskForGround)) {
 					groundNormal = hit.normal;
+
+					if (groundNormal.y <= 0.5f) {
+						groundNormal = Vector3.up;
+					}
 				}
 			}
 
@@ -295,43 +310,43 @@ public class Player : MonoBehaviour {
 		dragonAnimator.Attack = attack;
 
 		//handle if have grabbed object
-		if (grabScript.hasObject) {
-			int grabbedLayer = grabScript.grabbedObject.gameObject.layer;
-			if (grabbedLayer == PerchableLayer) {
-				perchScript.SetPerch (grabScript.grabbedObject, grabScript.grabbedLocation, grabScript.grabbedNormal, rigidBody.velocity.magnitude);
-			} else if (grabbedLayer == EnemyLayer) {
-			} else if (grabbedLayer == PreyLayer) {
-			}
+//		if (grabScript.hasObject) {
+//			int grabbedLayer = grabScript.grabbedObject.gameObject.layer;
+//			if (grabbedLayer == PerchableLayer) {
+//				perchScript.SetPerch (grabScript.grabbedObject, grabScript.grabbedLocation, grabScript.grabbedNormal, rigidBody.velocity.magnitude);
+//			} else if (grabbedLayer == EnemyLayer) {
+//			} else if (grabbedLayer == PreyLayer) {
+//			}
+//
+//			grabScript.ResetGrabbedObject();
+//		}
 
-			grabScript.ResetGrabbedObject();
-		}
-
-		if (perchScript.isPerching) {
-			glideV2Script.pitchLeft = 0;
-			glideV2Script.pitchRight = 0;
-			glideV2Script.yaw = 0;
-			glideV2Script.rollLeft = 0;
-			glideV2Script.rollRight = 0;
-			glideV2Script.forward = 0;
-			glideV2Script.right = 0;
-			glideV2Script.flapSpeed = 0;
-			glideV2Script.flapDirection = 0;
-
-			walkScript.forward = 0;
-			walkScript.right = 0;
-
-			rigidBody.velocity = Vector3.zero;
-//			rigidBody.constraints = RigidbodyConstraints.FreezePosition;
-
-			grabScript.grab = false;
-
-			if ((perchScript.isPerching && Input.GetAxis ("Flap") != 0)) {
-				perchScript.ResetPerch ();
-			}
-		}
+//		if (perchScript.isPerching) {
+//			glideV2Script.pitchLeft = 0;
+//			glideV2Script.pitchRight = 0;
+//			glideV2Script.yaw = 0;
+//			glideV2Script.rollLeft = 0;
+//			glideV2Script.rollRight = 0;
+//			glideV2Script.forward = 0;
+//			glideV2Script.right = 0;
+//			glideV2Script.flapSpeed = 0;
+//			glideV2Script.flapDirection = 0;
+//
+//			walkScript.forward = 0;
+//			walkScript.right = 0;
+//
+//			rigidBody.velocity = Vector3.zero;
+////			rigidBody.constraints = RigidbodyConstraints.FreezePosition;
+//
+//			grabScript.grab = false;
+//
+//			if ((perchScript.isPerching && Input.GetAxis ("Flap") != 0)) {
+//				perchScript.ResetPerch ();
+//			}
+//		}
 
 		//as long as we aren't perched, do normal controls
-		if(!perchScript.isPerching){
+//		if(!perchScript.isPerching){
 			if (twoStickFlight) {
 				TwoStickFlight ();
 			} else {
@@ -367,7 +382,7 @@ public class Player : MonoBehaviour {
 			if (grab) {
 				interactorScript.Pickup ();
 			}
-		}
+//		}
 	}
 
 	void TwoStickFlight() {

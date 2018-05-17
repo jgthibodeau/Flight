@@ -64,4 +64,8 @@ public class Health : MonoBehaviour, IHittable {
 	public void Reset() {
 		currentHealth = maxHealth;
 	}
+
+	public float Percentage() {
+		return currentHealth / maxHealth;
+	}
 }

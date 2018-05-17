@@ -53,7 +53,14 @@ public class Walk : MonoBehaviour {
 	void FixedUpdate () {
 		if (isGrounded) {
 			RigidbodyWalk ();
+		} else {
+			ResetWalkSpeed ();
 		}
+	}
+
+	void ResetWalkSpeed() {
+		currentSpeedIncreaseDelay = speedIncreaseDelay;
+		currentSpeed = walkSpeed;
 	}
 
 	void RigidbodyWalk() {
@@ -61,7 +68,7 @@ public class Walk : MonoBehaviour {
 		rigidBody.drag = rigidBodyDrag;
 		rigidBody.angularDrag = rigidBodyAngularDrag;
 
-		Vector3 inputVector = new Vector3 (right, 0, forward).normalized;
+		Vector3 inputVector = Vector3.ClampMagnitude(new Vector3 (right, 0, forward), 1);
 		float inputSpeed = inputVector.magnitude;
 		float speed = rigidBody.velocity.magnitude;
 
@@ -86,6 +93,7 @@ public class Walk : MonoBehaviour {
 			moveDirection = Vector3.ProjectOnPlane (moveDirection, groundNormal).normalized * inputSpeed;
 			if (isFlaming) {
 				moveDirection *= flameWalkSpeed;
+				ResetWalkSpeed ();
 			} else if (gradualRun) {
 				//if holding down movement, currentSpeed = walkSpeed
 				//if holding down movement > .95, start counting down delay
@@ -128,18 +136,21 @@ public class Walk : MonoBehaviour {
 			//				lookAt = Vector3.Slerp(transform.forward, lookAt, walkTurnSpeed * Time.fixedDeltaTime);
 
 //			Quaternion targetRotation = Quaternion.LookRotation(rigidBody.velocity, groundNormal);
-//			Quaternion targetRotation = Quaternion.LookRotation(rigidBody.velocity);
-			targetRotation = Quaternion.LookRotation (moveDirection, groundNormal);
+			//			Quaternion targetRotation = Quaternion.LookRotation(rigidBody.velocity);
+			if (moveDirection.y > rigidBody.velocity.y) {
+				targetRotation = Quaternion.LookRotation (moveDirection, groundNormal);
+			} else {
+				targetRotation = Quaternion.LookRotation (rigidBody.velocity, groundNormal);
+			}
 //			Debug.Break ();
 			//				Vector3 velocity = rigidBody.velocity;
 			//				transform.LookAt (lookAt, groundNormal);
 
 //				rigidBody.velocity = velocity;
 		} else {
-			targetRotation = Quaternion.LookRotation(transform.forward, groundNormal);
-
-			currentSpeedIncreaseDelay = speedIncreaseDelay;
-			currentSpeed = walkSpeed;
+			Vector3 forward = Vector3.ProjectOnPlane (transform.forward, groundNormal);
+			targetRotation = Quaternion.LookRotation(forward, groundNormal);
+			ResetWalkSpeed ();
 		}
 
 		if (isFlaming) {

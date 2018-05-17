@@ -14,6 +14,8 @@ public class Fire : MonoBehaviour {
 
 	public float minPitch, maxPitch;
 
+	public float damage;
+
 	void Start () {
 		killScript = GetComponent<Kill> ();
 		remainingLife = killScript.stopParticlesTimeInSeconds;
@@ -42,6 +44,13 @@ public class Fire : MonoBehaviour {
 	void OnCollisionEnter(Collision collision) {
 		if (collision.gameObject.tag == "Fire") {
 			collision.gameObject.GetComponent<Kill> ().Die ();
+		}
+	}
+
+	void OnCollisionStay(Collision collision) {
+		Burnable burnable = collision.gameObject.GetComponentInParent<Burnable> ();
+		if (burnable != null) {
+			burnable.SetOnFire (damage);
 		}
 	}
 }
