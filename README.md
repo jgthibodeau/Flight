@@ -1,63 +1,36 @@
 # Flight
 In-progress Unity game where you play a bird and must migrate. Eventually you will need to constantly move in order to avoid the changing seasons, will need to hunt, and will need to avoid predator animals.
 
-Current build available here: http://jgthibodeau.github.io/Flight
+Latest build available here: https://jgthibodeau.github.io/FlightBuilds/latest
 
 Xbox 360 controller recomended
 
 ---
 
-#### Controls
-- Left Stick/WASD - Adjust direction that flapping your wings will move you (up if none pressed), or move if on ground
-- Right Stick/Arrow Keys - Pitch and roll
-- Right Trigger/Space - Hold to flap your wings
-- Left Trigger/Left Shift - Hold when near a tree to perch in it
+### Controls
+#### General
+- Space - Flap wings
+- Q - Breath fire
+- Arrows - Aim fire
+- Alt - Pick up items
+- C - Re-center camera
 
----
+#### Ground
+- WASD - Move
+- E - Attack
 
-## TODO
+#### Flight
+- W/S - Wings in/out - pitch
+- A/D - Roll
 
-- Talons
-	- animate feet grabbing
-	- attack prey
+#### Flapping
+- Space - Flap upward
+- Space + W - Flap forward
+- Space + S - Flap backward
 
-- Make land movement better
-	- prevent slipping on normal terrain
-	- hop instead of walk? 
-
-- Day/night
-	- different creatures at night?
-	- moon phases
-
-- Weather
-	- clouds
-	- rain/snow
-	- wind
-
-- Seasons
-	- need to stay ahead of winter
-	- change terrain/foliage color, trees drop leaves
-
-- Terrain
-	- better generation
-	- better water
-	- trees/foliage
-	- structures
-
-- Nests
-	- find/make nest model
-	- build, or find nests
-	- replenish health
-	- allow to skip night?
-
-- Enemies
-	- hunt player
-	- need ways to be avoidable
-
-- Prey
-	- handle being grabbed
-
-- Stamina
-	- max stamina drains over time
-	- need to eat to replenish
-	- drains faster if colder?
+#### Tips
+- After running for a while, you will pick up speed
+- You can aim your flame breath in the air, and on the ground
+- You can only flap for a limited time, make sure to take breaks to regain stamina (feather icon)
+- Flap forward to gain speed, and backward to slow down or even reverse in the air
+- Flapping upward from the ground initially is the best way to take flight</li>
