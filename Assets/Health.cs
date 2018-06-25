@@ -9,12 +9,25 @@ public class Health : MonoBehaviour, IHittable {
 //	private Respawnable respawnable;
 
 	void Start() {
-		Reset ();
+//		Reset ();
 //		respawnable = GetComponent<Respawnable> ();
 	}
 
 	public void Hit(float damage, GameObject hitter) {
 		RpcTakeDamage (damage);
+	}
+
+	private float previouslyHealedHealth;
+	public bool Heal(float amount) {
+		bool healing = (currentHealth < maxHealth) && (previouslyHealedHealth <= currentHealth);
+
+		if (healing) {
+			currentHealth = Mathf.Clamp (currentHealth + amount, 0, maxHealth);
+		}
+
+		previouslyHealedHealth = currentHealth;
+
+		return healing;
 	}
 
 //	[ClientRpc]

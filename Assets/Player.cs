@@ -16,6 +16,7 @@ public class Player : MonoBehaviour {
 	private Stamina staminaScript;
 	private Interactor interactorScript;
 	private FlameBreath flameBreathScript;
+	private Health healthScript;
 
 	private int PerchableLayer;
 	private int EnemyLayer;
@@ -52,6 +53,10 @@ public class Player : MonoBehaviour {
 	public ForceMode gravityForceMode;
 	public bool keepUprightAlways;
 
+	public float minHealRate;
+	public float maxHealRate;
+	public float healRateRate;
+	public float currentHealRate;
 
 	public float minWaterPitch = 0.9f;
 	public float maxWaterPitch = 1.1f;
@@ -83,6 +88,7 @@ public class Player : MonoBehaviour {
 		staminaScript = transform.GetComponent<Stamina> ();
 		interactorScript = transform.GetComponent<Interactor> ();
 		flameBreathScript = transform.GetComponent<FlameBreath> ();
+		healthScript = transform.GetComponent<Health> ();
 
 		glideV2Script.birdAnimator = birdAnimator;
 		glideV2Script.dragonAnimator = dragonAnimator;
@@ -298,91 +304,72 @@ public class Player : MonoBehaviour {
 	}
 
 	public void GetInput () {
+		flameBreathScript.flameOn = false;
+		dragonAnimator.Flame = false;
+		walkScript.isFlaming = false;
+		dragonAnimator.Attack = false;
+		dragonAnimator.Healing = false;
+		rotateHead = false;
+
+		walkScript.forward = 0;
+		walkScript.right = 0;
+
+		glideV2Script.flapSpeed = 0;
+
+		bool heal = Util.GetButton ("Heal");
+		bool isHealing = heal && isGrounded && speed <= 5f;
+		if (isHealing && healthScript.Heal (currentHealRate * Time.deltaTime)) {
+			currentHealRate = Mathf.Clamp (currentHealRate + healRateRate * Time.deltaTime, minHealRate, maxHealRate);
+			dragonAnimator.Healing = true;
+			return;
+		} else {
+			currentHealRate = minHealRate;
+		}
+
 		bool flame = Util.GetButton ("Flame");
 		flameBreathScript.flameOn = flame;
 		dragonAnimator.Flame = flame;
 		walkScript.isFlaming = flame;
-
-		bool run = Util.GetButton ("Run");
-		walkScript.isRunning = run;
+		rotateHead = true;
 
 		bool attack = Util.GetButton ("Attack");
 		dragonAnimator.Attack = attack;
 
-		//handle if have grabbed object
-//		if (grabScript.hasObject) {
-//			int grabbedLayer = grabScript.grabbedObject.gameObject.layer;
-//			if (grabbedLayer == PerchableLayer) {
-//				perchScript.SetPerch (grabScript.grabbedObject, grabScript.grabbedLocation, grabScript.grabbedNormal, rigidBody.velocity.magnitude);
-//			} else if (grabbedLayer == EnemyLayer) {
-//			} else if (grabbedLayer == PreyLayer) {
-//			}
-//
-//			grabScript.ResetGrabbedObject();
-//		}
+		if (twoStickFlight) {
+			TwoStickFlight ();
+		} else {
+			OneStickFlight ();
+		}
 
-//		if (perchScript.isPerching) {
-//			glideV2Script.pitchLeft = 0;
-//			glideV2Script.pitchRight = 0;
-//			glideV2Script.yaw = 0;
-//			glideV2Script.rollLeft = 0;
-//			glideV2Script.rollRight = 0;
-//			glideV2Script.forward = 0;
-//			glideV2Script.right = 0;
-//			glideV2Script.flapSpeed = 0;
-//			glideV2Script.flapDirection = 0;
-//
-//			walkScript.forward = 0;
-//			walkScript.right = 0;
-//
-//			rigidBody.velocity = Vector3.zero;
-////			rigidBody.constraints = RigidbodyConstraints.FreezePosition;
-//
-//			grabScript.grab = false;
-//
-//			if ((perchScript.isPerching && Input.GetAxis ("Flap") != 0)) {
-//				perchScript.ResetPerch ();
-//			}
-//		}
+		walkScript.forward = Util.GetAxis ("Vertical");
+		walkScript.right = Util.GetAxis ("Horizontal");
 
-		//as long as we aren't perched, do normal controls
-//		if(!perchScript.isPerching){
-			if (twoStickFlight) {
-				TwoStickFlight ();
-			} else {
-				OneStickFlight ();
-			}
+		float flapSpeed = Util.GetAxis ("Flap");
+		if (staminaScript.HasStamina ()) {
+			glideV2Script.flapSpeed = Util.GetAxis ("Flap");
+		} else {
+			glideV2Script.flapSpeed = 0;
+		}
+		staminaScript.usingStamina = flapSpeed != 0;
 
-			walkScript.forward = Util.GetAxis ("Vertical");
-			walkScript.right = Util.GetAxis ("Horizontal");
+		if (glideV2Script.flapSpeed == 0) {
+			glideV2Script.wingsOut = Util.GetButtonDown ("Close Wings") ^ glideV2Script.wingsOut;
+		} else {
+			glideV2Script.wingsOut = true;
+		}
 
-			float flapSpeed = Util.GetAxis ("Flap");
-			if (staminaScript.HasStamina ()) {
-				glideV2Script.flapSpeed = Util.GetAxis ("Flap");
-			} else {
-				glideV2Script.flapSpeed = 0;
-			}
-			staminaScript.usingStamina = flapSpeed != 0;
+		isFlapping = flapSpeed > 0;
 
-			if (glideV2Script.flapSpeed == 0) {
-				glideV2Script.wingsOut = Util.GetButtonDown ("Close Wings") ^ glideV2Script.wingsOut;
-			} else {
-				glideV2Script.wingsOut = true;
-			}
+//		rigidBody.constraints = RigidbodyConstraints.None;
 
-			isFlapping = flapSpeed > 0;
+		bool grabHeld = Util.GetButton ("Grab");
+		bool grab = Util.GetButtonDown ("Grab");
+		grabScript.grab = grab;
 
-//			rigidBody.constraints = RigidbodyConstraints.None;
-
-			bool grabHeld = Util.GetButton ("Grab");
-			bool grab = Util.GetButtonDown ("Grab");
-			grabScript.grab = grab;
-
-//			if (grab && interactorScript.itemHolder.HasItem () || grabHeld && !interactorScript.itemHolder.HasItem ()) {
-			if (grab) {
-				interactorScript.Pickup ();
-			}
-//		}
+//		if (grab && interactorScript.itemHolder.HasItem () || grabHeld && !interactorScript.itemHolder.HasItem ()) {
+		if (grab) {
+			interactorScript.Pickup ();
+		}
 	}
 
 	void TwoStickFlight() {
@@ -479,8 +466,11 @@ public class Player : MonoBehaviour {
 	public float rotateSpeed;
 	private float headHoriz = 0;
 	private float headVert = 0;
+	private bool rotateHead = false;
 	void LateUpdate() {
-		RotateHead ();
+		if (rotateHead) {
+			RotateHead ();
+		}
 	}
 
 	void RotateHead(){

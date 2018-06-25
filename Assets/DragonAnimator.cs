@@ -3,7 +3,7 @@ using System.Collections;
 
 public class DragonAnimator : MonoBehaviour {
 	public float FadeLength;
-	public bool Flapping, Grounded, WingsOut, Walking, Hopping, InWater, Flame, Attack;
+	public bool Flapping, Grounded, WingsOut, Walking, Hopping, InWater, Flame, Attack, Healing;
 	private bool Attacking;
 	public float FlapSpeed;
 	public float MoveSpeed;
@@ -56,6 +56,7 @@ public class DragonAnimator : MonoBehaviour {
 		animator.SetBool ("InWater", InWater);
 		animator.SetBool ("Flame", Flame);
 		animator.SetBool ("Attacking", Attack);
+		animator.SetBool ("Healing", Healing);
 
 		animator.SetFloat ("MoveSpeed", MoveSpeed);
 		animator.SetFloat ("WalkSpeed", WalkScale * MoveSpeed);

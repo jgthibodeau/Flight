@@ -5,9 +5,13 @@ using UnityEngine;
 public class ParticleVelocity : MonoBehaviour {
 	public GameObject particleSpawned;
 	public float damage;
+	public bool collisionsEnabled = true;
+	public bool customInheritVelocity = true;
+	public float scale = 2f;
 
 	private ParticleSystem ps;
 	private ParticleSystem.MainModule mm;
+	private ParticleSystem.CollisionModule cm;
 	private ParticleSystem.MinMaxCurve particleSpeed;
 	private float originalSpeed;
 	private Rigidbody rb;
@@ -18,8 +22,9 @@ public class ParticleVelocity : MonoBehaviour {
 	void Start () {
 		ps = GetComponent<ParticleSystem> ();
 		mm = ps.main;
-		particleSpeed = mm.startSpeed;
-		originalSpeed = particleSpeed.constant;
+		cm = ps.collision;
+//		particleSpeed = mm.startSpeed;
+		originalSpeed = mm.startSpeed.constant;
 
 		rb = GetComponentInParent<Rigidbody> ();
 
@@ -27,12 +32,20 @@ public class ParticleVelocity : MonoBehaviour {
 	}
 
 	void Update () {
-		float forwardVelocity = Vector3.Dot (rb.velocity, transform.forward);
-		particleSpeed.constant = originalSpeed + forwardVelocity;
-		mm.startSpeed = particleSpeed;
 //		ps.main = mm;
 
 //		Debug.Log (ps+" particle speed: " + particleSpeed.constant);
+		cm.enabled = collisionsEnabled;
+	}
+
+	void LateUpdate() {
+		if (customInheritVelocity) {
+			float forwardVelocity = Vector3.Dot (rb.velocity, transform.forward) * scale;
+//			float forwardVelocity = Vector3.Dot (rb.velocity, rb.transform.forward) * scale;
+//			particleSpeed.constant = originalSpeed + forwardVelocity;
+//			mm.startSpeed = particleSpeed;
+			mm.startSpeed = originalSpeed + forwardVelocity;
+		}
 	}
 	
 	void OnParticleCollision(GameObject other) {
