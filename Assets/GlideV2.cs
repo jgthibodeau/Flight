@@ -42,6 +42,8 @@ public class GlideV2 : MonoBehaviour {
 	public float flapForwardDistance;
 	public float flapUpDistance;
 	public float flapOutDistance;
+	public float flapHoverUprightRotationSpeed = 1f;
+	public float flapHoverRotationSpeed = 1f;
 	public ForceMode flapForceMode;
 
 	public float wingLiftSurfaceArea;
@@ -87,7 +89,7 @@ public class GlideV2 : MonoBehaviour {
 	private Vector3 rightWingInitialRotation;
 
 	//Inputs
-	[HideInInspector]
+//	[HideInInspector]
 //	public float roll, pitch, tailPitch, yaw, forward, right, flapSpeed, flapDirection;
 	public float rollLeft, rollRight, pitchLeft, pitchRight, tailPitch, yaw, forward, right, flapSpeed, flapDirection;
 	[HideInInspector]
@@ -195,6 +197,7 @@ public class GlideV2 : MonoBehaviour {
 	public int flapTicks = 10;
 	public int currentFlapTick = 0;
 	public bool flapping;
+	public bool backFlapHover;
 	public float[] flapForces;
 	public float[] flapLiftPercents;
 
@@ -259,43 +262,79 @@ public class GlideV2 : MonoBehaviour {
 		}
 
 		if (flapping) {
+//			pitchLeft = 0f;
+//			pitchRight = 0f;
+
 			float realFlapSpeed = flapForces [currentFlapTick] * flapSpeed;
+			realFlapSpeed *= flapForwardCoef * flapScale * 0.5f;
 
-//			Vector3 flapForceDirectionLeft = (transform.forward * (1 + pitchLeft) / 2) + (transform.up * (1 - pitchLeft) / 2);
-
-//			Vector3 flapForceDirectionLeft = (transform.forward * (pitchLeft) / 3) + (transform.up * (1 - pitchLeft) / 3) + (transform.right * (rollLeft) / 2);
-
-//			Vector3 flapForceDirectionLeft = Vector3.ClampMagnitude(transform.forward * pitchLeft - transform.right * rollLeft, 1);
-//			float flapForceMagnitudeLeft = flapForceDirectionLeft.magnitude;
-//			flapForceDirectionLeft += transform.up * (1 - flapForceMagnitudeLeft*0.9f);
-
-			float flapLeft = -rollLeft;
-			Vector3 flapForceDirectionLeft = (transform.forward * (flapLeft) / 2) + (transform.up * (1 - Mathf.Abs(flapLeft)) / 2);
-
-			Vector3 flapForceLeft = flapForceDirectionLeft.normalized * flapForwardCoef * flapScale * realFlapSpeed / 2;
-//			Vector3 flapPositionLeft = transform.position + transform.up * playerScript.centerOfGravity.y + transform.forward * playerScript.centerOfGravity.z + transform.up * flapUpDistance + transform.forward * flapForwardDistance - transform.right * flapOutDistance;
-//			Vector3 flapPositionLeft = transform.position + transform.up * flapUpDistance + transform.forward * flapForwardDistance - transform.right * flapOutDistance;
 			Vector3 flapPositionLeft = transform.position + transform.up * playerScript.centerOfGravity.y + transform.forward * playerScript.centerOfGravity.z - transform.right * flapOutDistance;
-			rigidBody.AddForceAtPosition (flapForceLeft, flapPositionLeft, flapForceMode);
-			Util.DrawRigidbodyRay (rigidBody, flapPositionLeft, flapForceLeft, Color.red);
-
-//			Vector3 flapForceDirectionRight = (transform.forward * (1 + pitchRight) / 2) + (transform.up * (1 - pitchRight) / 2);
-
-//			Vector3 flapForceDirectionRight = (transform.forward * (1 + pitchRight) / 2) + (transform.up * (1 - pitchRight) / 2) + (transform.right * (rollRight) / 2);
-
-//			Vector3 flapForceDirectionRight = Vector3.ClampMagnitude(transform.forward * pitchRight + transform.right * rollRight, 1);
-//			float flapForceMagnitudeRight = flapForceDirectionRight.magnitude;
-//			flapForceDirectionRight += transform.up * (1 - flapForceMagnitudeRight*0.9f);
-
-			float flapRight = -rollRight;
-			Vector3 flapForceDirectionRight = (transform.forward * (flapRight) / 2) + (transform.up * (1 - Mathf.Abs(flapRight)) / 2);
-
-			Vector3 flapForceRight = flapForceDirectionRight.normalized * flapForwardCoef * flapScale * realFlapSpeed / 2;
-//			Vector3 flapPositionRight = transform.position + transform.up * playerScript.centerOfGravity.y + transform.forward * playerScript.centerOfGravity.z + transform.up * flapUpDistance + transform.forward * flapForwardDistance + transform.right * flapOutDistance;
-//			Vector3 flapPositionRight = transform.position + transform.up * flapUpDistance + transform.forward * flapForwardDistance + transform.right * flapOutDistance;
 			Vector3 flapPositionRight = transform.position + transform.up * playerScript.centerOfGravity.y + transform.forward * playerScript.centerOfGravity.z + transform.right * flapOutDistance;
-			rigidBody.AddForceAtPosition (flapForceRight, flapPositionRight, flapForceMode);
-			Util.DrawRigidbodyRay (rigidBody, flapPositionRight, flapForceRight, Color.blue);
+
+			//if backFlapHover is selected, and we are flapping backwards
+			if (backFlapHover && rollLeft > 0 && rollRight > 0) {
+				Vector3 flapForceDirectionLeft = Vector3.zero;
+				Vector3 flapForceDirectionRight = Vector3.zero;
+
+				//apply force until not moving forward
+				float forwardVelocity = Vector3.Dot (rigidBody.velocity, transform.forward);
+				if (forwardVelocity > 0) {
+					flapForceDirectionLeft -= transform.forward;
+					flapForceDirectionRight -= transform.forward;
+				}
+
+				//apply force until not moving down
+				float downVelocity = Vector3.Dot (rigidBody.velocity, Vector3.down);
+				if (downVelocity > 0) {
+					flapForceDirectionLeft += Vector3.up;
+					flapForceDirectionRight += Vector3.up;
+				}
+
+				Vector3 flapForceLeft = flapForceDirectionLeft.normalized * realFlapSpeed;
+				Vector3 flapForceRight = flapForceDirectionRight.normalized * realFlapSpeed;
+
+				rigidBody.AddForceAtPosition (flapForceLeft, flapPositionLeft, flapForceMode);
+				Util.DrawRigidbodyRay (rigidBody, flapPositionLeft, flapForceLeft, Color.red);
+
+				rigidBody.AddForceAtPosition (flapForceRight, flapPositionRight, flapForceMode);
+				Util.DrawRigidbodyRay (rigidBody, flapPositionRight, flapForceRight, Color.blue);
+
+				//rotate to become upright
+				Quaternion desiredForward;
+//				if (Vector3.Angle (transform.up, Vector3.up) > 10) {
+					Vector3 projectedForward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
+					desiredForward = Quaternion.Slerp (rigidBody.rotation, Quaternion.LookRotation(projectedForward, Vector3.up), Time.deltaTime * flapHoverUprightRotationSpeed);
+//				} else {
+//					desiredForward = Quaternion.Euler (Vector3.ProjectOnPlane (transform.forward, Vector3.up));
+				//				}
+//				Debug.DrawRay (rigidBody.position, desiredForward.eulerAngles.normalized * 5, Color.green);
+				rigidBody.MoveRotation (desiredForward);
+
+				//rotate instead of rolling
+				float rotateAmount = Mathf.Abs(pitchLeft) - Mathf.Abs(pitchRight);
+				Vector3 rotateForward = transform.forward * (1 - Mathf.Abs(rotateAmount)) + transform.right * rotateAmount;
+				desiredForward = Quaternion.Slerp (rigidBody.rotation, Quaternion.LookRotation (rotateForward, Vector3.up), Time.deltaTime * flapHoverRotationSpeed);
+
+//				Debug.DrawRay (rigidBody.position, desiredForward.eulerAngles * 5, Color.cyan);
+				rigidBody.MoveRotation (desiredForward);
+
+			} else {
+
+
+				float flapLeft = -2 * rollLeft;
+//				Vector3 flapForceDirectionLeft = (transform.forward * (flapLeft) * 0.75f) + (transform.up * (1 - Mathf.Abs (flapLeft)) * 0.25f);
+				Vector3 flapForceDirectionLeft = (transform.forward * (flapLeft)) + (transform.up * (1 - Mathf.Abs (flapLeft)));
+				Vector3 flapForceLeft = flapForceDirectionLeft.normalized * realFlapSpeed;
+				rigidBody.AddForceAtPosition (flapForceLeft, flapPositionLeft, flapForceMode);
+				Util.DrawRigidbodyRay (rigidBody, flapPositionLeft, flapForceLeft, Color.red);
+
+				float flapRight = -2 * rollRight;
+//				Vector3 flapForceDirectionRight = (transform.forward * (flapRight) * 0.75f) + (transform.up * (1 - Mathf.Abs (flapRight)) * 0.25f);
+				Vector3 flapForceDirectionRight = (transform.forward * (flapRight)) + (transform.up * (1 - Mathf.Abs (flapRight)));
+				Vector3 flapForceRight = flapForceDirectionRight.normalized * realFlapSpeed;
+				rigidBody.AddForceAtPosition (flapForceRight, flapPositionRight, flapForceMode);
+				Util.DrawRigidbodyRay (rigidBody, flapPositionRight, flapForceRight, Color.blue);
+			}
 		}
 	}
 

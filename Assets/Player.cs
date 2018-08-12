@@ -17,12 +17,15 @@ public class Player : MonoBehaviour {
 	private Interactor interactorScript;
 	private FlameBreath flameBreathScript;
 	private Health healthScript;
+	public PlayerCameraController playerCameraController;
 
 	private int PerchableLayer;
 	private int EnemyLayer;
 	private int PreyLayer;
 
 	public bool twoStickFlight = true;
+	public bool flameAdjustCamera = true;
+	public bool useHeadCamera = false;
 
 	public ThirdPersonCamera.Follow follow;
 
@@ -34,6 +37,7 @@ public class Player : MonoBehaviour {
 	public bool inWater;
 	public bool isGrounded;
 	public bool isUpright;
+	public bool isFlaming;
 	public float uprightThreshold;
 	public float speed;
 	public float ragdollSpeed;
@@ -163,9 +167,9 @@ public class Player : MonoBehaviour {
 //		} else if (isGrounded) {
 //			glideV2Script.isGrounded = true;
 //		}
-		if (isGrounded) {
-			glideV2Script.wingsOut = false;
-		}
+//		if (isGrounded) {
+//			glideV2Script.wingsOut = false;
+//		}
 	}
 
 
@@ -300,7 +304,19 @@ public class Player : MonoBehaviour {
 		dragonAnimator.InWater = inWater;
 		dragonAnimator.Grounded = isGrounded;
 
-//		RotateHead ();
+		if (useHeadCamera) {
+			if (Util.GetButtonDown ("Center Camera")) {
+				playerCameraController.ToggleCamera ();
+			}
+		}
+
+		if (flameAdjustCamera) {
+			if (isFlaming && rigidBody.velocity.magnitude < 5f) {
+				playerCameraController.EnableHeadCamera ();
+			} else {
+				playerCameraController.EnableMainCamera ();
+			}
+		}
 	}
 
 	public void GetInput () {
@@ -309,7 +325,6 @@ public class Player : MonoBehaviour {
 		walkScript.isFlaming = false;
 		dragonAnimator.Attack = false;
 		dragonAnimator.Healing = false;
-		rotateHead = false;
 
 		walkScript.forward = 0;
 		walkScript.right = 0;
@@ -326,20 +341,33 @@ public class Player : MonoBehaviour {
 			currentHealRate = minHealRate;
 		}
 
-		bool flame = Util.GetButton ("Flame");
-		flameBreathScript.flameOn = flame;
-		dragonAnimator.Flame = flame;
-		walkScript.isFlaming = flame;
-		rotateHead = true;
+		isFlaming = Util.GetButton ("Flame") && !interactorScript.itemHolder.HasItem ();
+		flameBreathScript.flameOn = isFlaming;
+		dragonAnimator.Flame = isFlaming;
+		walkScript.isFlaming = isFlaming;
 
 		bool attack = Util.GetButton ("Attack");
 		dragonAnimator.Attack = attack;
+
+		if (isFlaming) {
+			rotateHead = true;
+		} else {
+			rotateHead = false;
+		}
 
 		if (twoStickFlight) {
 			TwoStickFlight ();
 		} else {
 			OneStickFlight ();
 		}
+
+//		if (twoStickFlight) {
+//			rotateHead = false;
+//			TwoStickFlight ();
+//		} else {
+//			rotateHead = true;
+//			OneStickFlight ();
+//		}
 
 		walkScript.forward = Util.GetAxis ("Vertical");
 		walkScript.right = Util.GetAxis ("Horizontal");
@@ -352,11 +380,11 @@ public class Player : MonoBehaviour {
 		}
 		staminaScript.usingStamina = flapSpeed != 0;
 
-		if (glideV2Script.flapSpeed == 0) {
-			glideV2Script.wingsOut = Util.GetButtonDown ("Close Wings") ^ glideV2Script.wingsOut;
-		} else {
+//		if (glideV2Script.flapSpeed == 0) {
+//			glideV2Script.wingsOut = Util.GetButtonDown ("Close Wings") ^ glideV2Script.wingsOut;
+//		} else {
 			glideV2Script.wingsOut = true;
-		}
+//		}
 
 		isFlapping = flapSpeed > 0;
 
@@ -369,6 +397,9 @@ public class Player : MonoBehaviour {
 //		if (grab && interactorScript.itemHolder.HasItem () || grabHeld && !interactorScript.itemHolder.HasItem ()) {
 		if (grab) {
 			interactorScript.Pickup ();
+		}
+		if (!grabHeld) {
+			interactorScript.Drop ();
 		}
 	}
 
@@ -462,27 +493,39 @@ public class Player : MonoBehaviour {
 	}
 
 	public Transform[] headComponents;
-	public float rotateScale;
+	public float headRotateUpScale;
+	public float headRotateDownScale;
+	public float headRotateSideScale;
 	public float rotateSpeed;
 	private float headHoriz = 0;
 	private float headVert = 0;
 	private bool rotateHead = false;
 	void LateUpdate() {
-		if (rotateHead) {
-			RotateHead ();
-		}
+		RotateHead ();
 	}
 
 	void RotateHead(){
-		float desiredHeadHoriz = Util.GetAxis ("Horizontal Right") * rotateScale;
-		float desiredHeadVert = Util.GetAxis ("Vertical Right") * rotateScale;
+
+		float desiredHeadHoriz = 0f;
+		float desiredHeadVert = 0f;
+
+//		if (rotateHead && isGrounded) {
+//		if (isGrounded) {
+		desiredHeadHoriz = Util.GetAxis ("Horizontal Right") * headRotateSideScale;
+		desiredHeadVert = Util.GetAxis ("Vertical Right");
+		if (desiredHeadVert > 0) {
+			desiredHeadVert *= headRotateUpScale;
+		} else {
+			desiredHeadVert *= headRotateDownScale;
+		}
+//		}
 
 		headHoriz = Mathf.Lerp (headHoriz, desiredHeadHoriz, rotateSpeed * Time.deltaTime);
-//		headHoriz = Mathf.SmoothDamp(headHoriz, desiredHeadHoriz, ref yVelocity, smoothTime)
 		headVert = Mathf.Lerp (headVert, desiredHeadVert, rotateSpeed * Time.deltaTime);
 
 		foreach (Transform t in headComponents) {
 			Vector3 rot = t.eulerAngles;
+//			Vector3 rot = t.eulerAngles.normalized;
 			rot.y += headHoriz;
 			rot.z += headVert;
 			t.eulerAngles = rot;

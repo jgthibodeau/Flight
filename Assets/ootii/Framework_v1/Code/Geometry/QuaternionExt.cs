@@ -310,7 +310,7 @@ namespace com.ootii.Geometry
             rTwist.w = rThis.w;
 
             // qTwist.Normalize
-            rTwist = rTwist.Normalize();
+			rTwist = rTwist.normalized;
 
             rSwing = rThis * Quaternion.Inverse(rTwist);
         }

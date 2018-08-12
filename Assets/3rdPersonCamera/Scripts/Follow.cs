@@ -4,7 +4,7 @@ using System.Collections;
 namespace ThirdPersonCamera
 {
 	public enum FOLLOW_TYPE {
-		TIGHT, LOOSE, NONE
+		TIGHT, LOOSE, EXACT, NONE
 	}
     public class Follow : MonoBehaviour
     {
@@ -13,6 +13,7 @@ namespace ThirdPersonCamera
 		public FOLLOW_TYPE followType = FOLLOW_TYPE.TIGHT;
         public bool alignOnSlopes = true;
 
+		public float minTightAngle = 1f;
 		public float minAngleToTurn = 0.1f;
         public float rotationSpeed = 1.0f;
         public float rotationSpeedSlopes = 0.5f;
@@ -22,12 +23,12 @@ namespace ThirdPersonCamera
 
         private Vector3 prevPosition;
 
-        CameraController cc;
+        public CameraController cc;
 		Rigidbody targetRb;
 
         void Start()
         {
-            cc = GetComponent<CameraController>();
+//            cc = GetComponent<CameraController>();
 			targetRb = cc.target.GetComponent<Rigidbody> ();
         }
 
@@ -57,24 +58,11 @@ namespace ThirdPersonCamera
 			case FOLLOW_TYPE.TIGHT:
 				cc.slerpPosition = true;
 
-				if (movementDirection.magnitude > 0) {
-					toRotation = Quaternion.LookRotation ((Vector3.ClampMagnitude (movementDirection, 1).normalized + tiltVector), upVector);
-				} else {
-					toRotation = Quaternion.LookRotation (cc.target.forward + tiltVector, upVector);
-				}
+				toRotation = Quaternion.LookRotation (cc.target.forward + tiltVector, upVector);
+				Debug.Log(""+cc.target.forward +" "+ tiltVector+" "+ upVector+" "+ toRotation);
 
-				if (alignOnSlopes) {
-					if (Physics.Raycast (cc.target.transform.position, Vector3.down, out raycastHit, 25.0f, layerMask)) { // if the range of 15.0 is not enough, increase the value
-						upVector = raycastHit.normal;
-					}
-
-					float angle = AngleSigned (Vector3.up, upVector, cc.target.transform.right);
-
-					toRotation = Quaternion.Slerp (toRotation, toRotation * Quaternion.AngleAxis (angle, Vector3.right), Time.fixedDeltaTime * rotationSpeedSlopes);
-				}
-
-				cc.transform.rotation = Quaternion.Slerp (cc.transform.rotation, toRotation, Time.fixedDeltaTime * rotationSpeed);
-//				cc.transform.rotation = toRotation;
+				toRotation = Quaternion.Slerp (cc.transform.rotation, toRotation, Time.fixedDeltaTime * rotationSpeed);
+				cc.transform.rotation = toRotation;
 
 				break;
 

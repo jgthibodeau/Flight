@@ -11,6 +11,7 @@ Material:
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
@@ -77,9 +78,9 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecIntensity: 0.1
     - _SpecularHighlights: 1
-    - _Speed: 0.3
+    - _Speed: 0.15
     - _SrcBlend: 1
-    - _Transparency: 0
+    - _Transparency: 1
     - _UVSec: 0
     - _WorldScale: 1
     - _ZWrite: 1
@@ -94,11 +95,11 @@ Material:
     - _useDistanceTrans: 1
     - _useWind: 1
     - _xRandomness: 0
-    - _xScale: 8
+    - _xScale: 4
     - _yRandomness: 0.05
     - _yScale: 0.2
     - _zRandomness: 0
-    - _zScale: 8
+    - _zScale: 4
     m_Colors:
     - _Color: {r: 0, g: 0.7941176, b: 0.13691686, a: 1}
     - _Diffusecolor: {r: 0, g: 0.8308824, b: 0.10887415, a: 1}

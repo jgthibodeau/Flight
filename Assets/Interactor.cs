@@ -92,9 +92,13 @@ public class Interactor : MonoBehaviour {
 			Debug.Log ("placing on " + interactableItemHolder);
 			interactableItemHolder.Pickup (itemHolder.heldItem);
 		} else {
-			Debug.Log ("dropping");
-			itemHolder.Drop ();
+			Drop ();
 		}
+	}
+
+	public void Drop() {
+		Debug.Log ("dropping");
+		itemHolder.Drop ();
 	}
 
 	public void Pickup(Pickupable pickupable) {

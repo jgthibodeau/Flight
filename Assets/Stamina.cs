@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Stamina : MonoBehaviour {
+	public bool infiniteStamina = false;
+
 	public float currentStamina;
 	public float maxStamina;
 	public float extraStamina;
@@ -19,6 +21,10 @@ public class Stamina : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		if (infiniteStamina) {
+			return;
+		}
+
 		if (usingStamina && HasStamina()) {
 //		if (usingStamina) {
 //			if (HasStamina ()) {

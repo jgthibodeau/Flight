@@ -105,18 +105,18 @@ public class CloudGenerator : MonoBehaviour {
 		foreach (Transform transform in go.transform) {
 			GameObject child = transform.gameObject;
 			MeshParticleEmitter emmiter = child.AddComponent<MeshParticleEmitter> ();
-			emmiter.minSize = originalEmmiter.minSize;
-			emmiter.maxSize = originalEmmiter.maxSize;
-			emmiter.minEnergy = originalEmmiter.minEnergy;
-			emmiter.maxEnergy = originalEmmiter.maxEnergy;
-			emmiter.minEmission = originalEmmiter.minEmission;
-			emmiter.maxEmission = originalEmmiter.maxEmission;
+//			emmiter.minSize = originalEmmiter.minSize;
+//			emmiter.maxSize = originalEmmiter.maxSize;
+//			emmiter.minEnergy = originalEmmiter.minEnergy;
+//			emmiter.maxEnergy = originalEmmiter.maxEnergy;
+//			emmiter.minEmission = originalEmmiter.minEmission;
+//			emmiter.maxEmission = originalEmmiter.maxEmission;
 
 			ParticleAnimator animator = child.AddComponent<ParticleAnimator> ();
 
 			ParticleRenderer renderer = child.AddComponent<ParticleRenderer> ();
 			renderer.materials = originalRenderer.materials;
-			renderer.maxParticleSize = originalRenderer.maxParticleSize;
+//			renderer.maxParticleSize = originalRenderer.maxParticleSize;
 
 			child.GetComponent<MeshRenderer> ().enabled = false;
 		}

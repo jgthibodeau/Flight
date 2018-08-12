@@ -74,7 +74,7 @@ namespace Gaia.GX.ProceduralWorlds
             try
             {
                 //Set up the camera
-                camera.hdr = true;
+                camera.allowHDR = true;
                 camera.farClipPlane = GetRangeFromTerrain() * 2f;
                 camera.renderingPath = RenderingPath.DeferredShading;
 

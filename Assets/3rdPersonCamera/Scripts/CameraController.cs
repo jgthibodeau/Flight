@@ -21,6 +21,8 @@ namespace ThirdPersonCamera
         public Vector3 offsetVector;
 		public Vector3 cameraRecenterOffset;
 
+		public bool cameraCenter = false;
+
         public bool smartPivot = true;
         public bool occlusionCheck = true;
         public bool thicknessCheck = true;
@@ -366,7 +368,7 @@ namespace ThirdPersonCamera
 			Debug.DrawRay (transform.position, transform.rotation.eulerAngles, Color.blue);
 
 			Vector3 directionFromTargetToCamera = transform.position - target.position;
-			if (Util.GetButton ("Center Camera")) {
+			if (cameraCenter && Util.GetButton ("Center Camera")) {
 				Vector3 cameraRecenterOffsetTransformed = (target.transform.rotation * cameraRecenterOffset).normalized * desiredDistance;
 				desiredPosition = target.position + offsetVectorTransformed + cameraRecenterOffsetTransformed;
 				transform.position = Vector3.Slerp (transform.position, desiredPosition, Time.fixedDeltaTime * recenterSpeed);

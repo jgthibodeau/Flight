@@ -1549,7 +1549,7 @@ namespace Gaia
             foreach (GameObject currentInstance in prototypes)
             {
                 //Get the prefab
-                prefab = PrefabUtility.GetPrefabParent(currentInstance) as GameObject;
+                prefab = PrefabUtility.GetCorrespondingObjectFromSource(currentInstance) as GameObject;
 
                 //Calculate the bounds
                 localBounds = Gaia.Utils.GetBounds(currentInstance);

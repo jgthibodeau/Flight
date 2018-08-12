@@ -50,6 +50,7 @@ public class DragonAnimator : MonoBehaviour {
 	// Update is called once per frame
 	void LateUpdate () {
 		animator.SetBool ("Flapping", FlapSpeed != 0);
+		animator.SetBool ("FlapBack", FlapSpeed != 0 && liftLeft > 0 && liftRight > 0);
 		animator.SetBool ("Grounded", Grounded);
 		animator.SetBool ("WingsOut", WingsOut);
 		animator.SetBool ("Walking", MoveSpeed != 0);

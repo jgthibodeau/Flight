@@ -8,6 +8,8 @@ public class Pickupable : Tag {
 	public Vector3 heldLocalRotation;
 	public ItemHolder itemHolder;
 
+	public Transform pickupSpot;
+
 	private float slopeLimit, stepOffset, skinWidth, minMoveDistance, radius, height;
 	private Vector3 center;
 
@@ -136,16 +138,27 @@ public class Pickupable : Tag {
 	}
 
 	void Freeze() {
-		if (Vector3.SqrMagnitude (transform.localPosition - Vector3.zero) > 0.1f) {
-			transform.localPosition = Vector3.Slerp (transform.localPosition, Vector3.zero, Time.deltaTime * pickupSpeed);
-		} else {
-			transform.localPosition = Vector3.zero;
+		Vector3 desiredLocalPosition = itemHolder.heldLocation.position;
+		if (pickupSpot != null) {
+			desiredLocalPosition += transform.position - pickupSpot.position;
 		}
 
-		if (Vector3.Angle (transform.localEulerAngles, Vector3.zero) > 5f) {
-			transform.localRotation = Quaternion.Slerp (transform.localRotation, Quaternion.identity, Time.deltaTime * pickupRotateSpeed);
+		if (Vector3.SqrMagnitude (transform.position - desiredLocalPosition) > 0.1f) {
+			transform.position = Vector3.Slerp (transform.position, desiredLocalPosition, Time.deltaTime * pickupSpeed);
 		} else {
-			transform.localRotation = Quaternion.identity;
+			transform.position = desiredLocalPosition;
+		}
+
+
+		Quaternion desiredRotation = Quaternion.identity;
+		if (pickupSpot != null) {
+			desiredRotation = pickupSpot.localRotation;
+		}
+
+		if (Quaternion.Angle (transform.localRotation, desiredRotation) > 5f) {
+			transform.localRotation = Quaternion.Slerp (transform.localRotation, desiredRotation, Time.deltaTime * pickupRotateSpeed);
+		} else {
+			transform.localRotation = desiredRotation;
 		}
 	}
 

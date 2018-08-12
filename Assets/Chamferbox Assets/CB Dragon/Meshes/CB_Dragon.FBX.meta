@@ -3,7 +3,7 @@ guid: 5ec0e2db5b805b04d9a0931c1894e12a
 timeCreated: 1513551549
 licenseType: Store
 ModelImporter:
-  serializedVersion: 22
+  serializedVersion: 18
   fileIDToRecycleName:
     100000: Bip01
     100002: Bip01 Footsteps
@@ -379,39 +379,22 @@ ModelImporter:
     7400080: CB_Dragon Whip tail
     7400082: CB_Dragon Bite
     9500000: //RootNode
-    11100000: //RootNode
     13700000: CB_Dragon
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: default
-    second: {fileID: 2100000, guid: 14c77a13dabb8e94381bb473978d0fc6, type: 2}
   materials:
     importMaterials: 1
     materialName: 0
     materialSearch: 1
-    materialLocation: 0
   animations:
     legacyGenerateAnimations: 4
     bakeSimulation: 0
-    resampleCurves: 1
     optimizeGameObjects: 0
     motionNodeName: 
-    rigImportErrors: 
-    rigImportWarnings: 
-    animationImportErrors: 
-    animationImportWarnings: 
-    animationRetargetingWarnings: 
-    animationDoRetargetingWarnings: 0
-    importAnimatedCustomProperties: 0
-    animationCompression: 3
-    animationRotationError: 0.5
-    animationPositionError: 0.5
-    animationScaleError: 0.5
+    animationCompression: 0
+    animationRotationError: .5
+    animationPositionError: .5
+    animationScaleError: .5
     animationWrapMode: 0
     extraExposedTransformPaths: []
-    extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
       name: CB_Dragon Attack 1
@@ -423,7 +406,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
@@ -958,7 +940,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Attack 2
       takeName: Take 001
@@ -969,7 +950,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
@@ -1504,7 +1484,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Attack 3
       takeName: Take 001
@@ -1515,7 +1494,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
@@ -2050,7 +2028,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Breath Fire
       takeName: Take 001
@@ -2061,7 +2038,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
@@ -2079,184 +2055,184 @@ ModelImporter:
       - path: 
         weight: 1
       - path: Bip01
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Footsteps
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 L Thigh
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 L Thigh/Bip01 L Calf
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 L Thigh/Bip01 L Calf/Bip01 L Foot
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 L Thigh/Bip01 L Calf/Bip01 L Foot/Bip01 L Toe0
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 L Thigh/Bip01 L Calf/Bip01 L Foot/Bip01 L Toe0/Bip01
           L Toe01
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 L Thigh/Bip01 L Calf/Bip01 L Foot/Bip01 L Toe0/Bip01
           L Toe01/Bip01 L Toe02
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 L Thigh/Bip01 L Calf/Bip01 L Foot/Bip01 L Toe0/Bip01
           L Toe01/Bip01 L Toe02/Bip01 L Toe0Nub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 L Thigh/Bip01 L Calf/Bip01 L Foot/Bip01 L Toe1
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 L Thigh/Bip01 L Calf/Bip01 L Foot/Bip01 L Toe1/Bip01
           L Toe11
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 L Thigh/Bip01 L Calf/Bip01 L Foot/Bip01 L Toe1/Bip01
           L Toe11/Bip01 L Toe12
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 L Thigh/Bip01 L Calf/Bip01 L Foot/Bip01 L Toe1/Bip01
           L Toe11/Bip01 L Toe12/Bip01 L Toe1Nub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 L Thigh/Bip01 L Calf/Bip01 L Foot/Bip01 L Toe2
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 L Thigh/Bip01 L Calf/Bip01 L Foot/Bip01 L Toe2/Bip01
           L Toe21
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 L Thigh/Bip01 L Calf/Bip01 L Foot/Bip01 L Toe2/Bip01
           L Toe21/Bip01 L Toe22
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 L Thigh/Bip01 L Calf/Bip01 L Foot/Bip01 L Toe2/Bip01
           L Toe21/Bip01 L Toe22/Bip01 L Toe2Nub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 L Thigh/Bip01 L Calf/Bip01 L Foot/Bip01 L Toe3
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 L Thigh/Bip01 L Calf/Bip01 L Foot/Bip01 L Toe3/Bip01
           L Toe31
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 L Thigh/Bip01 L Calf/Bip01 L Foot/Bip01 L Toe3/Bip01
           L Toe31/Bip01 L Toe32
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 L Thigh/Bip01 L Calf/Bip01 L Foot/Bip01 L Toe3/Bip01
           L Toe31/Bip01 L Toe32/Bip01 L Toe3Nub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 R Thigh
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 R Thigh/Bip01 R Calf
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 R Thigh/Bip01 R Calf/Bip01 R Foot
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 R Thigh/Bip01 R Calf/Bip01 R Foot/Bip01 R Toe0
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 R Thigh/Bip01 R Calf/Bip01 R Foot/Bip01 R Toe0/Bip01
           R Toe01
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 R Thigh/Bip01 R Calf/Bip01 R Foot/Bip01 R Toe0/Bip01
           R Toe01/Bip01 R Toe02
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 R Thigh/Bip01 R Calf/Bip01 R Foot/Bip01 R Toe0/Bip01
           R Toe01/Bip01 R Toe02/Bip01 R Toe0Nub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 R Thigh/Bip01 R Calf/Bip01 R Foot/Bip01 R Toe1
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 R Thigh/Bip01 R Calf/Bip01 R Foot/Bip01 R Toe1/Bip01
           R Toe11
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 R Thigh/Bip01 R Calf/Bip01 R Foot/Bip01 R Toe1/Bip01
           R Toe11/Bip01 R Toe12
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 R Thigh/Bip01 R Calf/Bip01 R Foot/Bip01 R Toe1/Bip01
           R Toe11/Bip01 R Toe12/Bip01 R Toe1Nub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 R Thigh/Bip01 R Calf/Bip01 R Foot/Bip01 R Toe2
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 R Thigh/Bip01 R Calf/Bip01 R Foot/Bip01 R Toe2/Bip01
           R Toe21
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 R Thigh/Bip01 R Calf/Bip01 R Foot/Bip01 R Toe2/Bip01
           R Toe21/Bip01 R Toe22
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 R Thigh/Bip01 R Calf/Bip01 R Foot/Bip01 R Toe2/Bip01
           R Toe21/Bip01 R Toe22/Bip01 R Toe2Nub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 R Thigh/Bip01 R Calf/Bip01 R Foot/Bip01 R Toe3
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 R Thigh/Bip01 R Calf/Bip01 R Foot/Bip01 R Toe3/Bip01
           R Toe31
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 R Thigh/Bip01 R Calf/Bip01 R Foot/Bip01 R Toe3/Bip01
           R Toe31/Bip01 R Toe32
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 R Thigh/Bip01 R Calf/Bip01 R Foot/Bip01 R Toe3/Bip01
           R Toe31/Bip01 R Toe32/Bip01 R Toe3Nub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 L Clavicle
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 L Clavicle/Bip01
           L UpperArm
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 L Clavicle/Bip01
           L UpperArm/Bip01 L Forearm
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 L Clavicle/Bip01
           L UpperArm/Bip01 L Forearm/Bip01 L Hand
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 L Clavicle/Bip01
           L UpperArm/Bip01 L Forearm/Bip01 L Hand/Bip01 L Finger0
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 L Clavicle/Bip01
           L UpperArm/Bip01 L Forearm/Bip01 L Hand/Bip01 L Finger0/Bip01 L Finger01
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 L Clavicle/Bip01
           L UpperArm/Bip01 L Forearm/Bip01 L Hand/Bip01 L Finger0/Bip01 L Finger01/Bip01
           L Finger02
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 L Clavicle/Bip01
           L UpperArm/Bip01 L Forearm/Bip01 L Hand/Bip01 L Finger0/Bip01 L Finger01/Bip01
           L Finger02/Bip01 L Finger0Nub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 L Clavicle/Bip01
           L UpperArm/Bip01 L Forearm/Bip01 L Hand/Bip01 L Finger1
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 L Clavicle/Bip01
           L UpperArm/Bip01 L Forearm/Bip01 L Hand/Bip01 L Finger1/Bip01 L Finger11
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 L Clavicle/Bip01
           L UpperArm/Bip01 L Forearm/Bip01 L Hand/Bip01 L Finger1/Bip01 L Finger11/Bip01
           L Finger12
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 L Clavicle/Bip01
           L UpperArm/Bip01 L Forearm/Bip01 L Hand/Bip01 L Finger1/Bip01 L Finger11/Bip01
           L Finger12/Bip01 L Finger1Nub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 L Clavicle/Bip01
           L UpperArm/Bip01 L Forearm/Bip01 L Hand/Bip01 L Finger2
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 L Clavicle/Bip01
           L UpperArm/Bip01 L Forearm/Bip01 L Hand/Bip01 L Finger2/Bip01 L Finger21
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 L Clavicle/Bip01
           L UpperArm/Bip01 L Forearm/Bip01 L Hand/Bip01 L Finger2/Bip01 L Finger21/Bip01
           L Finger22
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 L Clavicle/Bip01
           L UpperArm/Bip01 L Forearm/Bip01 L Hand/Bip01 L Finger2/Bip01 L Finger21/Bip01
           L Finger22/Bip01 L Finger2Nub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 L Clavicle/Bip01
           L UpperArm/Bip01 L Forearm/Bip01 L Hand/Bip01 L Finger3
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 L Clavicle/Bip01
           L UpperArm/Bip01 L Forearm/Bip01 L Hand/Bip01 L Finger3/Bip01 L Finger31
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 L Clavicle/Bip01
           L UpperArm/Bip01 L Forearm/Bip01 L Hand/Bip01 L Finger3/Bip01 L Finger31/Bip01
           L Finger32
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 L Clavicle/Bip01
           L UpperArm/Bip01 L Forearm/Bip01 L Hand/Bip01 L Finger3/Bip01 L Finger31/Bip01
           L Finger32/Bip01 L Finger3Nub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 Neck1
         weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 Neck1/Bip01
@@ -2278,325 +2254,324 @@ ModelImporter:
           Neck2/Bip01 Neck3/Bip01 Head/Bip01 Ponytail1/Bip01 Ponytail1Nub
         weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 R Clavicle
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 R Clavicle/Bip01
           R UpperArm
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 R Clavicle/Bip01
           R UpperArm/Bip01 R Forearm
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 R Clavicle/Bip01
           R UpperArm/Bip01 R Forearm/Bip01 R Hand
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 R Clavicle/Bip01
           R UpperArm/Bip01 R Forearm/Bip01 R Hand/Bip01 R Finger0
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 R Clavicle/Bip01
           R UpperArm/Bip01 R Forearm/Bip01 R Hand/Bip01 R Finger0/Bip01 R Finger01
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 R Clavicle/Bip01
           R UpperArm/Bip01 R Forearm/Bip01 R Hand/Bip01 R Finger0/Bip01 R Finger01/Bip01
           R Finger02
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 R Clavicle/Bip01
           R UpperArm/Bip01 R Forearm/Bip01 R Hand/Bip01 R Finger0/Bip01 R Finger01/Bip01
           R Finger02/Bip01 R Finger0Nub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 R Clavicle/Bip01
           R UpperArm/Bip01 R Forearm/Bip01 R Hand/Bip01 R Finger1
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 R Clavicle/Bip01
           R UpperArm/Bip01 R Forearm/Bip01 R Hand/Bip01 R Finger1/Bip01 R Finger11
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 R Clavicle/Bip01
           R UpperArm/Bip01 R Forearm/Bip01 R Hand/Bip01 R Finger1/Bip01 R Finger11/Bip01
           R Finger12
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 R Clavicle/Bip01
           R UpperArm/Bip01 R Forearm/Bip01 R Hand/Bip01 R Finger1/Bip01 R Finger11/Bip01
           R Finger12/Bip01 R Finger1Nub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 R Clavicle/Bip01
           R UpperArm/Bip01 R Forearm/Bip01 R Hand/Bip01 R Finger2
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 R Clavicle/Bip01
           R UpperArm/Bip01 R Forearm/Bip01 R Hand/Bip01 R Finger2/Bip01 R Finger21
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 R Clavicle/Bip01
           R UpperArm/Bip01 R Forearm/Bip01 R Hand/Bip01 R Finger2/Bip01 R Finger21/Bip01
           R Finger22
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 R Clavicle/Bip01
           R UpperArm/Bip01 R Forearm/Bip01 R Hand/Bip01 R Finger2/Bip01 R Finger21/Bip01
           R Finger22/Bip01 R Finger2Nub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 R Clavicle/Bip01
           R UpperArm/Bip01 R Forearm/Bip01 R Hand/Bip01 R Finger3
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 R Clavicle/Bip01
           R UpperArm/Bip01 R Forearm/Bip01 R Hand/Bip01 R Finger3/Bip01 R Finger31
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 R Clavicle/Bip01
           R UpperArm/Bip01 R Forearm/Bip01 R Hand/Bip01 R Finger3/Bip01 R Finger31/Bip01
           R Finger32
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 Neck/Bip01 R Clavicle/Bip01
           R UpperArm/Bip01 R Forearm/Bip01 R Hand/Bip01 R Finger3/Bip01 R Finger31/Bip01
           R Finger32/Bip01 R Finger3Nub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing/Bip01 RWing02
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing/Bip01 RWing02/Bip01
           RWing03
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing/Bip01 RWing02/Bip01
           RWing03/Bip01 RWing04
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing/Bip01 RWing02/Bip01
           RWing03/Bip01 RWing04/Bip01 RWing05
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing/Bip01 RWing02/Bip01
           RWing03/Bip01 RWing04/Bip01 RWing05/Bip01 RWing06
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing/Bip01 RWing02/Bip01
           RWing03/Bip01 RWing04/Bip01 RWing05/Bip01 RWing06/Bip01 RWing07
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing/Bip01 RWing02/Bip01
           RWing03/Bip01 RWing04/Bip01 RWing05/Bip01 RWing06/Bip01 RWing07/Bip01 RWingNub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing/Bip01 RWing02/Bip01
           RWing03/Bip01 RWing04/Bip01 RWingFinger2
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing/Bip01 RWing02/Bip01
           RWing03/Bip01 RWing04/Bip01 RWingFinger2/Bip01 RWingFinger202
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing/Bip01 RWing02/Bip01
           RWing03/Bip01 RWing04/Bip01 RWingFinger2/Bip01 RWingFinger202/Bip01 RWingFinger203
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing/Bip01 RWing02/Bip01
           RWing03/Bip01 RWing04/Bip01 RWingFinger2/Bip01 RWingFinger202/Bip01 RWingFinger203/Bip01
           RWingFinger2Nub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing/Bip01 RWing02/Bip01
           RWing03/Bip01 RWing04/Bip01 RWingFinger3
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing/Bip01 RWing02/Bip01
           RWing03/Bip01 RWing04/Bip01 RWingFinger3/Bip01 RWingFinger302
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing/Bip01 RWing02/Bip01
           RWing03/Bip01 RWing04/Bip01 RWingFinger3/Bip01 RWingFinger302/Bip01 RWingFinger303
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing/Bip01 RWing02/Bip01
           RWing03/Bip01 RWing04/Bip01 RWingFinger3/Bip01 RWingFinger302/Bip01 RWingFinger303/Bip01
           RWingFinger3Nub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing/Bip01 RWing02/Bip01
           RWing03/Bip01 RWing04/Bip01 RWingFinger4
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing/Bip01 RWing02/Bip01
           RWing03/Bip01 RWing04/Bip01 RWingFinger4/Bip01 RWingFinger402
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing/Bip01 RWing02/Bip01
           RWing03/Bip01 RWing04/Bip01 RWingFinger4/Bip01 RWingFinger402/Bip01 RWingFinger403
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing/Bip01 RWing02/Bip01
           RWing03/Bip01 RWing04/Bip01 RWingFinger4/Bip01 RWingFinger402/Bip01 RWingFinger403/Bip01
           RWingFinger4Nub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing/Bip01 RWing02/Bip01
           RWingHand
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing/Bip01 RWing02/Bip01
           RWingHand/Bip01 RWingHand02
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWing/Bip01 RWing02/Bip01
           RWingHand/Bip01 RWingHand02/Bip01 RWingHandNub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp/Bip01 RWingOpp02
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp/Bip01 RWingOpp02/Bip01
           RWingHandOpp
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp/Bip01 RWingOpp02/Bip01
           RWingHandOpp/Bip01 RWingHandOpp02
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp/Bip01 RWingOpp02/Bip01
           RWingHandOpp/Bip01 RWingHandOpp02/Bip01 RWingHandOppNub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp/Bip01 RWingOpp02/Bip01
           RWingOpp03
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp/Bip01 RWingOpp02/Bip01
           RWingOpp03/Bip01 RWingOpp04
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp/Bip01 RWingOpp02/Bip01
           RWingOpp03/Bip01 RWingOpp04/Bip01 RWingFinger2Opp
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp/Bip01 RWingOpp02/Bip01
           RWingOpp03/Bip01 RWingOpp04/Bip01 RWingFinger2Opp/Bip01 RWingFinger2Opp02
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp/Bip01 RWingOpp02/Bip01
           RWingOpp03/Bip01 RWingOpp04/Bip01 RWingFinger2Opp/Bip01 RWingFinger2Opp02/Bip01
           RWingFinger2Opp03
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp/Bip01 RWingOpp02/Bip01
           RWingOpp03/Bip01 RWingOpp04/Bip01 RWingFinger2Opp/Bip01 RWingFinger2Opp02/Bip01
           RWingFinger2Opp03/Bip01 RWingFinger2OppNub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp/Bip01 RWingOpp02/Bip01
           RWingOpp03/Bip01 RWingOpp04/Bip01 RWingFinger3Opp
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp/Bip01 RWingOpp02/Bip01
           RWingOpp03/Bip01 RWingOpp04/Bip01 RWingFinger3Opp/Bip01 RWingFinger3Opp02
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp/Bip01 RWingOpp02/Bip01
           RWingOpp03/Bip01 RWingOpp04/Bip01 RWingFinger3Opp/Bip01 RWingFinger3Opp02/Bip01
           RWingFinger3Opp03
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp/Bip01 RWingOpp02/Bip01
           RWingOpp03/Bip01 RWingOpp04/Bip01 RWingFinger3Opp/Bip01 RWingFinger3Opp02/Bip01
           RWingFinger3Opp03/Bip01 RWingFinger3OppNub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp/Bip01 RWingOpp02/Bip01
           RWingOpp03/Bip01 RWingOpp04/Bip01 RWingFinger4Opp
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp/Bip01 RWingOpp02/Bip01
           RWingOpp03/Bip01 RWingOpp04/Bip01 RWingFinger4Opp/Bip01 RWingFinger4Opp02
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp/Bip01 RWingOpp02/Bip01
           RWingOpp03/Bip01 RWingOpp04/Bip01 RWingFinger4Opp/Bip01 RWingFinger4Opp02/Bip01
           RWingFinger4Opp03
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp/Bip01 RWingOpp02/Bip01
           RWingOpp03/Bip01 RWingOpp04/Bip01 RWingFinger4Opp/Bip01 RWingFinger4Opp02/Bip01
           RWingFinger4Opp03/Bip01 RWingFinger4OppNub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp/Bip01 RWingOpp02/Bip01
           RWingOpp03/Bip01 RWingOpp04/Bip01 RWingOpp05
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp/Bip01 RWingOpp02/Bip01
           RWingOpp03/Bip01 RWingOpp04/Bip01 RWingOpp05/Bip01 RWingOpp06
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp/Bip01 RWingOpp02/Bip01
           RWingOpp03/Bip01 RWingOpp04/Bip01 RWingOpp05/Bip01 RWingOpp06/Bip01 RWingOpp07
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Spine/Bip01 Spine1/Bip01 RWingOpp/Bip01 RWingOpp02/Bip01
           RWingOpp03/Bip01 RWingOpp04/Bip01 RWingOpp05/Bip01 RWingOpp06/Bip01 RWingOpp07/Bip01
           RWingOppNub
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3/Bip01
           Tail4
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3/Bip01
           Tail4/Bip01 Tail5
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3/Bip01
           Tail4/Bip01 Tail5/Bip01 Tail6
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3/Bip01
           Tail4/Bip01 Tail5/Bip01 Tail6/Bip01 Tail7
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3/Bip01
           Tail4/Bip01 Tail5/Bip01 Tail6/Bip01 Tail7/Bip01 Tail8
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3/Bip01
           Tail4/Bip01 Tail5/Bip01 Tail6/Bip01 Tail7/Bip01 Tail8/Bip01 Tail9
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3/Bip01
           Tail4/Bip01 Tail5/Bip01 Tail6/Bip01 Tail7/Bip01 Tail8/Bip01 Tail9/Bip01
           Tail10
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3/Bip01
           Tail4/Bip01 Tail5/Bip01 Tail6/Bip01 Tail7/Bip01 Tail8/Bip01 Tail9/Bip01
           Tail10/Bip01 Tail11
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3/Bip01
           Tail4/Bip01 Tail5/Bip01 Tail6/Bip01 Tail7/Bip01 Tail8/Bip01 Tail9/Bip01
           Tail10/Bip01 Tail11/Bip01 Tail12
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3/Bip01
           Tail4/Bip01 Tail5/Bip01 Tail6/Bip01 Tail7/Bip01 Tail8/Bip01 Tail9/Bip01
           Tail10/Bip01 Tail11/Bip01 Tail12/Bip01 Tail13
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3/Bip01
           Tail4/Bip01 Tail5/Bip01 Tail6/Bip01 Tail7/Bip01 Tail8/Bip01 Tail9/Bip01
           Tail10/Bip01 Tail11/Bip01 Tail12/Bip01 Tail13/Bip01 Tail14
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3/Bip01
           Tail4/Bip01 Tail5/Bip01 Tail6/Bip01 Tail7/Bip01 Tail8/Bip01 Tail9/Bip01
           Tail10/Bip01 Tail11/Bip01 Tail12/Bip01 Tail13/Bip01 Tail14/Bip01 Tail15
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3/Bip01
           Tail4/Bip01 Tail5/Bip01 Tail6/Bip01 Tail7/Bip01 Tail8/Bip01 Tail9/Bip01
           Tail10/Bip01 Tail11/Bip01 Tail12/Bip01 Tail13/Bip01 Tail14/Bip01 Tail15/Bip01
           Tail16
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3/Bip01
           Tail4/Bip01 Tail5/Bip01 Tail6/Bip01 Tail7/Bip01 Tail8/Bip01 Tail9/Bip01
           Tail10/Bip01 Tail11/Bip01 Tail12/Bip01 Tail13/Bip01 Tail14/Bip01 Tail15/Bip01
           Tail16/Bip01 Tail17
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3/Bip01
           Tail4/Bip01 Tail5/Bip01 Tail6/Bip01 Tail7/Bip01 Tail8/Bip01 Tail9/Bip01
           Tail10/Bip01 Tail11/Bip01 Tail12/Bip01 Tail13/Bip01 Tail14/Bip01 Tail15/Bip01
           Tail16/Bip01 Tail17/Bip01 Tail18
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3/Bip01
           Tail4/Bip01 Tail5/Bip01 Tail6/Bip01 Tail7/Bip01 Tail8/Bip01 Tail9/Bip01
           Tail10/Bip01 Tail11/Bip01 Tail12/Bip01 Tail13/Bip01 Tail14/Bip01 Tail15/Bip01
           Tail16/Bip01 Tail17/Bip01 Tail18/Bip01 Tail19
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3/Bip01
           Tail4/Bip01 Tail5/Bip01 Tail6/Bip01 Tail7/Bip01 Tail8/Bip01 Tail9/Bip01
           Tail10/Bip01 Tail11/Bip01 Tail12/Bip01 Tail13/Bip01 Tail14/Bip01 Tail15/Bip01
           Tail16/Bip01 Tail17/Bip01 Tail18/Bip01 Tail19/Bip01 Tail20
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3/Bip01
           Tail4/Bip01 Tail5/Bip01 Tail6/Bip01 Tail7/Bip01 Tail8/Bip01 Tail9/Bip01
           Tail10/Bip01 Tail11/Bip01 Tail12/Bip01 Tail13/Bip01 Tail14/Bip01 Tail15/Bip01
           Tail16/Bip01 Tail17/Bip01 Tail18/Bip01 Tail19/Bip01 Tail20/Bip01 Tail21
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3/Bip01
           Tail4/Bip01 Tail5/Bip01 Tail6/Bip01 Tail7/Bip01 Tail8/Bip01 Tail9/Bip01
           Tail10/Bip01 Tail11/Bip01 Tail12/Bip01 Tail13/Bip01 Tail14/Bip01 Tail15/Bip01
           Tail16/Bip01 Tail17/Bip01 Tail18/Bip01 Tail19/Bip01 Tail20/Bip01 Tail21/Bip01
           Tail22
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3/Bip01
           Tail4/Bip01 Tail5/Bip01 Tail6/Bip01 Tail7/Bip01 Tail8/Bip01 Tail9/Bip01
           Tail10/Bip01 Tail11/Bip01 Tail12/Bip01 Tail13/Bip01 Tail14/Bip01 Tail15/Bip01
           Tail16/Bip01 Tail17/Bip01 Tail18/Bip01 Tail19/Bip01 Tail20/Bip01 Tail21/Bip01
           Tail22/Bip01 Tail23
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3/Bip01
           Tail4/Bip01 Tail5/Bip01 Tail6/Bip01 Tail7/Bip01 Tail8/Bip01 Tail9/Bip01
           Tail10/Bip01 Tail11/Bip01 Tail12/Bip01 Tail13/Bip01 Tail14/Bip01 Tail15/Bip01
           Tail16/Bip01 Tail17/Bip01 Tail18/Bip01 Tail19/Bip01 Tail20/Bip01 Tail21/Bip01
           Tail22/Bip01 Tail23/Bip01 Tail24
-        weight: 0
+        weight: 1
       - path: Bip01/Bip01 Pelvis/Bip01 Tail/Bip01 Tail1/Bip01 Tail2/Bip01 Tail3/Bip01
           Tail4/Bip01 Tail5/Bip01 Tail6/Bip01 Tail7/Bip01 Tail8/Bip01 Tail9/Bip01
           Tail10/Bip01 Tail11/Bip01 Tail12/Bip01 Tail13/Bip01 Tail14/Bip01 Tail15/Bip01
           Tail16/Bip01 Tail17/Bip01 Tail18/Bip01 Tail19/Bip01 Tail20/Bip01 Tail21/Bip01
           Tail22/Bip01 Tail23/Bip01 Tail24/Bip01 TailNub
-        weight: 0
+        weight: 1
       - path: CB_Dragon
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Death
       takeName: Take 001
@@ -2607,7 +2582,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
@@ -3142,7 +3116,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Fly
       takeName: Take 001
@@ -3153,7 +3126,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -3688,7 +3660,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Fly forward
       takeName: Take 001
@@ -3699,7 +3670,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -4234,7 +4204,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Fly forward 2
       takeName: Take 001
@@ -4245,7 +4214,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -4780,7 +4748,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Fly forward 2 root motion
       takeName: Take 001
@@ -4791,7 +4758,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -5326,7 +5292,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Fly forward root motion
       takeName: Take 001
@@ -5337,7 +5302,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -5872,7 +5836,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Fly forward strong
       takeName: Take 001
@@ -5883,7 +5846,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -6418,7 +6380,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Fly breath fire
       takeName: Take 001
@@ -6429,7 +6390,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
@@ -6964,7 +6924,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Fly death
       takeName: Take 001
@@ -6975,7 +6934,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
@@ -7510,7 +7468,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Fly hit 1
       takeName: Take 001
@@ -7521,7 +7478,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
@@ -8056,7 +8012,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Fly hit 2
       takeName: Take 001
@@ -8067,7 +8022,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
@@ -8602,7 +8556,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Fly left
       takeName: Take 001
@@ -8613,7 +8566,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -9148,7 +9100,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Fly left root motion
       takeName: Take 001
@@ -9159,7 +9110,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -9694,7 +9644,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Fly right
       takeName: Take 001
@@ -9705,7 +9654,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -10240,7 +10188,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Fly right root motion
       takeName: Take 001
@@ -10251,7 +10198,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -10786,7 +10732,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Fly soar
       takeName: Take 001
@@ -10797,7 +10742,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -11332,7 +11276,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Fly soar root motion
       takeName: Take 001
@@ -11343,7 +11286,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -11878,7 +11820,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Fly to stand
       takeName: Take 001
@@ -11889,7 +11830,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
@@ -12424,7 +12364,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Fly attack 1
       takeName: Take 001
@@ -12435,7 +12374,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
@@ -12970,7 +12908,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Fly attack 2
       takeName: Take 001
@@ -12981,7 +12918,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
@@ -13516,7 +13452,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Fly back
       takeName: Take 001
@@ -13527,7 +13462,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -14062,7 +13996,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Fly back root motion
       takeName: Take 001
@@ -14073,7 +14006,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -14608,7 +14540,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Hit 1
       takeName: Take 001
@@ -14619,7 +14550,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
@@ -15154,7 +15084,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Hit 2
       takeName: Take 001
@@ -15165,7 +15094,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
@@ -15700,7 +15628,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Idle
       takeName: Take 001
@@ -15711,7 +15638,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -16246,18 +16172,16 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Roar
       takeName: Take 001
       firstFrame: 1842
-      lastFrame: 1941.9999
+      lastFrame: 1941.99988
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
@@ -16792,7 +16716,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Run
       takeName: Take 001
@@ -16803,7 +16726,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -17338,18 +17260,16 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Run root motion
       takeName: Take 001
-      firstFrame: 1984.9999
+      firstFrame: 1984.99988
       lastFrame: 2010
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -17884,18 +17804,16 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Stand
       takeName: Take 001
-      firstFrame: 2019.0001
+      firstFrame: 2019.00012
       lastFrame: 2064
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -18430,7 +18348,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Stand to fly
       takeName: Take 001
@@ -18441,7 +18358,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
@@ -18976,7 +18892,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Strafe left
       takeName: Take 001
@@ -18987,7 +18902,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -19522,7 +19436,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Strafe left root motion
       takeName: Take 001
@@ -19533,7 +19446,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -20068,7 +19980,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Strafe right
       takeName: Take 001
@@ -20079,7 +19990,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -20614,7 +20524,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Strafe right root motion
       takeName: Take 001
@@ -20625,7 +20534,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -21160,7 +21068,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Walk
       takeName: Take 001
@@ -21171,7 +21078,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -21706,7 +21612,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Walk root motion
       takeName: Take 001
@@ -21717,7 +21622,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
@@ -22252,7 +22156,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Whip tail
       takeName: Take 001
@@ -22263,7 +22166,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
@@ -22798,7 +22700,6 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: CB_Dragon Bite
       takeName: Take 001
@@ -22809,7 +22710,6 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
@@ -23344,25 +23244,19 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     isReadable: 1
   meshes:
     lODScreenPercentages: []
     globalScale: 1
     meshCompression: 0
     addColliders: 0
-    importVisibility: 0
     importBlendShapes: 1
-    importCameras: 0
-    importLights: 0
     swapUVChannels: 0
     generateSecondaryUV: 0
     useFileUnits: 1
     optimizeMeshForGPU: 1
     keepQuads: 0
     weldVertices: 1
-    preserveHierarchy: 0
-    indexFormat: 1
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
@@ -23370,30 +23264,24 @@ ModelImporter:
     useFileScale: 1
   tangentSpace:
     normalSmoothAngle: 60
+    splitTangentsAcrossUV: 1
     normalImportMode: 0
-    tangentImportMode: 4
-    normalCalculationMode: 0
+    tangentImportMode: 1
   importAnimation: 1
   copyAvatar: 0
   humanDescription:
-    serializedVersion: 2
     human: []
     skeleton: []
-    armTwist: 0.5
-    foreArmTwist: 0.5
-    upperLegTwist: 0.5
-    legTwist: 0.5
-    armStretch: 0.05
-    legStretch: 0.05
+    armTwist: .5
+    foreArmTwist: .5
+    upperLegTwist: .5
+    legTwist: .5
+    armStretch: .0500000007
+    legStretch: .0500000007
     feetSpacing: 0
-    rootMotionBoneName: Bip01
-    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
-    hasTranslationDoF: 0
-    hasExtraRoot: 1
-    skeletonHasParents: 0
+    rootMotionBoneName: 
   lastHumanDescriptionAvatarSource: {instanceID: 0}
   animationType: 2
-  humanoidOversampling: 1
   additionalBone: 0
   userData: 
   assetBundleName: 

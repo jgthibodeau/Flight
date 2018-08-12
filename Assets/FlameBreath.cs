@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class FlameBreath : MonoBehaviour {
+	public bool infiniteBreath = false;
+
 	public bool flameOn;
 
 	public ParticleSystem flameParticles;
@@ -77,7 +79,7 @@ public class FlameBreath : MonoBehaviour {
 			flameAudio.time = 0;
 		}
 
-		if (currentBreath > 0) {
+		if (currentBreath > 0 || infiniteBreath) {
 			rateMultiplier = Mathf.Clamp01 (rateMultiplier + Time.deltaTime * rampUpSpeed);
 			flameParticleVelocity.collisionsEnabled = true;
 		} else {
