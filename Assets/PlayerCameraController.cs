@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerCameraController : MonoBehaviour {
+	public ThirdPersonCamera.Follow mainFollowCamera;
 	public List<MonoBehaviour> mainCameraScripts;
 	public List<MonoBehaviour> headCameraScripts;
 
@@ -10,6 +11,14 @@ public class PlayerCameraController : MonoBehaviour {
 
 	void Start () {
 		EnableMainCamera ();
+	}
+
+	public void SetMainCameraTight (bool tight) {
+		if (tight) {
+			mainFollowCamera.SetFollowType (ThirdPersonCamera.FOLLOW_TYPE.TIGHT);
+		} else {
+			mainFollowCamera.UnsetFollowType ();
+		}
 	}
 
 	public void ToggleCamera() {

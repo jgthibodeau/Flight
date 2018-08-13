@@ -8,8 +8,22 @@ public class FlameBreath : MonoBehaviour {
 	public bool flameOn;
 
 	public ParticleSystem flameParticles;
-	public ParticleSystem flameDepletedParticles;
+//	public ParticleSystem flameDepletedParticles;
 	public ParticleVelocity flameParticleVelocity;
+
+	public float flameParticleMaxEmission = 100;
+	public float flameParticleMaxLifetime = 2;
+	public float flameParticleMaxSpeed = 20;
+	public float flameParticleMaxScale = 1;
+
+//	public float flameParticleMinEmission = 50;
+//	public float flameParticleMinLifetime = 1;
+//	public float flameParticleMinSpeed = 10;
+//	public float flameParticleMinScale = 20;
+	public float flameParticleMinPercent = 0.25f;
+
+	public float breathPercentStartsDiminishing = 0.25f;
+
 	public enum FlameState
 	{
 		Starting, Playing, Stopping, Stopped
@@ -23,27 +37,31 @@ public class FlameBreath : MonoBehaviour {
 	public float rampUpSpeed = 2;
 	public float rampDownSpeed = 2f;
 
+	private ParticleSystem.MainModule mm;
 	private ParticleSystem.EmissionModule em;
+	private ParticleSystem.SizeOverLifetimeModule solm;
 	private ParticleSystem.MinMaxCurve rateOverTime;
+	private ParticleSystem.MinMaxCurve sizeOverTime;
 	public float originalRate;
 	public float rateMultiplier;
 
 	public float maxedOutRateMultiplier;
-	public  float maxBreath;
-	public  float currentBreath;
+	public float maxBreath;
+	public float currentBreath;
 
-	public  float breathUseRate;
-	public  float breathUseDelay;
-	public  float currentUseDelay;
+	public float breathUseRate;
+	public float breathUseDelay;
+	public float currentUseDelay;
 
-	public  float breathRegainRate;
-	public  float breathRegainDelay;
-	public  float currentRegainDelay;
+	public float breathRegainRate;
+	public float breathRegainDelay;
+	public float currentRegainDelay;
 
 	void Start() {
+		mm = flameParticles.main;
+		solm = flameParticles.sizeOverLifetime;
 		em = flameParticles.emission;
 		rateOverTime = em.rateOverTime;
-		originalRate = rateOverTime.constant;
 
 		rateMultiplier = 0;
 
@@ -60,9 +78,16 @@ public class FlameBreath : MonoBehaviour {
 		} else {
 			StopFlame ();
 		}
-		rateOverTime.constant = originalRate * rateMultiplier;
+
+		float diminishedPercent = DiminishedPercent ();
+		rateOverTime.constant = flameParticleMaxEmission * diminishedPercent * rateMultiplier;
 		em.rateOverTime = rateOverTime;
-		flameAudio.volume = rateMultiplier;
+		flameAudio.volume = rateMultiplier * diminishedPercent;
+
+		mm.startLifetime = flameParticleMaxLifetime * diminishedPercent * rateMultiplier;
+		mm.startSpeed = flameParticleMaxSpeed * diminishedPercent * rateMultiplier;
+
+		solm.sizeMultiplier = diminishedPercent;
 	}
 
 	public void StartFlame () {
@@ -79,22 +104,8 @@ public class FlameBreath : MonoBehaviour {
 			flameAudio.time = 0;
 		}
 
-		if (currentBreath > 0 || infiniteBreath) {
-			rateMultiplier = Mathf.Clamp01 (rateMultiplier + Time.deltaTime * rampUpSpeed);
-			flameParticleVelocity.collisionsEnabled = true;
-		} else {
-//			rateMultiplier = Mathf.Clamp (rateMultiplier, 0, maxedOutRateMultiplier);
-//			rateMultiplier = maxedOutRateMultiplier;
-//			flameParticleVelocity.collisionsEnabled = false;
-			if (flameParticles.isPlaying) {
-				flameParticles.Stop ();
-//				ParticleSystem.MainModule mm = flameDepletedParticles.main;
-//				mm.prewarm = true;
-				flameDepletedParticles.Play ();
-			} else if (!flameDepletedParticles.isPlaying){
-				flameDepletedParticles.Play ();
-			}
-		}
+		rateMultiplier = Mathf.Clamp01 (rateMultiplier + Time.deltaTime * rampUpSpeed);
+		flameParticleVelocity.collisionsEnabled = true;
 	}
 	
 	public void StopFlame () {
@@ -112,12 +123,18 @@ public class FlameBreath : MonoBehaviour {
 			if (flameParticles.isPlaying) {
 				flameParticles.Stop ();
 			}
-			if (flameDepletedParticles.isPlaying) {
-//				ParticleSystem.MainModule mm = flameDepletedParticles.main;
-//				mm.prewarm = false;
-				flameDepletedParticles.Stop ();
-			}
 		}
+	}
+
+	public float DiminishedPercent() {
+		float percentage = Percentage ();
+		if (percentage > breathPercentStartsDiminishing || infiniteBreath) {
+			return 1f;
+		}
+
+		float diminishedPercent = percentage / breathPercentStartsDiminishing;
+
+		return diminishedPercent * (1 - flameParticleMinPercent) + flameParticleMinPercent;
 	}
 
 	public float Percentage() {

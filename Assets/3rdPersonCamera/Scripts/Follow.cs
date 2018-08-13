@@ -103,6 +103,15 @@ namespace ThirdPersonCamera
             return Mathf.Atan2(
                 Vector3.Dot(n, Vector3.Cross(v1, v2)),
                 Vector3.Dot(v1, v2)) * Mathf.Rad2Deg;
-        }
+		}
+
+		public void SetFollowType(FOLLOW_TYPE newFollowType) {
+			adjustFollowTypeWithSpeed = false;
+			followType = newFollowType;
+		}
+
+		public void UnsetFollowType() {
+			adjustFollowTypeWithSpeed = true;
+		}
     }
 }

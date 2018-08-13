@@ -7,6 +7,10 @@ using System.Collections;
 [RequireComponent(typeof(Perch))]
 [RequireComponent(typeof(Walk))]
 [RequireComponent(typeof(Stamina))]
+[RequireComponent(typeof(DiscreteStamina))]
+[RequireComponent(typeof(Interactor))]
+[RequireComponent(typeof(FlameBreath))]
+[RequireComponent(typeof(Health))]
 
 public class Player : MonoBehaviour {
 	private GlideV2 glideV2Script;
@@ -14,6 +18,7 @@ public class Player : MonoBehaviour {
 	private Perch perchScript;
 	private Walk walkScript;
 	private Stamina staminaScript;
+	private DiscreteStamina discreteStaminaScript;
 	private Interactor interactorScript;
 	private FlameBreath flameBreathScript;
 	private Health healthScript;
@@ -38,6 +43,8 @@ public class Player : MonoBehaviour {
 	public bool isGrounded;
 	public bool isUpright;
 	public bool isFlaming;
+	public bool isGusting;
+	public bool gustTriggered;
 	public float uprightThreshold;
 	public float speed;
 	public float ragdollSpeed;
@@ -83,13 +90,13 @@ public class Player : MonoBehaviour {
 
 		characterCollider = transform.GetComponent<Collider> ();
 		rigidBody = transform.GetComponent<Rigidbody> ();
-//		rigidBody = transform.GetComponentInChildren<Rigidbody> ();
 
 		glideV2Script = transform.GetComponent<GlideV2> ();
 		grabScript = transform.GetComponent<Grab> ();
 		perchScript = transform.GetComponent<Perch> ();
 		walkScript = transform.GetComponent<Walk> ();
 		staminaScript = transform.GetComponent<Stamina> ();
+		discreteStaminaScript = transform.GetComponent<DiscreteStamina> ();
 		interactorScript = transform.GetComponent<Interactor> ();
 		flameBreathScript = transform.GetComponent<FlameBreath> ();
 		healthScript = transform.GetComponent<Health> ();
@@ -104,33 +111,10 @@ public class Player : MonoBehaviour {
 		walkScript.rigidBody = rigidBody;
 
 		glideV2Script.gravity = gravity;
-
-//		rigidBody.ResetCenterOfMass ();
-//		rigidBody.ResetInertiaTensor ();
-//		rigidBody.centerOfMass = centerOfMass;
-//		rigidBody.inertiaTensorRotation = inertiaTensorRotation;
-//		Debug.Log ("centerOfMass: "+rigidBody.centerOfMass);
-//		Debug.Log ("inertiaTensor: "+rigidBody.inertiaTensor);
-//		Debug.Log ("inertiaTensorRotation: "+rigidBody.inertiaTensorRotation);
-
-
-		//		leftWing = transform.Find ("bird2/1/Bird_rig_3/1_2/Backbones_null_3/Wing_3");
-		//		rightWing = transform.Find ("bird2/1/Bird_rig_3/1_2/Backbones_null_3/Wing_1_3");
-
-		//		leftWingInitialRotation = leftWing.localRotation.eulerAngles;
-		//		rightWingInitialRotation = rightWing.localRotation.eulerAngles;
 	}
 
 	void FixedUpdate () {
 		CheckGround ();
-
-//		rigidBody.centerOfMass = centerOfMass;
-//		rigidBody.inertiaTensorRotation = inertiaTensorRotation;
-//		Debug.Log ("centerOfMass: "+rigidBody.centerOfMass);
-//		Debug.Log ("inertiaTensor: "+rigidBody.inertiaTensor);
-//		Debug.Log ("inertiaTensorRotation: "+rigidBody.inertiaTensorRotation);
-
-//		center = transform.position + centerOfGravity.x * transform.right + centerOfGravity.y * transform.up + centerOfGravity.z * transform.forward;
 
 		//assume not fully grounded
 		landed = false;
@@ -211,7 +195,7 @@ public class Player : MonoBehaviour {
 	}
 
 	void GroundGravity(){
-//				Vector3 gravityForce = -groundNormal * gravity;
+//		Vector3 gravityForce = -groundNormal * gravity;
 		Vector3 gravityForce = Vector3.down * groundGravity;
 		rigidBody.AddForceAtPosition (gravityForce, transform.position - transform.up, ForceMode.Acceleration);
 //		rigidBody.AddForceAtPosition (gravityForce/2, transform.position - transform.up * 1 + transform.forward, ForceMode.Force);
@@ -295,8 +279,8 @@ public class Player : MonoBehaviour {
 	}
 
 	void UpdateRendering(){
-		birdAnimator.WingsOut = glideV2Script.wingsOut;
-		dragonAnimator.WingsOut = glideV2Script.wingsOut;
+//		birdAnimator.WingsOut = glideV2Script.wingsOut;
+//		dragonAnimator.WingsOut = glideV2Script.wingsOut;
 
 		birdAnimator.InWater = inWater;
 		birdAnimator.Grounded = landed;//isGrounded && !isFlapping;
@@ -317,6 +301,8 @@ public class Player : MonoBehaviour {
 				playerCameraController.EnableMainCamera ();
 			}
 		}
+
+		playerCameraController.SetMainCameraTight (glideV2Script.isBackFlapping);
 	}
 
 	public void GetInput () {
@@ -361,14 +347,6 @@ public class Player : MonoBehaviour {
 			OneStickFlight ();
 		}
 
-//		if (twoStickFlight) {
-//			rotateHead = false;
-//			TwoStickFlight ();
-//		} else {
-//			rotateHead = true;
-//			OneStickFlight ();
-//		}
-
 		walkScript.forward = Util.GetAxis ("Vertical");
 		walkScript.right = Util.GetAxis ("Horizontal");
 
@@ -380,26 +358,35 @@ public class Player : MonoBehaviour {
 		}
 		staminaScript.usingStamina = flapSpeed != 0;
 
-//		if (glideV2Script.flapSpeed == 0) {
-//			glideV2Script.wingsOut = Util.GetButtonDown ("Close Wings") ^ glideV2Script.wingsOut;
-//		} else {
-			glideV2Script.wingsOut = true;
-//		}
-
 		isFlapping = flapSpeed > 0;
-
-//		rigidBody.constraints = RigidbodyConstraints.None;
 
 		bool grabHeld = Util.GetButton ("Grab");
 		bool grab = Util.GetButtonDown ("Grab");
-		grabScript.grab = grab;
-
-//		if (grab && interactorScript.itemHolder.HasItem () || grabHeld && !interactorScript.itemHolder.HasItem ()) {
+//		grabScript.grab = grab;
 		if (grab) {
 			interactorScript.Pickup ();
 		}
 		if (!grabHeld) {
 			interactorScript.Drop ();
+		}
+
+		isGusting = Util.GetButton ("Gust");
+		gustTriggered = Util.GetButtonDown ("Gust");
+
+		glideV2Script.boostHeld = !isGrounded && isGusting;
+		if (gustTriggered) {
+			if (!isGrounded) {
+				if (!glideV2Script.isBackFlapping) {
+					if (glideV2Script.CanBoost () && discreteStaminaScript.HasStamina ()) {
+						glideV2Script.boostTriggered = true;
+						discreteStaminaScript.UseStamina ();
+					}
+				} else {
+					//TODO backflap gusts
+				}
+			} else {
+				//TODO ground gusts
+			}
 		}
 	}
 
@@ -430,7 +417,8 @@ public class Player : MonoBehaviour {
 	public float oneStickForwardPitchScale = 1f;
 	public float oneStickBackwardPitchScale = 1f;
 	public float oneStickWingInScale = 0.5f;
-	public float oneStickWingMinYToPointDown = -0.75f;
+	public float oneStickWingMinYToPointDown = -0.9f;
+	public float oneStickWingMaxYToPointDown = -0.99f;
 	public float oneStickWingInScalePointingDown = 1f;
 	public float oneStickWingOutScale = 1f;
 
@@ -438,6 +426,9 @@ public class Player : MonoBehaviour {
 	public float maxPitch = 0.75f;
 
 	void OneStickFlight() {
+		OneStickFlightV2 ();
+		return;
+
 		Vector2 input = new Vector2 (Util.GetAxis ("Horizontal"), Util.GetAxis ("Vertical"));
 		input = Vector2.ClampMagnitude (input, 1);
 		float vert = input.y;
@@ -464,17 +455,76 @@ public class Player : MonoBehaviour {
 			float percent = 0;
 			if (transform.forward.y < oneStickWingMinYToPointDown) {
 				percent = (1 + transform.forward.y) / (1 + oneStickWingMinYToPointDown);
-				wingScale = Mathf.Lerp (oneStickWingInScale, oneStickWingInScalePointingDown, 1-percent);
+				wingScale = Mathf.Lerp (oneStickWingInScale, oneStickWingInScalePointingDown, 1 - percent);
 			}
 
 			glideV2Script.rollLeft = -vert * wingScale;
 			glideV2Script.rollRight = -vert * wingScale;
+
 		} else {
 			glideV2Script.pitchLeft += vert * oneStickBackwardPitchScale;
 			glideV2Script.pitchRight += vert * oneStickBackwardPitchScale;
 
 			glideV2Script.rollLeft = -vert * oneStickWingOutScale;
 			glideV2Script.rollRight = -vert * oneStickWingOutScale;
+		}
+
+		glideV2Script.pitchLeft = Mathf.Clamp (glideV2Script.pitchLeft, minPitch, maxPitch);
+		glideV2Script.pitchRight = Mathf.Clamp (glideV2Script.pitchRight, minPitch, maxPitch);
+	}
+
+	void OneStickFlightV2() {
+		Vector2 input = new Vector2 (Util.GetAxis ("Horizontal"), Util.GetAxis ("Vertical"));
+		input = Vector2.ClampMagnitude (input, 1);
+		float vert = input.y;
+		float horiz = -input.x;
+
+		//forward/back -> wings in/out
+		if (vert > 0) {
+			glideV2Script.pitchLeft += vert * oneStickForwardPitchScale;
+			glideV2Script.pitchRight += vert * oneStickForwardPitchScale;
+
+			float wingScale = oneStickWingInScale;
+			float percent = 0;
+			if (transform.forward.y < oneStickWingMinYToPointDown) {
+				percent = (1 + transform.forward.y) / (1 + oneStickWingMinYToPointDown);
+				wingScale = Mathf.Lerp (oneStickWingInScale, oneStickWingInScalePointingDown, 1 - percent);
+			}
+
+			glideV2Script.rollLeft = -vert * wingScale;
+			glideV2Script.rollRight = -vert * wingScale;
+
+
+
+			if (transform.forward.y < oneStickWingMaxYToPointDown) {
+				glideV2Script.rollLeft = -1;
+				glideV2Script.rollRight = -1;
+			}
+
+
+
+//			if (transform.forward.y < oneStickWingMinYToPointDown) {
+//				glideV2Script.rollLeft = -1;
+//				glideV2Script.rollRight = -1;
+//				pointingDown = true;
+//			} else {
+//				glideV2Script.rollLeft = -vert * oneStickWingInScale;
+//				glideV2Script.rollRight = -vert * oneStickWingInScale;
+//			}
+
+		} else {
+			glideV2Script.pitchLeft = vert * oneStickBackwardPitchScale;
+			glideV2Script.pitchRight = vert * oneStickBackwardPitchScale;
+
+			glideV2Script.rollLeft = -vert * oneStickWingOutScale;
+			glideV2Script.rollRight = -vert * oneStickWingOutScale;
+		}
+			
+//		left/right -> more lift on that side and less on the opposite side
+		if (horiz > 0) {
+			glideV2Script.pitchRight -= horiz * oneStickRollScale;
+		} else if (horiz < 0) {
+			glideV2Script.pitchLeft += horiz * oneStickRollScale;
 		}
 
 		glideV2Script.pitchLeft = Mathf.Clamp (glideV2Script.pitchLeft, minPitch, maxPitch);
@@ -509,8 +559,6 @@ public class Player : MonoBehaviour {
 		float desiredHeadHoriz = 0f;
 		float desiredHeadVert = 0f;
 
-//		if (rotateHead && isGrounded) {
-//		if (isGrounded) {
 		desiredHeadHoriz = Util.GetAxis ("Horizontal Right") * headRotateSideScale;
 		desiredHeadVert = Util.GetAxis ("Vertical Right");
 		if (desiredHeadVert > 0) {
@@ -518,14 +566,12 @@ public class Player : MonoBehaviour {
 		} else {
 			desiredHeadVert *= headRotateDownScale;
 		}
-//		}
 
 		headHoriz = Mathf.Lerp (headHoriz, desiredHeadHoriz, rotateSpeed * Time.deltaTime);
 		headVert = Mathf.Lerp (headVert, desiredHeadVert, rotateSpeed * Time.deltaTime);
 
 		foreach (Transform t in headComponents) {
 			Vector3 rot = t.eulerAngles;
-//			Vector3 rot = t.eulerAngles.normalized;
 			rot.y += headHoriz;
 			rot.z += headVert;
 			t.eulerAngles = rot;

@@ -97,8 +97,10 @@ public class Interactor : MonoBehaviour {
 	}
 
 	public void Drop() {
-		Debug.Log ("dropping");
-		itemHolder.Drop ();
+		if (itemHolder.HasItem ()) {
+			Debug.Log ("dropping" + itemHolder.heldItem);
+			itemHolder.Drop ();
+		}
 	}
 
 	public void Pickup(Pickupable pickupable) {

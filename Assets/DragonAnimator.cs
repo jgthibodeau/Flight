@@ -3,7 +3,7 @@ using System.Collections;
 
 public class DragonAnimator : MonoBehaviour {
 	public float FadeLength;
-	public bool Flapping, Grounded, WingsOut, Walking, Hopping, InWater, Flame, Attack, Healing;
+	public bool Flapping, Grounded, WingsOut, Walking, Hopping, InWater, Flame, Attack, Healing, Boosting, BoostTriggered;
 	private bool Attacking;
 	public float FlapSpeed;
 	public float MoveSpeed;
@@ -58,6 +58,12 @@ public class DragonAnimator : MonoBehaviour {
 		animator.SetBool ("Flame", Flame);
 		animator.SetBool ("Attacking", Attack);
 		animator.SetBool ("Healing", Healing);
+		animator.SetBool ("Boosting", Boosting);
+
+		if (BoostTriggered) {
+			animator.SetTrigger ("BoostTriggered");
+			BoostTriggered = false;
+		}
 
 		animator.SetFloat ("MoveSpeed", MoveSpeed);
 		animator.SetFloat ("WalkSpeed", WalkScale * MoveSpeed);
@@ -65,14 +71,9 @@ public class DragonAnimator : MonoBehaviour {
 		animator.SetFloat ("FlapSpeed", FlapSpeed);
 
 		if (manuallyAdjustWings) {
-			if (!Grounded && WingsOut && !Flapping) {
-//			if (!Grounded && WingsOut) {
+			if (WingsOut && !Grounded && !Flapping && !Boosting) {
 				UpdateWings ();
 			} else {
-//				if (Grounded) {
-					leftWing.localScale = defaultRightWingScale;
-					rightWing.localScale = defaultLeftWingScale;
-//				}
 				ResetWings ();
 			}
 		}
@@ -83,6 +84,8 @@ public class DragonAnimator : MonoBehaviour {
 	}
 
 	void ResetWings() {
+		leftWing.localScale = defaultRightWingScale;
+		rightWing.localScale = defaultLeftWingScale;
 		wingsReset = true;
 	}
 
