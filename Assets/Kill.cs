@@ -6,7 +6,7 @@ public class Kill : MonoBehaviour {
 	public float lifeTimeInSeconds;
 	public float startTime;
 
-	private ParticleSystem ps;
+    public ParticleSystem ps;
 	public float stopParticlesTimeInSeconds;
 
 	private AudioSource audioSource;
@@ -14,7 +14,6 @@ public class Kill : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		ps = GetComponent<ParticleSystem> ();
 		audioSource = GetComponent<AudioSource> ();
 		startTime = Time.time;
 		MyGameManager.instance.AddInstace (this.gameObject);

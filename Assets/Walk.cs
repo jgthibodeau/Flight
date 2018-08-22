@@ -61,7 +61,8 @@ public class Walk : MonoBehaviour {
 	void ResetWalkSpeed() {
 		currentSpeedIncreaseDelay = speedIncreaseDelay;
 		currentSpeed = walkSpeed;
-	}
+        dragonAnimator.MoveSpeed = 0;
+    }
 
 	void RigidbodyWalk() {
 		//			rigidBody.constraints = RigidbodyConstraints.FreezeRotation;
@@ -159,18 +160,20 @@ public class Walk : MonoBehaviour {
 			transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, walkTurnSpeed * Time.fixedDeltaTime);
 		}
 
+        float forwardSpeed = Vector3.Dot(rigidBody.velocity, transform.forward);
 
-		if (speed >= minWalkAmount) {
-			bool walking = speed > 0;
-			bool running = speed > hopTransitionSpeed;
+
+        if (forwardSpeed >= minWalkAmount) {
+			bool walking = forwardSpeed > 0;
+			bool running = forwardSpeed > hopTransitionSpeed;
 
 			birdAnimator.Walking = walking && !running;
 			birdAnimator.Hopping = running;
-			birdAnimator.MoveSpeed = speed * animationSpeedScale;
+			birdAnimator.MoveSpeed = forwardSpeed * animationSpeedScale;
 
 			dragonAnimator.Walking = walking && !running;
 			dragonAnimator.Hopping = running;
-			dragonAnimator.MoveSpeed = speed;
+			dragonAnimator.MoveSpeed = forwardSpeed;
 		} else {
 			birdAnimator.Walking = false;
 			birdAnimator.Hopping = false;

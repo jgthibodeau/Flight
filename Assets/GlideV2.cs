@@ -11,9 +11,8 @@ public class GlideV2 : MonoBehaviour {
 	[HideInInspector]
 	private TrailRenderer[] trails;
 	[HideInInspector]
-	public bool isGrounded;
-	[HideInInspector]
 	public Player playerScript;
+	public bool isGrounded;
 
 	public float speed;
 	public float gravity;
@@ -60,8 +59,9 @@ public class GlideV2 : MonoBehaviour {
 	public float airDensity;
 
 	public bool flap = false;
-	private bool isFlapping = false;
 	public bool isBackFlapping;
+	public float rollAmountTriggersBackflap = 0.9f;
+	public float rollAmountHoldBackflap = 0f;
 	public float wingOutDistance = 0.5f;
 	public float wingOutDragDistance = 0.5f;
 	public float wingForwardDistance = 0.5f;
@@ -74,13 +74,12 @@ public class GlideV2 : MonoBehaviour {
 	public float liftAngle = 0;
 
 	public AudioSource airAudioSource;
-	public AudioSource flapAudioSource;
-	private bool playingFlapSound = false;
-	public float flapMinPitch;
-	public float flapMaxPitch;
+	public float maxAirAudioPitch = 10f;
+	public float maxAirAudioVolume = 0.5f;
+	public float airAudioPitchScale = 0.05f;
+	public float airAudioVolumeScale = 0.0005f;
+	public float airAudioChangeSpeed = 0.5f;
 
-	public float pitchScale = 1.5f;
-	public float volumeScale = 0.7f;
 	public float minTrailSpeed = 10f;
 	public float trailScale = 0.3f;
 	public float trailStartWidth = 0f;
@@ -113,7 +112,7 @@ public class GlideV2 : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update() {
-		wingsOut = isGrounded || !boostHeld;
+		wingsOut = isGrounded || isBackFlapping || flapping || !boostHeld;
 
 		//set air density based on height
 		//		airDensity = 1.2238f * Mathf.Pow(1f - (0.0000226f * transform.position.y), 5.26f);
@@ -121,15 +120,13 @@ public class GlideV2 : MonoBehaviour {
 		speed = rigidBody.velocity.magnitude;
 
 		//flap wings
-		if (flapping && !boosting) {
-			isFlapping = true;
+		if (flapping && !boosting && !boostHeld) {
 			birdAnimator.FlapSpeed = 2f;// + flapAnimationScale * flapSpeed;
 			birdAnimator.Flapping = true;
 
 			dragonAnimator.FlapSpeed = 2f;
 			dragonAnimator.Flapping = true;
 		} else {
-			isFlapping = false;
 			dragonAnimator.FlapSpeed = 0;
 			birdAnimator.Flapping = false;
 
@@ -138,8 +135,11 @@ public class GlideV2 : MonoBehaviour {
 		}
 
 		//audio based on speed
-		airAudioSource.pitch = speed * pitchScale;
-		airAudioSource.volume = speed * volumeScale;
+		if (!isGrounded) {
+			SetAirAudio (speed * airAudioPitchScale, speed * airAudioVolumeScale);
+		} else {
+			SetAirAudio (0, 0);
+		}
 
 		foreach(TrailRenderer trail in trails){
 			if (speed > minTrailSpeed) {
@@ -151,7 +151,7 @@ public class GlideV2 : MonoBehaviour {
 			}
 		}
 
-		birdAnimator.WingsOut = wingsOut;
+		birdAnimator.WingsOut = WingsOut ();
 		birdAnimator.pitchLeft = pitchLeft;
 		birdAnimator.pitchRight = pitchRight;
 		birdAnimator.rollLeft = -rollLeft;
@@ -159,8 +159,8 @@ public class GlideV2 : MonoBehaviour {
 		birdAnimator.tailPitch = flapDirection;
 
 
-		dragonAnimator.WingsOut = wingsOut;
-		dragonAnimator.Boosting = boosting;
+		dragonAnimator.WingsOut = WingsOut ();
+		dragonAnimator.Boosting = (boostState == BoostState.STARTING) || (boostState == BoostState.GOING);
 		dragonAnimator.pitchLeft = pitchLeft;
 		dragonAnimator.pitchRight = pitchRight;
 		dragonAnimator.rollLeft = -rollLeft;
@@ -168,19 +168,37 @@ public class GlideV2 : MonoBehaviour {
 		dragonAnimator.tailPitch = flapDirection;
 	}
 
-	IEnumerator PlayFlapSound(float wait){
-		flapAudioSource.Play();
-		yield return new WaitForSeconds(wait);
-		playingFlapSound = false;
+	void SetAirAudio (float desiredPitch, float desiredVolume) {
+		desiredPitch = Mathf.Clamp (desiredPitch, 0, maxAirAudioPitch);
+		desiredVolume = Mathf.Clamp (desiredVolume, 0, maxAirAudioVolume);
+		airAudioSource.pitch = Mathf.Lerp(airAudioSource.pitch, desiredPitch, airAudioChangeSpeed * Time.deltaTime);
+		airAudioSource.volume = Mathf.Lerp(airAudioSource.volume, desiredVolume, airAudioChangeSpeed * Time.deltaTime);
 	}
 
 	public bool CanBoost() {
-		return !boosting && !boostTriggered;
+		return (boostState == BoostState.STOPPED) && !boostTriggered;
+	}
+
+	public bool IsFlapping() {
+		return flapping && !boostHeld;
+	}
+
+	public bool CanFlap() {
+		return !flapping && WingsOut();
+	}
+
+	public bool WingsOut() {
+		return !boosting && !boostHeld;
 	}
 
 	void FixedUpdate () {
 //		SteadyFlapOverTime ();
-		isBackFlapping = false;
+//		if (!flapping) {
+//			isBackFlapping = false;
+//		}
+		if (!flapping || rollLeft < rollAmountHoldBackflap || rollRight < rollAmountHoldBackflap) {
+			isBackFlapping = false;
+		}
 
 		if (boostTriggered) {
 			flapping = false;
@@ -191,11 +209,11 @@ public class GlideV2 : MonoBehaviour {
 		}
 
 		if (boosting) {
-			if (boostState == BoostState.STARTING) {
-				wingsOut = false;
-			}
+//			if (boostState == BoostState.STARTING) {
+//				wingsOut = false;
+//			}
 			ApplyBoostForce ();
-		} else if (wingsOut) {
+		} else if (WingsOut ()) {
 			WingFlap ();
 		}
 
@@ -239,17 +257,13 @@ public class GlideV2 : MonoBehaviour {
 
 	void SteadyFlapOverTime(){
 		if (flapSpeed != 0) {
-			if (!flapping) {
-				flapAudioSource.Play();
-				flapAudioSource.pitch = Random.Range (flapMinPitch, flapMaxPitch);
+			if (CanFlap ()) {
 				flapping = true;
 			} else if (currentFlapTick < flapTicks) {
 				currentFlapTick++;
 			}
 			if (currentFlapTick >= flapTicks) {
 				currentFlapTick = 0;
-				flapAudioSource.Play();
-				flapAudioSource.pitch = Random.Range (flapMinPitch, flapMaxPitch);
 			}
 		} else if (flapping) {
 			if (currentFlapTick < flapTicks) {
@@ -275,17 +289,16 @@ public class GlideV2 : MonoBehaviour {
 
 	void WingFlap() {
 		if (flapSpeed != 0) {
-			if (!flapping) {
-				flapAudioSource.Play();
-				flapAudioSource.pitch = Random.Range (flapMinPitch, flapMaxPitch);
+			if (CanFlap ()) {
 				flapping = true;
-			} else if (currentFlapTick < flapTicks) {
+			} else if (flapping && currentFlapTick < flapTicks) {
 				currentFlapTick++;
-			}
-			if (currentFlapTick >= flapTicks) {
+				if (currentFlapTick >= flapTicks) {
+					currentFlapTick = 0;
+				}
+			} else {
 				currentFlapTick = 0;
-				flapAudioSource.Play();
-				flapAudioSource.pitch = Random.Range (flapMinPitch, flapMaxPitch);
+				flapping = false;
 			}
 		} else if (flapping) {
 			if (currentFlapTick < flapTicks) {
@@ -308,34 +321,16 @@ public class GlideV2 : MonoBehaviour {
 			Vector3 flapPositionRight = transform.position + transform.up * playerScript.centerOfGravity.y + transform.forward * playerScript.centerOfGravity.z + transform.right * flapOutDistance;
 
 			//if backFlapHover is selected, and we are flapping backwards
-			if (backFlapHover && rollLeft > 0 && rollRight > 0) {
+			if (backFlapHover && (isBackFlapping || rollLeft > rollAmountTriggersBackflap && rollRight > rollAmountTriggersBackflap && !isGrounded)) {
+				//TODO have to triggers, 1 to start and 1 to keep
 				isBackFlapping = true;
 
-				Vector3 flapForceDirectionLeft = Vector3.zero;
-				Vector3 flapForceDirectionRight = Vector3.zero;
+				realFlapSpeed = flapSpeed * flapForwardCoef * flapScale * 2;
+				Vector3 forceDirection = -rigidBody.velocity.normalized;
+				Vector3 flapForce = forceDirection * realFlapSpeed;
+				rigidBody.AddForce (flapForce, flapForceMode);
+				Util.DrawRigidbodyRay (rigidBody, transform.position, flapForce, Color.green);
 
-				//apply force until not moving forward
-				float forwardVelocity = Vector3.Dot (rigidBody.velocity, transform.forward);
-				if (forwardVelocity > 0) {
-					flapForceDirectionLeft -= transform.forward;
-					flapForceDirectionRight -= transform.forward;
-				}
-
-				//apply force until not moving down
-				float downVelocity = Vector3.Dot (rigidBody.velocity, Vector3.down);
-				if (downVelocity > 0) {
-					flapForceDirectionLeft += Vector3.up;
-					flapForceDirectionRight += Vector3.up;
-				}
-
-				Vector3 flapForceLeft = flapForceDirectionLeft.normalized * realFlapSpeed;
-				Vector3 flapForceRight = flapForceDirectionRight.normalized * realFlapSpeed;
-
-				rigidBody.AddForceAtPosition (flapForceLeft, flapPositionLeft, flapForceMode);
-				Util.DrawRigidbodyRay (rigidBody, flapPositionLeft, flapForceLeft, Color.red);
-
-				rigidBody.AddForceAtPosition (flapForceRight, flapPositionRight, flapForceMode);
-				Util.DrawRigidbodyRay (rigidBody, flapPositionRight, flapForceRight, Color.blue);
 
 				//rotate to become upright
 				Quaternion desiredForward;
@@ -347,26 +342,55 @@ public class GlideV2 : MonoBehaviour {
 				float rotateAmount = Mathf.Abs(pitchLeft) - Mathf.Abs(pitchRight);
 				Vector3 rotateForward = transform.forward * (1 - Mathf.Abs(rotateAmount)) + transform.right * rotateAmount;
 				desiredForward = Quaternion.Slerp (rigidBody.rotation, Quaternion.LookRotation (rotateForward, Vector3.up), Time.deltaTime * flapHoverRotationSpeed);
-
 				rigidBody.MoveRotation (desiredForward);
 
 			} else {
 				float flapLeft = -2 * rollLeft;
 //				Vector3 flapForceDirectionLeft = (transform.forward * (flapLeft) * 0.75f) + (transform.up * (1 - Mathf.Abs (flapLeft)) * 0.25f);
-				Vector3 flapForceDirectionLeft = (transform.forward * (flapLeft)) + (transform.up * (1 - Mathf.Abs (flapLeft)));
-				Vector3 flapForceLeft = flapForceDirectionLeft.normalized * realFlapSpeed;
+                //Vector3 flapForceDirectionLeft = (transform.forward * (flapLeft)) + (transform.up * (1 - Mathf.Abs (flapLeft)));
+                Vector3 flapForceDirectionLeft = CalculateFlapForceDirection();
+                Vector3 flapForceLeft = flapForceDirectionLeft.normalized * realFlapSpeed;
 				rigidBody.AddForceAtPosition (flapForceLeft, flapPositionLeft, flapForceMode);
 				Util.DrawRigidbodyRay (rigidBody, flapPositionLeft, flapForceLeft, Color.red);
 
 				float flapRight = -2 * rollRight;
 //				Vector3 flapForceDirectionRight = (transform.forward * (flapRight) * 0.75f) + (transform.up * (1 - Mathf.Abs (flapRight)) * 0.25f);
-				Vector3 flapForceDirectionRight = (transform.forward * (flapRight)) + (transform.up * (1 - Mathf.Abs (flapRight)));
-				Vector3 flapForceRight = flapForceDirectionRight.normalized * realFlapSpeed;
+				//Vector3 flapForceDirectionRight = (transform.forward * (flapRight)) + (transform.up * (1 - Mathf.Abs (flapRight)));
+                Vector3 flapForceDirectionRight = CalculateFlapForceDirection();
+                Vector3 flapForceRight = flapForceDirectionRight.normalized * realFlapSpeed;
 				rigidBody.AddForceAtPosition (flapForceRight, flapPositionRight, flapForceMode);
 				Util.DrawRigidbodyRay (rigidBody, flapPositionRight, flapForceRight, Color.blue);
 			}
 		}
 	}
+
+    public Vector3 CalculateFlapForceDirection()
+    {
+        //return (transform.forward * (0.5f)) + (transform.up * (1 - 0.5f));
+
+        //float minVelToFlapForward = 10f;
+        //float maxVelToFlapForward = 100f;
+        //if (isGrounded || rigidBody.velocity.magnitude < minVelToFlapForward) {
+        //    return transform.up;
+        //} else
+        //{
+        //    float vel = Mathf.Clamp(rigidBody.velocity.magnitude, minVelToFlapForward, maxVelToFlapForward);
+
+        //    float forwardPercent = (vel - minVelToFlapForward) / (maxVelToFlapForward - minVelToFlapForward);
+
+        //    return (transform.forward * (forwardPercent)) + (transform.up * (1 - forwardPercent));
+        //}
+        if (isGrounded)
+        {
+            return transform.up;
+        }
+        else
+        {
+            float forwardPercent = 0.25f;
+
+            return (transform.forward * (forwardPercent)) + (transform.up * (1 - forwardPercent));
+        }
+    }
 
 	IEnumerator StartBoost() {
 		boostState = BoostState.STARTING;
@@ -420,7 +444,7 @@ public class GlideV2 : MonoBehaviour {
 
 		Vector3 liftDirection = (transform.up * (1 - liftAngle) + transform.forward * liftAngle).normalized;
 
-		if (wingsOut) {
+		if (WingsOut ()) {
 			/**
 			 * Left
 			*/
@@ -516,7 +540,7 @@ public class GlideV2 : MonoBehaviour {
 	}
 
 	public void SeparateDrag (float liftCoefLeft, float liftCoefRight, float angleOfAttackLeft, float angleOfAttackRight, float liftLeft, float liftRight, Vector3 leftPosition, Vector3 rightPosition){
-		if (rigidBody.velocity.magnitude > 0) {
+		if (rigidBody.velocity.magnitude > 0 && !isBackFlapping) {
 			float dragScaleLeft = pitchLeft * (-0.75f) + 1;
 			float dragScaleRight = pitchRight * (-0.75f) + 1;
 

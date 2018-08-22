@@ -22,9 +22,10 @@ public class Player : MonoBehaviour {
 	private Interactor interactorScript;
 	private FlameBreath flameBreathScript;
 	private Health healthScript;
-	public PlayerCameraController playerCameraController;
+    public PlayerCameraController playerCameraController;
+    public PrefabSpawner gustSpawner;
 
-	private int PerchableLayer;
+    private int PerchableLayer;
 	private int EnemyLayer;
 	private int PreyLayer;
 
@@ -39,7 +40,8 @@ public class Player : MonoBehaviour {
 	public float waterBobAmount, waterBobTime, timeSinceWaterBob;
 	public float airGroundDistance = 0.1f;
 	public float groundDistance = 0.15f;
-	public bool inWater;
+    public float groundCheckRadius = 1f;
+    public bool inWater;
 	public bool isGrounded;
 	public bool isUpright;
 	public bool isFlaming;
@@ -121,7 +123,7 @@ public class Player : MonoBehaviour {
 		speed = rigidBody.velocity.magnitude;
 
 		//not on ground
-		if (!isGrounded || isFlapping) {
+		if (!isGrounded || glideV2Script.IsFlapping ()) {
 //			if (keepUprightAlways) {
 			AirGravity ();
 //			}
@@ -142,8 +144,8 @@ public class Player : MonoBehaviour {
 //			}
 		}
 
-		glideV2Script.isGrounded = isGrounded && !isFlapping;
-		walkScript.isGrounded = isGrounded && !isFlapping;
+        glideV2Script.isGrounded = isGrounded;// && !glideV2Script.IsFlapping();
+        walkScript.isGrounded = isGrounded;// && !glideV2Script.IsFlapping();
 
 //		walkScript.isGrounded = isGrounded && !isFlapping;
 //		if (isFlapping) {
@@ -212,34 +214,64 @@ public class Player : MonoBehaviour {
 
 	void CheckGround(){
 		//if flapping, not grounded
-		if (isFlapping) {
-			isGrounded = false;
-		} else {
-			float groundCheckDistance = 0;
+		//if (glideV2Script.IsFlapping()) {
+			//isGrounded = false;
+		//} else {
+		float groundCheckDistance = 0;
+        float groundCapsuleHeight = 0;
 
-			//if in air
-			if (!isGrounded) {
-				//check for ground with small distance below player
-				//if found, set grounded
-				groundCheckDistance = airGroundDistance;
-			}
-			//if grounded
-			else {
-				//check for ground with more generous distance
-				groundCheckDistance = groundDistance;
-				//if found, set grounded
-			}
+		//if in air
+		if (!isGrounded || glideV2Script.IsFlapping()) {
+			//check for ground with small distance below player
+			groundCheckDistance = airGroundDistance;
+        }
+		else {
+			//check for ground with more generous distance
+			groundCheckDistance = groundDistance;
+        }
 
-			Debug.DrawLine (characterCollider.bounds.center, new Vector3 (characterCollider.bounds.center.x, characterCollider.bounds.min.y - groundCheckDistance, characterCollider.bounds.center.z), Color.red);
+        if (!isGrounded)
+        {
+            groundCapsuleHeight = 1f;
+        }
+        else
+        {
+            groundCapsuleHeight = 0.5f;
+        }
 
-			isGrounded = Physics.CheckCapsule (
-				characterCollider.bounds.center,
-				new Vector3 (characterCollider.bounds.center.x, characterCollider.bounds.min.y - groundCheckDistance, characterCollider.bounds.center.z),
-				1f,
-				layerMaskForGround.value
-			);
+        //         Debug.DrawLine(characterCollider.bounds.center, new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y - groundCheckDistance, characterCollider.bounds.center.z), Color.red);
+        //         Debug.DrawLine(characterCollider.bounds.center, new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.center.y + groundCheckRadius, characterCollider.bounds.center.z), Color.green);
+        //         Debug.DrawLine(new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y - groundCheckDistance, characterCollider.bounds.center.z), new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y - groundCheckDistance - groundCheckRadius, characterCollider.bounds.center.z), Color.green);
 
-			if (isGrounded) {
+        //         isGrounded = Physics.CheckCapsule (
+        //	characterCollider.bounds.center,
+        //	new Vector3 (characterCollider.bounds.center.x, characterCollider.bounds.min.y - groundCheckDistance, characterCollider.bounds.center.z),
+        //	groundCheckRadius,
+        //	layerMaskForGround.value
+        //);
+
+
+        //Vector3 capsuleStart = characterCollider.bounds.center + (characterCollider.bounds.max.z - groundCheckRadius) * transform.forward - groundCheckDistance * Vector3.up;
+        //Vector3 capsuleEnd = characterCollider.bounds.center - (characterCollider.bounds.min.z - groundCheckRadius) * transform.forward - groundCheckDistance * Vector3.up;
+
+
+        Vector3 capsuleStart = rigidBody.position + groundCapsuleHeight * transform.forward + groundCheckDistance * Vector3.down;
+        Vector3 capsuleEnd = rigidBody.position - groundCapsuleHeight * transform.forward + groundCheckDistance * Vector3.down;
+
+        Vector3 rbOff = rigidBody.velocity * Time.fixedDeltaTime;
+        DebugExtension.DebugCapsule(capsuleStart + rbOff, capsuleEnd + rbOff, Color.red, groundCheckRadius);
+        Debug.DrawLine(capsuleStart + rbOff, capsuleEnd + rbOff, Color.red);
+        Debug.DrawLine(capsuleStart + rbOff, capsuleStart + groundCheckRadius * Vector3.down + rbOff, Color.green);
+        Debug.DrawLine(capsuleEnd + rbOff, capsuleEnd + groundCheckRadius * Vector3.down + rbOff, Color.green);
+
+        isGrounded = Physics.CheckCapsule(
+            capsuleStart,
+            capsuleEnd,
+            groundCheckRadius,
+            layerMaskForGround.value
+        );
+
+        if (isGrounded) {
 				RaycastHit hit;
 				if (Physics.Raycast (transform.position, -transform.up, out hit, 5f, layerMaskForGround)) {
 					groundNormal = hit.normal;
@@ -260,7 +292,7 @@ public class Player : MonoBehaviour {
 			//maybe?
 			//if grounded and not upright, use ragdoll gravity and forces (don't let walk script take over yet)
 			//else, use ground gravity and let walk script take over
-		}
+		//}
 
 
 			
@@ -318,7 +350,7 @@ public class Player : MonoBehaviour {
 		glideV2Script.flapSpeed = 0;
 
 		bool heal = Util.GetButton ("Heal");
-		bool isHealing = heal && isGrounded && speed <= 5f;
+		bool isHealing = heal && isGrounded && !glideV2Script.IsFlapping() && speed <= 5f;
 		if (isHealing && healthScript.Heal (currentHealRate * Time.deltaTime)) {
 			currentHealRate = Mathf.Clamp (currentHealRate + healRateRate * Time.deltaTime, minHealRate, maxHealRate);
 			dragonAnimator.Healing = true;
@@ -373,7 +405,8 @@ public class Player : MonoBehaviour {
 		isGusting = Util.GetButton ("Gust");
 		gustTriggered = Util.GetButtonDown ("Gust");
 
-		glideV2Script.boostHeld = !isGrounded && isGusting;
+		glideV2Script.boostHeld = isGusting && !glideV2Script.isBackFlapping;
+
 		if (gustTriggered) {
 			if (!isGrounded) {
 				if (!glideV2Script.isBackFlapping) {
@@ -382,11 +415,22 @@ public class Player : MonoBehaviour {
 						discreteStaminaScript.UseStamina ();
 					}
 				} else {
-					//TODO backflap gusts
-				}
+                    //TODO backflap gusts
+                    if (gustSpawner.Spawn())
+                    {
+                        discreteStaminaScript.UseStamina();
+                    }
+                }
 			} else {
-				//TODO ground gusts
+                //TODO ground gusts
+                if (gustSpawner.Spawn())
+                {
+                    discreteStaminaScript.UseStamina();
+                }
 			}
+//			glideV2Script.boostHeld = true;
+		} else if (!isGusting || isGrounded) {
+//			glideV2Script.boostHeld = false;
 		}
 	}
 
@@ -474,6 +518,7 @@ public class Player : MonoBehaviour {
 	}
 
 	void OneStickFlightV2() {
+		//TODO clean up input so rolling is smoother
 		Vector2 input = new Vector2 (Util.GetAxis ("Horizontal"), Util.GetAxis ("Vertical"));
 		input = Vector2.ClampMagnitude (input, 1);
 		float vert = input.y;
@@ -501,8 +546,6 @@ public class Player : MonoBehaviour {
 				glideV2Script.rollRight = -1;
 			}
 
-
-
 //			if (transform.forward.y < oneStickWingMinYToPointDown) {
 //				glideV2Script.rollLeft = -1;
 //				glideV2Script.rollRight = -1;
@@ -523,7 +566,9 @@ public class Player : MonoBehaviour {
 //		left/right -> more lift on that side and less on the opposite side
 		if (horiz > 0) {
 			glideV2Script.pitchRight -= horiz * oneStickRollScale;
+			glideV2Script.pitchLeft += horiz * oneStickRollScale;
 		} else if (horiz < 0) {
+			glideV2Script.pitchRight -= horiz * oneStickRollScale;
 			glideV2Script.pitchLeft += horiz * oneStickRollScale;
 		}
 
@@ -543,9 +588,14 @@ public class Player : MonoBehaviour {
 	}
 
 	public Transform[] headComponents;
-	public float headRotateUpScale;
-	public float headRotateDownScale;
-	public float headRotateSideScale;
+	public float headRotateUpScaleAir;
+	public float headRotateDownScaleAir;
+	public float headRotateSideScaleAir;
+
+	public float headRotateUpScaleGround;
+	public float headRotateDownScaleGround;
+	public float headRotateSideScaleGround;
+
 	public float rotateSpeed;
 	private float headHoriz = 0;
 	private float headVert = 0;
@@ -555,16 +605,15 @@ public class Player : MonoBehaviour {
 	}
 
 	void RotateHead(){
-
 		float desiredHeadHoriz = 0f;
 		float desiredHeadVert = 0f;
 
-		desiredHeadHoriz = Util.GetAxis ("Horizontal Right") * headRotateSideScale;
+		desiredHeadHoriz = Util.GetAxis ("Horizontal Right") * (isGrounded ? headRotateSideScaleGround : headRotateSideScaleAir);
 		desiredHeadVert = Util.GetAxis ("Vertical Right");
 		if (desiredHeadVert > 0) {
-			desiredHeadVert *= headRotateUpScale;
+			desiredHeadVert *= (isGrounded ? headRotateUpScaleGround : headRotateUpScaleAir);
 		} else {
-			desiredHeadVert *= headRotateDownScale;
+			desiredHeadVert *= (isGrounded ? headRotateDownScaleGround : headRotateDownScaleAir);
 		}
 
 		headHoriz = Mathf.Lerp (headHoriz, desiredHeadHoriz, rotateSpeed * Time.deltaTime);

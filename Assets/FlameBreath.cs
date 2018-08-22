@@ -34,12 +34,14 @@ public class FlameBreath : MonoBehaviour {
 	public AudioClip flameContinueClip;
 	public AudioClip flameEndClip;
 
+	public float flameVolumeScale = 0.1f;
+	public float maxFlameVolume = 0.5f;
+
 	public float rampUpSpeed = 2;
 	public float rampDownSpeed = 2f;
 
 	private ParticleSystem.MainModule mm;
 	private ParticleSystem.EmissionModule em;
-	private ParticleSystem.SizeOverLifetimeModule solm;
 	private ParticleSystem.MinMaxCurve rateOverTime;
 	private ParticleSystem.MinMaxCurve sizeOverTime;
 	public float originalRate;
@@ -59,7 +61,6 @@ public class FlameBreath : MonoBehaviour {
 
 	void Start() {
 		mm = flameParticles.main;
-		solm = flameParticles.sizeOverLifetime;
 		em = flameParticles.emission;
 		rateOverTime = em.rateOverTime;
 
@@ -69,25 +70,28 @@ public class FlameBreath : MonoBehaviour {
 		flameAudio.clip = flameContinueClip;
 		flameAudio.Play ();
 
-		flameAudio.volume = rateMultiplier;
+		flameAudio.volume = 0;
 	}
 
 	void Update() {
 		if (flameOn) {
 			StartFlame ();
+			flameState = FlameState.Starting;
 		} else {
 			StopFlame ();
+			flameState = FlameState.Stopping;
 		}
 
 		float diminishedPercent = DiminishedPercent ();
 		rateOverTime.constant = flameParticleMaxEmission * diminishedPercent * rateMultiplier;
 		em.rateOverTime = rateOverTime;
-		flameAudio.volume = rateMultiplier * diminishedPercent;
+
+		float volume = rateMultiplier * flameVolumeScale;
+		flameAudio.volume = Mathf.Clamp(volume, 0, maxFlameVolume);
 
 		mm.startLifetime = flameParticleMaxLifetime * diminishedPercent * rateMultiplier;
 		mm.startSpeed = flameParticleMaxSpeed * diminishedPercent * rateMultiplier;
-
-		solm.sizeMultiplier = diminishedPercent;
+		mm.startSize = rateMultiplier * diminishedPercent;
 	}
 
 	public void StartFlame () {

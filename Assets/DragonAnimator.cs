@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class DragonAnimator : MonoBehaviour {
 	public float FadeLength;
@@ -195,5 +196,62 @@ public class DragonAnimator : MonoBehaviour {
 
 	void UpdateRightWingFlap() {
 		desiredRightWingRotation.x += flapRotateScale * rollRight;
+	}
+
+	public AudioSource audioSource;
+
+	public AudioClip flapAudioClip;
+	public float flapVolume = 1f;
+	public float flapMinPitch = 0.8f;
+	public float flapMaxPitch = 1.5f;
+
+	public AudioClip backFlapAudioClip;
+	public float backFlapVolume = 1f;
+	public float backFlapMinPitch = 0.6f;
+	public float backFlapMaxPitch = 1.2f;
+
+	public AudioClip boostAudioClip;
+	public float boostVolume = 1f;
+	public float boostMinPitch = 1f;
+	public float boostMaxPitch = 1f;
+
+	public List<AudioClip> walkAudioClips;
+	public float walkVolume = 1f;
+	public float walkMinPitch = 1f;
+	public float walkMaxPitch = 1f;
+
+	public List<AudioClip> runAudioClips;
+	public float runVolume = 1f;
+	public float runMinPitch = 1f;
+	public float runMaxPitch = 1f;
+
+	void PlayFlapAudio() {
+		audioSource.volume = flapVolume;
+		audioSource.pitch = Random.Range (flapMinPitch, flapMaxPitch);
+		audioSource.PlayOneShot (flapAudioClip);
+	}
+
+	void PlayBackFlapAudio() {
+		audioSource.volume = backFlapVolume;
+		audioSource.pitch = Random.Range (backFlapMinPitch, backFlapMaxPitch);
+		audioSource.PlayOneShot (backFlapAudioClip);
+	}
+
+	void PlayBoostAudio() {
+		audioSource.volume = boostVolume;
+		audioSource.pitch = Random.Range (boostMinPitch, boostMaxPitch);
+		audioSource.PlayOneShot (boostAudioClip);
+	}
+
+	void PlayWalkAudio() {
+		audioSource.volume = walkVolume;
+		audioSource.pitch = Random.Range (walkMinPitch, walkMaxPitch);
+		audioSource.PlayOneShot (walkAudioClips[Random.Range(0, walkAudioClips.Count - 1)]);
+	}
+
+	void PlayRunAudio() {
+		audioSource.volume = runVolume;
+		audioSource.pitch = Random.Range (runMinPitch, runMaxPitch);
+		audioSource.PlayOneShot (runAudioClips[Random.Range(0, runAudioClips.Count - 1)]);
 	}
 }

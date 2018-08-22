@@ -3,7 +3,7 @@
 --- !u!241 &24100000
 AudioMixerController:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: MasterMixer
   m_OutputGroup: {fileID: 0}
@@ -14,6 +14,7 @@ AudioMixerController:
   m_StartSnapshot: {fileID: 24500003}
   m_SuspendThreshold: -80
   m_EnableSuspend: 1
+  m_UpdateMode: 0
   m_ExposedParameters:
   - guid: 4570643c44b0a4ed280458a81f91cf1e
     name: musicVol
@@ -30,7 +31,7 @@ AudioMixerController:
 --- !u!243 &24300001
 AudioMixerGroupController:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: Master
   m_AudioMixer: {fileID: 24100000}
@@ -49,7 +50,7 @@ AudioMixerGroupController:
 --- !u!243 &24301952
 AudioMixerGroupController:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: SoundFx
   m_AudioMixer: {fileID: 24100000}
@@ -66,7 +67,7 @@ AudioMixerGroupController:
 --- !u!243 &24324684
 AudioMixerGroupController:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: Music
   m_AudioMixer: {fileID: 24100000}
@@ -83,7 +84,7 @@ AudioMixerGroupController:
 --- !u!244 &24400002
 AudioMixerEffectController:
   m_ObjectHideFlags: 3
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: 
   m_EffectID: 853f0ee8e72974191afd77f6d4e509c5
@@ -96,7 +97,7 @@ AudioMixerEffectController:
 --- !u!244 &24419350
 AudioMixerEffectController:
   m_ObjectHideFlags: 3
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: 
   m_EffectID: 65ea677ec9c544577bcb2bf433e99c2c
@@ -109,7 +110,7 @@ AudioMixerEffectController:
 --- !u!244 &24437336
 AudioMixerEffectController:
   m_ObjectHideFlags: 3
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: 
   m_EffectID: 96dcdac2dd0de4028ad600ee0082af62
@@ -122,19 +123,21 @@ AudioMixerEffectController:
 --- !u!245 &24500003
 AudioMixerSnapshotController:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: VolumeUp
   m_AudioMixer: {fileID: 24100000}
   m_SnapshotID: 5a86393fbd46043aba7c2766c98de25f
   m_FloatValues:
-    b2cc95b5d75b5428a8f51d8061ebe927: -2.8722944
-    1e3a377f854de43b7a3e47634a4b05bc: 0.04171297
+    b2cc95b5d75b5428a8f51d8061ebe927: 0
+    4570643c44b0a4ed280458a81f91cf1e: 0
+    5fb8eb5f3c1c54684bedb56b663743f5: 1
+    1e3a377f854de43b7a3e47634a4b05bc: 0
   m_TransitionOverrides: {}
 --- !u!245 &24519918
 AudioMixerSnapshotController:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: VolumeDown
   m_AudioMixer: {fileID: 24100000}
