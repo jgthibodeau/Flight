@@ -32,6 +32,7 @@ public class Player : MonoBehaviour {
 	public bool twoStickFlight = true;
 	public bool flameAdjustCamera = true;
 	public bool useHeadCamera = false;
+    public Transform headCameraTarget;
 
 	public ThirdPersonCamera.Follow follow;
 
@@ -625,5 +626,11 @@ public class Player : MonoBehaviour {
 			rot.z += headVert;
 			t.eulerAngles = rot;
 		}
-	}
+
+        Vector3 headCameraTargetRot = headCameraTarget.localEulerAngles;
+        headCameraTargetRot.y = headHoriz * headComponents.Length;
+        headCameraTargetRot.x = -headVert * headComponents.Length;
+
+        headCameraTarget.localEulerAngles = headCameraTargetRot;
+    }
 }

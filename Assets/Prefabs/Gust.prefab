@@ -21,7 +21,7 @@ GameObject:
   - component: {fileID: 4050442222909234}
   - component: {fileID: 198252839632385046}
   - component: {fileID: 199062879786037350}
-  m_Layer: 0
+  m_Layer: 27
   m_Name: FX_Gust
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -41,7 +41,7 @@ GameObject:
   - component: {fileID: 135989817659196522}
   - component: {fileID: 114862341682973724}
   - component: {fileID: 114555460281950572}
-  m_Layer: 9
+  m_Layer: 27
   m_Name: Gust
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -128,10 +128,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea13606153d8812428fa100bae964108, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lifeTimeInSeconds: 4
-  startTime: 0
+  lifeTimeInSeconds: 2
+  remainingLifeTime: 0
   ps: {fileID: 198252839632385046}
-  stopParticlesTimeInSeconds: 1.5
+  deathTimeInSeconds: 2
+  remainingDeathTime: 0
   volumeDropoffRate: 1
 --- !u!114 &114862341682973724
 MonoBehaviour:
@@ -149,8 +150,9 @@ MonoBehaviour:
   maxScale: 10
   growSpeed: 15
   moveSpeed: {x: 0, y: 0, z: 10}
-  gustForce: 0
-  gustForceRollOff: 0
+  fanFlameAmount: 5
+  minGustForce: 1000
+  maxGustForce: 5000
   collidedObjects: []
 --- !u!135 &135989817659196522
 SphereCollider:
@@ -1777,8 +1779,8 @@ ParticleSystem:
     orbitalY:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 5
-      minScalar: -5
+      scalar: 15
+      minScalar: -15
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -2145,7 +2147,7 @@ ParticleSystem:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-    inWorldSpace: 1
+    inWorldSpace: 0
   InheritVelocityModule:
     enabled: 0
     m_Mode: 0

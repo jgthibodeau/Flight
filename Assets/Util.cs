@@ -78,4 +78,16 @@ public class Util : MonoBehaviour {
 	public static bool InLayerMask(int layer, LayerMask layermask) {
 		return layermask == (layermask | (1 << layer));
 	}
+
+    public static float ConvertScale(float oldMin, float oldMax, float newMin, float newMax, float value)
+    {
+        return (((value - oldMin) * (newMax - newMin)) / (oldMax - oldMin)) + newMin;
+    }
+
+    public static bool CanSpawn(Vector3 position, float radius, float height, LayerMask layer)
+    {
+        Collider[] colliders = Physics.OverlapCapsule(position - Vector3.up * height, position + Vector3.up * height, radius, layer);
+        Debug.Log("found " + colliders.Length + " colliders");
+        return colliders.Length > 0;
+    }
 }

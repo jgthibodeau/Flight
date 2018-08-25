@@ -2,20 +2,26 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Kill))]
 public class Gust : MonoBehaviour {
+    private Kill killScript;
 
 	public float currentScale;
     public float minScale;
     public float maxScale;
     public float growSpeed;
     public Vector3 moveSpeed;
-	public float gustForce;
-    public float gustForceRollOff;
 
-	public List<Collider> collidedObjects = new List<Collider>();
+    public float fanFlameAmount;
+
+    public float minGustForce;
+    public float maxGustForce;
+
+	public List<GameObject> collidedObjects = new List<GameObject>();
 
 	// Use this for initialization
 	void Start () {
+        killScript = GetComponent<Kill>();
 		currentScale = minScale;
 		transform.localScale = new Vector3 (currentScale, currentScale, currentScale);
 	}
@@ -38,11 +44,73 @@ public class Gust : MonoBehaviour {
         //}
     }
 
-        void OnTriggerEnter(Collider other) {
-		if (!collidedObjects.Contains(other)) {
-			collidedObjects.Add (other);
-//			Rigidbody otherRb = other.GetComponent<Rigidbody> ();
-//			otherRb.AddForce ();
-		}
+    void OnTriggerStay(Collider other)
+    {
+        if (killScript.IsDying())
+        {
+            return;
+        }
+
+        if (isFire(other.gameObject))
+        {
+            if (canCollide(other.gameObject))
+            {
+                Debug.Log("Gusted fire " + other);
+                other.gameObject.GetComponent<Fire>().FanFlame(fanFlameAmount);
+            }
+        }
+        else
+        {
+            Rigidbody otherRb = getCollidableRigidbody(other.gameObject);
+            if (otherRb != null)
+            {
+                Debug.Log("Gusted object " + otherRb);
+                ApplyForce(otherRb);
+            }
+        }
+
+        if (!collidedObjects.Contains(other.gameObject))
+        {
+            
+        }
 	}
+
+    private bool isFire(GameObject go)
+    {
+        return (go.tag == "Fire");
+    }
+
+    private bool canCollide(GameObject go)
+    {
+        if (!collidedObjects.Contains(go))
+        {
+            collidedObjects.Add(go);
+            return true;
+        }
+        return false;
+    }
+
+    private Rigidbody getCollidableRigidbody(GameObject go)
+    {
+        Rigidbody otherRb = go.GetComponentInParent<Rigidbody>();
+        if (!collidedObjects.Contains(go))
+        {
+            collidedObjects.Add(go);
+            return otherRb;
+        }
+        return null;
+    }
+
+    private void ApplyForce(Rigidbody otherRb)
+    {
+        Vector3 forceDir = otherRb.transform.position - transform.position;
+        Vector3 force = forceDir.normalized * CalculateForce();
+        Debug.Log("Gusted " + otherRb + " " + force);
+        otherRb.AddForce(force);
+    }
+
+    private float CalculateForce()
+    {
+        return Util.ConvertScale(0, killScript.lifeTimeInSeconds, minGustForce, maxGustForce, killScript.remainingLifeTime);
+    }
 }

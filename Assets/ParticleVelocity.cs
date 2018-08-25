@@ -8,8 +8,9 @@ public class ParticleVelocity : MonoBehaviour {
 	public bool collisionsEnabled = true;
 	public bool customInheritVelocity = true;
 	public float scale = 2f;
+    public LayerMask fireLayer;
 
-	private ParticleSystem ps;
+    private ParticleSystem ps;
 	private ParticleSystem.MainModule mm;
 	private ParticleSystem.CollisionModule cm;
 	private ParticleSystem.MinMaxCurve particleSpeed;
@@ -48,7 +49,7 @@ public class ParticleVelocity : MonoBehaviour {
 		}
 	}
 	
-	void OnParticleCollision(GameObject other) {
+	void OnParticleCollisionOld(GameObject other) {
 		int numCollisionEvents = ParticlePhysicsExtensions.GetCollisionEvents (ps, other, collisionEvents);
 
 		int i = 0;
@@ -65,4 +66,37 @@ public class ParticleVelocity : MonoBehaviour {
 			burnable.SetOnFire (damage);
 		}
 	}
+
+    private ParticleCollisionEvent[] CollisionEvents = new ParticleCollisionEvent[8];
+    public void OnParticleCollision(GameObject other)
+    {
+        int collCount = ps.GetSafeCollisionEventSize();
+
+        if (collCount > CollisionEvents.Length)
+        {
+            CollisionEvents = new ParticleCollisionEvent[collCount];
+        }
+
+        int eventCount = ps.GetCollisionEvents(other, CollisionEvents);
+
+        for (int i = 0; i < eventCount; i++)
+        {
+
+            ParticleCollisionEvent pevent = CollisionEvents[i];
+            if (Util.CanSpawn(pevent.intersection, 0.5f, 10f, fireLayer))
+            {
+                Debug.Log("spawning fire");
+                GameObject.Instantiate(particleSpawned, pevent.intersection, Quaternion.identity);
+            } else
+            {
+                Debug.Log("cant spawn fire at " + pevent.intersection);
+            }
+        }
+
+        Burnable burnable = other.GetComponentInParent<Burnable>();
+        if (burnable != null)
+        {
+            burnable.SetOnFire(damage);
+        }
+    }
 }

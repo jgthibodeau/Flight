@@ -40,7 +40,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1158248402795780}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 66.2, y: 467.7, z: 314.86}
+  m_LocalPosition: {x: 65.8, y: 467.7, z: 356.7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -53,7 +53,7 @@ Rigidbody:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1158248402795780}
   serializedVersion: 2
-  m_Mass: 1
+  m_Mass: 10
   m_Drag: 0
   m_AngularDrag: 0.05
   m_UseGravity: 1
@@ -222,13 +222,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83444a52a075d224d9e0724764f0f4f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fireLayer:
+    serializedVersion: 2
+    m_Bits: 4194304
   spreadableFire: {fileID: 1158248402795780}
   killScript: {fileID: 0}
+  cc: {fileID: 0}
+  changeSpeed: 5
+  scale: 1
   spreadChance: 0.1
   spreadRadius: 0.8
   minPitch: 0.8
   maxPitch: 1
   damage: 20
+  startLifetime: 6
+  maxLifetime: 20
+  minScale: 0.5
+  maxScale: 2.5
+  minSpreadChance: 0
+  maxSpreadChance: 0
+  minSpreadRadius: 0.8
+  maxSpreadRadius: 3.5
+  minDamage: 5
+  maxDamage: 20
 --- !u!114 &114863552462632740
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -240,9 +256,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea13606153d8812428fa100bae964108, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lifeTimeInSeconds: 6
-  startTime: 0
-  stopParticlesTimeInSeconds: 3
+  lifeTimeInSeconds: 3
+  remainingLifeTime: 0
+  ps: {fileID: 198190561867896454}
+  deathTimeInSeconds: 3
+  remainingDeathTime: 0
   volumeDropoffRate: 1
 --- !u!136 &136709207309860542
 CapsuleCollider:
@@ -250,13 +268,13 @@ CapsuleCollider:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1158248402795780}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: ba92fb44336020f40bdf294bb66bc9da, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   m_Radius: 0.5
   m_Height: 2.78
   m_Direction: 1
-  m_Center: {x: -0.009017944, y: 0.91, z: -0.08062744}
+  m_Center: {x: -0.009017944, y: 1.39, z: -0.08062744}
 --- !u!198 &198190561867896454
 ParticleSystem:
   m_ObjectHideFlags: 1
@@ -886,7 +904,7 @@ ParticleSystem:
     boxThickness: {x: 0, y: 0, z: 0}
     radiusThickness: 0
     donutRadius: 0.2
-    m_Position: {x: 0, y: 0, z: 0}
+    m_Position: {x: 0, y: 0.3, z: 0}
     m_Rotation: {x: 0, y: 0, z: 0}
     m_Scale: {x: 1, y: 1, z: 1}
     placementMode: 0
