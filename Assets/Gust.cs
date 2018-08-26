@@ -55,7 +55,6 @@ public class Gust : MonoBehaviour {
         {
             if (canCollide(other.gameObject))
             {
-                Debug.Log("Gusted fire " + other);
                 other.gameObject.GetComponent<Fire>().FanFlame(fanFlameAmount);
             }
         }
@@ -64,7 +63,6 @@ public class Gust : MonoBehaviour {
             Rigidbody otherRb = getCollidableRigidbody(other.gameObject);
             if (otherRb != null)
             {
-                Debug.Log("Gusted object " + otherRb);
                 ApplyForce(otherRb);
             }
         }
@@ -105,7 +103,6 @@ public class Gust : MonoBehaviour {
     {
         Vector3 forceDir = otherRb.transform.position - transform.position;
         Vector3 force = forceDir.normalized * CalculateForce();
-        Debug.Log("Gusted " + otherRb + " " + force);
         otherRb.AddForce(force);
     }
 

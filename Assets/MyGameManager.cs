@@ -22,7 +22,7 @@ public class MyGameManager : MonoBehaviour {
 		}
 
 		oceanLevel = ocean != null ? ocean.position.y : oceanLevel;
-	}
+    }
 
 	public void AddInstace(GameObject instanceObj) {
 		int numberInstances = instances.Count;
@@ -41,9 +41,5 @@ public class MyGameManager : MonoBehaviour {
 		}
 		GameObject.Destroy (instanceObj);
 	}
-
-//	public IEnumerator Destroy(GameObject go) {
-//		yield return new WaitForFixedUpdate ();
-//	}
 }
 

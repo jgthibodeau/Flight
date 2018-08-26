@@ -78,20 +78,17 @@ public class ParticleVelocity : MonoBehaviour {
         }
 
         int eventCount = ps.GetCollisionEvents(other, CollisionEvents);
-
-        for (int i = 0; i < eventCount; i++)
-        {
-
+        
+        //for (int i = 0; i < eventCount; i++)
+        //{
+            int i = Random.Range(0, eventCount - 1);
             ParticleCollisionEvent pevent = CollisionEvents[i];
-            if (Util.CanSpawn(pevent.intersection, 0.5f, 10f, fireLayer))
+            Vector3 position = pevent.intersection;
+            if (Util.CanSpawn(position, 0.5f, 10f, fireLayer))
             {
-                Debug.Log("spawning fire");
-                GameObject.Instantiate(particleSpawned, pevent.intersection, Quaternion.identity);
-            } else
-            {
-                Debug.Log("cant spawn fire at " + pevent.intersection);
+                GameObject.Instantiate(particleSpawned, position, Quaternion.identity);
             }
-        }
+        //}
 
         Burnable burnable = other.GetComponentInParent<Burnable>();
         if (burnable != null)

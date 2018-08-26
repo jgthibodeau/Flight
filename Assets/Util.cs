@@ -87,7 +87,6 @@ public class Util : MonoBehaviour {
     public static bool CanSpawn(Vector3 position, float radius, float height, LayerMask layer)
     {
         Collider[] colliders = Physics.OverlapCapsule(position - Vector3.up * height, position + Vector3.up * height, radius, layer);
-        Debug.Log("found " + colliders.Length + " colliders");
-        return colliders.Length > 0;
+        return colliders.Length == 0;
     }
 }

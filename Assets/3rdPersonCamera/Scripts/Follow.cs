@@ -59,7 +59,6 @@ namespace ThirdPersonCamera
 				cc.slerpPosition = true;
 
 				toRotation = Quaternion.LookRotation (cc.target.forward + tiltVector, upVector);
-				Debug.Log(""+cc.target.forward +" "+ tiltVector+" "+ upVector+" "+ toRotation);
 
 				toRotation = Quaternion.Slerp (cc.transform.rotation, toRotation, Time.fixedDeltaTime * rotationSpeed);
 				cc.transform.rotation = toRotation;

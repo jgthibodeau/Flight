@@ -9,6 +9,7 @@ public class Fire : MonoBehaviour {
     public GameObject spreadableFire;
 	public Kill killScript;
     public CapsuleCollider cc;
+    //public Rigidbody rb;
 
     public float changeSpeed;
 
@@ -41,8 +42,11 @@ public class Fire : MonoBehaviour {
     public float minDamage;
     public float maxDamage;
 
+    //private float aliveTime = 0f;
 
     void Start () {
+        //rb = GetComponentInParent<Rigidbody>();
+
         killScript.lifeTimeInSeconds = startLifetime;
         killScript.remainingLifeTime = startLifetime;
 
@@ -55,6 +59,13 @@ public class Fire : MonoBehaviour {
 
     void Update ()
     {
+        //aliveTime += Time.deltaTime;
+        //if (aliveTime > 1 && rb.velocity.magnitude < 0.01f)
+        //{
+        //    rb.isKinematic = true;
+        //    rb.constraints = RigidbodyConstraints.FreezeAll;
+        //}
+
         float remainingLifeTime = killScript.remainingLifeTime;
 
         if (!killScript.IsDying())
@@ -85,11 +96,11 @@ public class Fire : MonoBehaviour {
 			yield return new WaitForSeconds (waitTime);
 			float spread = Random.value;
 			if (spread < spreadChance) {
-				Debug.Log ("Fire spreading");
                 Vector3 newPosition;
                 do {
                     Vector2 direction = Random.insideUnitCircle.normalized * spreadRadius;
                     newPosition = new Vector3(transform.position.x + direction.x, transform.position.y, transform.position.z + direction.y);
+                    yield return null;
                 } while (!Util.CanSpawn(newPosition, cc.radius, 10f, fireLayer));
 
                 GameObject.Instantiate(spreadableFire, newPosition, Quaternion.identity);
@@ -97,7 +108,7 @@ public class Fire : MonoBehaviour {
 		}
 	}
 
-	void OnCollisionStay(Collision collision) {
+	void OnTriggerStay(Collider collision) {
 		Burnable burnable = collision.gameObject.GetComponentInParent<Burnable> ();
 		if (burnable != null) {
 			burnable.SetOnFire (damage);
