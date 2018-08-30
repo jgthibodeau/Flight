@@ -23,6 +23,7 @@ namespace TerrainComposer2
 
         public float scale = 1;
         public bool linkScaleToMask = true;
+        public float linkScaleToMaskAmount = 1;
 
         public bool untouched = true;
         public int placed;
@@ -234,7 +235,8 @@ namespace TerrainComposer2
                     {
                         if (TC_Settings.instance.hasMasterTerrain)
                         {
-                            if (selectItem.splatCustomValues.Length != TC_Settings.instance.masterTerrain.terrainData.splatPrototypes.Length) selectItem.splatCustomValues = Mathw.ResizeArray<float>(selectItem.splatCustomValues, TC_Settings.instance.masterTerrain.terrainData.splatPrototypes.Length);
+                            if (selectItem.splatCustomValues == null) selectItem.splatCustomValues = new float[TC_Settings.instance.masterTerrain.terrainData.splatPrototypes.Length];
+                            else if (selectItem.splatCustomValues.Length != TC_Settings.instance.masterTerrain.terrainData.splatPrototypes.Length) selectItem.splatCustomValues = Mathw.ResizeArray(selectItem.splatCustomValues, TC_Settings.instance.masterTerrain.terrainData.splatPrototypes.Length);
                         }
                         selectItem.CalcSplatCustomTotal();
                     }
@@ -308,7 +310,7 @@ namespace TerrainComposer2
                     }
                     
                     selectItem.SetPreviewItemTexture();
-                    selectItem.SetPreviewColor();
+                    if (selectItem.outputId != TC.colorOutput) selectItem.SetPreviewColor();
 
                     itemList.Add(selectItem);
                     listIndex++;
@@ -378,6 +380,8 @@ namespace TerrainComposer2
 
         public void CreateSplatMixBuffer()
         {
+            // Debug.Log("Create splat mix buffer");
+
             if (splatMixBuffer == null) splatMixBuffer = new SplatCustom[totalActive];
             if (splatMixBuffer.Length != totalActive) splatMixBuffer = new SplatCustom[totalActive];
 
@@ -412,7 +416,7 @@ namespace TerrainComposer2
                         custom1 = Vector4.zero;
                     }
                     
-                    splatMixBuffer[index++] = new SplatCustom(new Vector4(selectItem.range.x - blend, selectItem.range.y, range, selectItem.splatCustom ? -selectItem.selectIndex : selectItem.selectIndex), custom0, custom1);
+                    splatMixBuffer[index++] = new SplatCustom(new Vector4(selectItem.range.x - blend, selectItem.range.y, range, selectItem.splatCustom ? -1 : selectItem.selectIndex), custom0, custom1, custom0, custom1);
                 }
             }
         }
@@ -627,12 +631,16 @@ namespace TerrainComposer2
         public Vector4 select;
         public Vector4 map0;
         public Vector4 map1;
+        public Vector4 map2;
+        public Vector4 map3;
 
-        public SplatCustom(Vector4 select, Vector4 map0, Vector4 map1)
+        public SplatCustom(Vector4 select, Vector4 map0, Vector4 map1, Vector4 map2, Vector4 map3)
         {
             this.select = select;
             this.map0 = map0;
             this.map1 = map1;
+            this.map2 = map2;
+            this.map3 = map3;
         }
     }
 

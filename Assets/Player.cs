@@ -403,6 +403,15 @@ public class Player : MonoBehaviour {
 			interactorScript.Drop ();
 		}
 
+        if (interactorScript.itemHolder.HasItem()) {
+            Eatable eatable = interactorScript.itemHolder.heldItem.GetComponent<Eatable>();
+            if (eatable != null)
+            {
+                interactorScript.Drop();
+                eatable.Eat(healthScript, interactorScript.itemHolder.heldLocation.position);
+            }
+        }
+
 		isGusting = Util.GetButton ("Gust");
 		gustTriggered = Util.GetButtonDown ("Gust");
 
@@ -527,8 +536,8 @@ public class Player : MonoBehaviour {
 
 		//forward/back -> wings in/out
 		if (vert > 0) {
-			glideV2Script.pitchLeft += vert * oneStickForwardPitchScale;
-			glideV2Script.pitchRight += vert * oneStickForwardPitchScale;
+			glideV2Script.pitchLeft = vert * oneStickForwardPitchScale;
+			glideV2Script.pitchRight = vert * oneStickForwardPitchScale;
 
 			float wingScale = oneStickWingInScale;
 			float percent = 0;
@@ -597,8 +606,9 @@ public class Player : MonoBehaviour {
 	public float headRotateDownScaleGround;
 	public float headRotateSideScaleGround;
 
-	public float rotateSpeed;
-	private float headHoriz = 0;
+	public float regularHeadRotateSpeed;
+    public float flameHeadRotateSpeed = 5;
+    private float headHoriz = 0;
 	private float headVert = 0;
 	private bool rotateHead = false;
 	void LateUpdate() {
@@ -617,7 +627,8 @@ public class Player : MonoBehaviour {
 			desiredHeadVert *= (isGrounded ? headRotateDownScaleGround : headRotateDownScaleAir);
 		}
 
-		headHoriz = Mathf.Lerp (headHoriz, desiredHeadHoriz, rotateSpeed * Time.deltaTime);
+        float rotateSpeed = isFlaming ? flameHeadRotateSpeed : regularHeadRotateSpeed;
+        headHoriz = Mathf.Lerp (headHoriz, desiredHeadHoriz, rotateSpeed * Time.deltaTime);
 		headVert = Mathf.Lerp (headVert, desiredHeadVert, rotateSpeed * Time.deltaTime);
 
 		foreach (Transform t in headComponents) {

@@ -15,6 +15,10 @@ namespace TerrainComposer2
         SerializedProperty previewResolution;
         SerializedProperty hideTerrainGroup;
         SerializedProperty useTCRuntime;
+        SerializedProperty defaultTerrainHeight;
+        SerializedProperty generateOffset;
+        SerializedProperty resExpandBorderPercentage;
+        // SerializedProperty scrollAdd;
 
         // Global Settings
         SerializedObject global;
@@ -40,6 +44,10 @@ namespace TerrainComposer2
             previewResolution = serializedObject.FindProperty("previewResolution");
             hideTerrainGroup = serializedObject.FindProperty("hideTerrainGroup");
             useTCRuntime = serializedObject.FindProperty("useTCRuntime");
+            defaultTerrainHeight = serializedObject.FindProperty("defaultTerrainHeight");
+            generateOffset = serializedObject.FindProperty("generateOffset");
+            resExpandBorderPercentage = serializedObject.FindProperty("resExpandBorderPercentage");
+            // scrollAdd = serializedObject.FindProperty("scrollAdd");
 
             global = new SerializedObject(((TC_Settings)target).global);
             
@@ -107,7 +115,10 @@ namespace TerrainComposer2
             {
                 if (!useTCRuntime.boolValue) TC_Settings.instance.transform.parent.tag = "EditorOnly"; else TC_Settings.instance.transform.parent.tag = "Untagged";
             }
-            
+            TD.DrawProperty(defaultTerrainHeight);
+            TD.DrawProperty(generateOffset);
+            EditorGUILayout.Slider(resExpandBorderPercentage, 0.0625f, 1);
+            // TD.DrawProperty(scrollAdd);
             EditorGUILayout.EndVertical();
 
             GUILayout.Space(10);

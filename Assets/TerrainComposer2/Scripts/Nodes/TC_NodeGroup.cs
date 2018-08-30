@@ -96,7 +96,7 @@ namespace TerrainComposer2
                     node.Init();
                     
                     if (!node.active) continue;
-
+                    
                     if (node.clamp)
                     {
                         // if (node.OutOfBounds()) continue;
@@ -146,6 +146,8 @@ namespace TerrainComposer2
                 TC_Compute.DisposeRenderTexture(ref rtPreview);
                 rtDisplay = itemList[firstActive].rtDisplay;
             }
+
+            if (isPortalCount > 0 && totalBuffer != null) TC_Compute.instance.MakePortalBuffer(this, totalBuffer);
 
             return totalBuffer;
         }
@@ -201,12 +203,22 @@ namespace TerrainComposer2
                 if (node != null)
                 {
                     if (resetTextures) node.DisposeTextures();
-                    node.active = node.visible;
+                    node.active = true;
+                    node.Init();
+                    if (node.inputKind == InputKind.Current && totalActive == 0)
+                    {
+                        TC.AddMessage("'Current' can only be used if there is active node/s before it.");
+                        node.active = false;
+                    }
+                    if (!node.visible)
+                    {
+                        node.active = false;
+                        // Debug.Log(node.name);
+                    }
                     node.SetParameters(this, listIndex);
                     node.nodeGroupLevel = nodeGroupLevel + 1;
                     node.nodeType = type;
 
-                    node.Init();
                     node.UpdateVersion();
 
                     if (node.active)

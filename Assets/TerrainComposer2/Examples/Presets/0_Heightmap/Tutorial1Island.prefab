@@ -1319,6 +1319,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -1328,18 +1332,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -1352,18 +1362,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -1441,6 +1457,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -1450,18 +1470,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -1474,18 +1500,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -1562,6 +1594,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -1571,18 +1607,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -1595,18 +1637,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -1681,6 +1729,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -1690,18 +1742,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -1714,18 +1772,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -1778,6 +1842,7 @@ MonoBehaviour:
   mix: 0
   scale: 1
   linkScaleToMask: 1
+  linkScaleToMaskAmount: 1
   untouched: 1
   placed: 0
 --- !u!114 &11412818
@@ -1810,6 +1875,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 1
   opacity: 1
   abs: 0
@@ -1819,18 +1888,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -1843,18 +1918,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -1993,6 +2074,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 7
   opacity: 1
   abs: 0
@@ -2002,18 +2087,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -2026,18 +2117,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -2114,6 +2211,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -2123,18 +2224,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -2147,18 +2254,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -2236,6 +2349,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 7
   opacity: 1
   abs: 0
@@ -2245,18 +2362,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -2269,18 +2392,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -2357,6 +2486,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 7
   opacity: 1
   abs: 0
@@ -2366,18 +2499,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -2390,18 +2529,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -2478,6 +2623,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -2487,18 +2636,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -2511,18 +2666,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -2600,6 +2761,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -2609,18 +2774,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -2633,18 +2804,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -2722,6 +2899,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -2731,18 +2912,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -2755,18 +2942,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -2844,6 +3037,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -2853,18 +3050,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -2877,18 +3080,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -2941,6 +3150,7 @@ MonoBehaviour:
   mix: 0
   scale: 1
   linkScaleToMask: 1
+  linkScaleToMaskAmount: 1
   untouched: 1
   placed: 0
 --- !u!114 &11433966
@@ -2973,6 +3183,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -2982,18 +3196,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -3006,18 +3226,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -3095,6 +3321,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -3104,18 +3334,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -3128,18 +3364,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -3217,6 +3459,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -3226,18 +3472,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -3250,18 +3502,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -3339,6 +3597,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -3348,18 +3610,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -3375,18 +3643,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -3528,6 +3802,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -3537,18 +3815,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -3561,18 +3845,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -3625,6 +3915,7 @@ MonoBehaviour:
   mix: 0
   scale: 1
   linkScaleToMask: 1
+  linkScaleToMaskAmount: 1
   untouched: 1
   placed: 0
 --- !u!114 &11446066
@@ -3657,6 +3948,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -3666,18 +3961,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -3690,18 +3991,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -3779,6 +4086,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -3788,18 +4099,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -3812,18 +4129,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -3962,6 +4285,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -3971,18 +4298,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -3995,18 +4328,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -4084,6 +4423,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -4093,18 +4436,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -4117,18 +4466,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -4206,6 +4561,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -4215,18 +4574,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -4239,18 +4604,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -4327,6 +4698,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -4336,18 +4711,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -4360,18 +4741,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -4449,6 +4836,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -4458,18 +4849,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -4482,18 +4879,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -4571,6 +4974,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -4580,18 +4987,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -4604,18 +5017,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -4754,6 +5173,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -4763,18 +5186,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -4787,18 +5216,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -4876,6 +5311,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -4885,18 +5324,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -4909,18 +5354,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -4998,6 +5449,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -5007,18 +5462,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -5031,18 +5492,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -5117,6 +5584,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 1
   opacity: 1
   abs: 0
@@ -5126,18 +5597,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -5150,18 +5627,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -5300,6 +5783,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -5309,18 +5796,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -5333,18 +5826,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -5397,6 +5896,7 @@ MonoBehaviour:
   mix: 0
   scale: 1
   linkScaleToMask: 1
+  linkScaleToMaskAmount: 1
   untouched: 1
   placed: 0
 --- !u!114 &11484900
@@ -5429,6 +5929,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -5438,18 +5942,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -5462,18 +5972,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -5526,6 +6042,7 @@ MonoBehaviour:
   mix: 0
   scale: 1
   linkScaleToMask: 1
+  linkScaleToMaskAmount: 1
   untouched: 1
   placed: 0
 --- !u!114 &11485042
@@ -5558,6 +6075,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 7
   opacity: 1
   abs: 0
@@ -5567,18 +6088,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -5591,18 +6118,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -5679,6 +6212,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -5688,18 +6225,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -5712,18 +6255,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -5801,6 +6350,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -5810,18 +6363,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -5834,18 +6393,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -5984,6 +6549,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -5993,18 +6562,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -6017,18 +6592,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -6105,6 +6686,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -6114,18 +6699,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -6138,18 +6729,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -6288,6 +6885,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -6297,18 +6898,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -6321,18 +6928,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -6385,6 +6998,7 @@ MonoBehaviour:
   mix: 0
   scale: 1
   linkScaleToMask: 1
+  linkScaleToMaskAmount: 1
   untouched: 1
   placed: 0
 --- !u!114 &11491074
@@ -6417,6 +7031,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -6426,18 +7044,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -6450,18 +7074,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -6600,6 +7230,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -6609,18 +7243,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -6633,18 +7273,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -6783,6 +7429,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -6792,18 +7442,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -6819,18 +7475,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -6972,6 +7634,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -6981,18 +7647,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -7005,18 +7677,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -7091,6 +7769,10 @@ MonoBehaviour:
     tex: {fileID: 0}
   rtDisplay: {fileID: 0}
   rtPreview: {fileID: 0}
+  rtPortal: {fileID: 0}
+  isPortalCount: 0
+  portalNode: {fileID: 0}
+  usedAsPortalList: []
   method: 0
   opacity: 1
   abs: 0
@@ -7100,18 +7782,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -7124,18 +7812,24 @@ MonoBehaviour:
     curve:
       serializedVersion: 2
       m_Curve:
-      - serializedVersion: 2
+      - serializedVersion: 3
         time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - serializedVersion: 2
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
         inSlope: 1
         outSlope: 0
         tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4

@@ -7,6 +7,7 @@ namespace TerrainComposer2
 {
     static public class Mathw
     {
+        static public readonly byte[] bit8 = { 1, 2, 4, 8, 16, 32, 64, 128 };
 
         static public float Clamp01(float v)
         {

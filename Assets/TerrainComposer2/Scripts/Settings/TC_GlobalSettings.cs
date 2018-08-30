@@ -6,7 +6,7 @@ using System;
 
 namespace TerrainComposer2
 {
-    // [CreateAssetMenu(fileName = "TC_GlobalSettings", menuName = "TerrainComposer2/GlobalSettings")]
+    [CreateAssetMenu(fileName = "TC_GlobalSettings", menuName = "TerrainComposer2/GlobalSettings")]
     public class TC_GlobalSettings : ScriptableObject
     {
         public bool tooltip;

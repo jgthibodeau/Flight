@@ -70,7 +70,10 @@ MonoBehaviour:
     color_terrain: {r: 2, g: 2, b: 2, a: 1}
     copy_terrain: 0
     copy_terrain_settings: 1
+    generateStatus: 0
     objectsParent: {fileID: 0}
+    newPos: {x: 0, y: 0, z: 0}
+    updateTerrainPos: 0
     detailSettingsFoldout: 0
     splatSettingsFoldout: 0
     treeSettingsFoldout: 0

@@ -19,6 +19,7 @@ namespace TerrainComposer2
 		public bool squareResolution;
 		public ByteOrder byteOrder;
 		public Texture2D tex;
+        public Texture2D tex2;
 		
 		public bool isDestroyed, callDestroy;
 
@@ -36,6 +37,7 @@ namespace TerrainComposer2
 		void OnDestroy()
 		{
 			TC_Compute.DisposeTexture(ref tex);
+            TC_Compute.DisposeTexture(ref tex2);
 			#if UNITY_EDITOR
 				if (!UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode && !callDestroy) TC.RefreshOutputReferences(TC.allOutput);
 			#else
@@ -101,12 +103,12 @@ namespace TerrainComposer2
 
 			if (tex != null) return;
 
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
 				if (!isResourcesFolder)
 				{ 
 					if (!TC.FileExists(fullPath)) return;
 				}
-#endif
+            #endif
 
 			TC_Reporter.Log("Load Raw file " + fullPath);
 
@@ -138,12 +140,33 @@ namespace TerrainComposer2
 			if (bytes == null) return;
 			if (bytes.Length == 0) return;
 
-			GetResolutionFromLength(bytes.Length);
-			tex = new Texture2D(resolution.x, resolution.y, TextureFormat.R16, false);
-			tex.hideFlags = HideFlags.DontSave;
-			tex.LoadRawTextureData(bytes);
-			tex.Apply();
-			
+            GetResolutionFromLength(bytes.Length);
+
+            #if UNITY_EDITOR_OSX
+                byte[] bytes1 = new byte[bytes.Length / 2];
+                byte[] bytes2 = new byte[bytes.Length / 2];
+
+                for (int i = 0; i < bytes.Length / 2; i++)
+                {
+                    bytes1[i] = bytes[i * 2];
+                    bytes2[i] = bytes[(i * 2) + 1];
+                }
+
+			    tex = new Texture2D(resolution.x, resolution.y, TextureFormat.Alpha8, false, true);
+                tex.hideFlags = HideFlags.DontSave;
+                tex2 = new Texture2D(resolution.x, resolution.y, TextureFormat.Alpha8, false, true);
+                tex2.hideFlags = HideFlags.DontSave;
+                tex2.LoadRawTextureData(bytes2);
+                tex2.Apply();
+                tex.LoadRawTextureData(bytes1);
+            #else
+                tex = new Texture2D(resolution.x, resolution.y, TextureFormat.R16, false, true);
+                tex.hideFlags = HideFlags.DontSave;
+                tex.LoadRawTextureData(bytes);
+            #endif
+            
+            tex.Apply();
+             
 			// For use of mipmap
 			//rt = new RenderTexture(resolution.x, resolution.y, 0, RenderTextureFormat.RFloat, RenderTextureReadWrite.Linear);
 			//rt.useMipMap = true;

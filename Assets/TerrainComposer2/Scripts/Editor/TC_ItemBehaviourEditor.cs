@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System.Collections;
+using System.Collections.Generic;
 
 
 namespace TerrainComposer2
@@ -37,17 +38,21 @@ namespace TerrainComposer2
         SerializedProperty notes;
 
         // SelectItemGroup 
-        SerializedProperty mix, scaleMulti, scaleMinMaxMulti, linkScaleToMask;
+        SerializedProperty mix, scaleMulti, scaleMinMaxMulti, linkScaleToMask, linkScaleToMaskAmount;
 
         // Item
-        SerializedProperty selectIndex;// , splatCustom, splatCustomValues;
+        SerializedProperty selectIndex, texColor, brightness, saturation; //, splatCustom, splatCustomValues;
 
         // Tree
         SerializedProperty tree, scaleRange, nonUniformScale, scaleCurve, randomPosition, heightOffset;
 
         // SpawnObject
-        SerializedProperty spawnObject, linkToPrefab, go, rotRangeX, rotRangeY, rotRangeZ, isSnapRot, isSnapRotX, isSnapRotY, isSnapRotZ, snapRotX, snapRotY, snapRotZ, lookAtTarget, lookAtX, heightRange, includeTerrainHeight;
+        SerializedProperty spawnObject, linkToPrefab, go, rotRangeX, rotRangeY, rotRangeZ, isSnapRot, isSnapRotX, isSnapRotY, isSnapRotZ, snapRotX, snapRotY, snapRotZ, lookAtTarget, lookAtX, heightRange;
+        SerializedProperty includeTerrainHeight, includeTerrainAngle;
         SerializedProperty customScaleRange, scaleRangeX, scaleRangeY, scaleRangeZ, parentMode, parentName, parentT, parentToTerrain;
+
+        // Portal
+        SerializedProperty portalNode;
 
         SPCurve localCurve = new SPCurve();
         SPCurve worldCurve = new SPCurve();
@@ -168,7 +173,9 @@ namespace TerrainComposer2
                 blurMode = serializedObject.FindProperty("blurMode");
 
                 noise = serializedObject.FindProperty("noise");
-                
+
+                portalNode = serializedObject.FindProperty("portalNode");
+
                 if (noise != null)
                 {
                     // frequency = noise.FindPropertyRelative("frequency");
@@ -221,14 +228,20 @@ namespace TerrainComposer2
                 scaleMinMaxMulti = serializedObject.FindProperty("scaleMinMaxMulti");
                 scaleMulti = serializedObject.FindProperty("scaleMulti");
                 linkScaleToMask = serializedObject.FindProperty("linkScaleToMask");
+                linkScaleToMaskAmount = serializedObject.FindProperty("linkScaleToMaskAmount");
             }
             else if (selectItem != null)
             {
                 selectIndex = serializedObject.FindProperty("selectIndex");
+                size = serializedObject.FindProperty("size");
+                wrapMode = serializedObject.FindProperty("wrapMode");
                 // splatCustom = serializedObject.FindProperty("splatCustom");
                 // splatCustomValues = serializedObject.FindProperty("splatCustomValues");
                 distanceRules = serializedObject.FindProperty("distanceRules");
-                
+                texColor = serializedObject.FindProperty("texColor");
+                brightness = serializedObject.FindProperty("brightness");
+                saturation = serializedObject.FindProperty("saturation");
+
                 if (selectItem.outputId == TC.treeOutput)
                 {
                     tree = serializedObject.FindProperty("tree");
@@ -257,6 +270,7 @@ namespace TerrainComposer2
 
                     randomPosition = spawnObject.FindPropertyRelative("randomPosition");
                     includeTerrainHeight = spawnObject.FindPropertyRelative("includeTerrainHeight");
+                    includeTerrainAngle = spawnObject.FindPropertyRelative("includeTerrainAngle");
                     
                     rotRangeX = spawnObject.FindPropertyRelative("rotRangeX");
                     rotRangeY = spawnObject.FindPropertyRelative("rotRangeY");
@@ -331,7 +345,15 @@ namespace TerrainComposer2
             if (Tools.current == Tool.Rotate || Tools.current == Tool.Move || Tools.current == Tool.Scale) Tools.hidden = true;
             else { Tools.hidden = false; return; }
 
-            if (selectItem != null || selectItemGroup != null) return;
+            if (selectItemGroup != null) return;
+
+            if (selectItem != null)
+            {
+                if (selectItem.parentItem.itemList.Count > 1) return;
+                if (selectItem.texColor == null) return;
+            }
+
+            CheckKeyLockOnSelection(eventCurrent);
 
             if (Tools.current == Tool.Move)
             {
@@ -409,7 +431,11 @@ namespace TerrainComposer2
                 Undo.RecordObject(item.transform, "Rotate");
                 Handles.color = Color.blue;
                 Handles.Slider(item.t.position, item.t.localRotation * new Vector3(0, 0, 1));
+                #if UNITY_5_1 || UNITY_5_2 || UNITY_5_3 || UNITY_5_4 || UNITY_5_5
                 Handles.SphereCap(0, item.t.position, Quaternion.identity, 0.15f * HandleUtility.GetHandleSize(item.t.position));
+                #else
+                Handles.SphereHandleCap(0, item.t.position, Quaternion.identity, 0.15f * HandleUtility.GetHandleSize(item.t.position), EventType.Repaint);
+                #endif
                 Handles.color = Color.white; 
                 GUI.changed = false;
                 
@@ -471,6 +497,16 @@ namespace TerrainComposer2
                     DoRepaint();
                 }
             }
+
+            if (node != null)
+            {
+                if (node.portalNode != null)
+                {
+                    node.portalNode.t.position = item.t.position;
+                    node.portalNode.t.rotation = item.t.rotation;
+                    node.portalNode.t.localScale = item.t.localScale;
+                }
+            }
         }
 
         public void DoRepaint()
@@ -488,7 +524,7 @@ namespace TerrainComposer2
             serializedObject.Update();
             
             EditorGUILayout.BeginHorizontal();
-            GUILayout.Space((Screen.width / 2) - 130);
+            GUILayout.Space((EditorGUIUtility.currentViewWidth / 2) - 130);
 
             string control = GUI.GetNameOfFocusedControl();
             if (control == "PreviewEdit") { GUI.color = Color.red; TD.PreviewEdit(item); }
@@ -499,21 +535,28 @@ namespace TerrainComposer2
             Rect rect = GUILayoutUtility.GetLastRect();
             EditorGUILayout.EndHorizontal();
 
-            Rect previewTexRect = new Rect((Screen.width / 2) - 111, rect.y + 5f, 250, 250);
+            Rect previewTexRect = new Rect((EditorGUIUtility.currentViewWidth / 2) - 111, rect.y + 5f, 250, 250);
 
-            //bool splatCustom = false;
-            //if (selectItem != null)
-            //{
-            //    if (selectItem.splatCustom) splatCustom = true;
-            //}
-            
-            if (item.outputId == TC.colorOutput && selectItem != null)
+            bool splatCustom = false;
+            if (selectItem != null)
+            {
+                if (selectItem.splatCustom) splatCustom = true;
+            }
+
+            bool drawColor = false;
+
+            if (selectItem != null && item.outputId == TC.colorOutput)
+            {
+                if (selectItem.parentItem.itemList.Count != 1 || selectItem.texColor == null) drawColor = true;
+            }
+
+            if (drawColor)
             {
                 GUI.color = selectItem.color;
                 EditorGUI.DrawPreviewTexture(previewTexRect, Texture2D.whiteTexture);
                 GUI.color = Color.white;
             }
-            // else if (splatCustom) TC_SelectItemGUI.DrawSplatCustomPreview(selectItem, previewTexRect);
+            else if (splatCustom) TC_SelectItemGUI.DrawSplatCustomPreview(selectItem, previewTexRect);
             else if (item.rtDisplay != null) EditorGUI.DrawPreviewTexture(previewTexRect, item.rtDisplay);
             else if (item.preview.tex != null) EditorGUI.DrawPreviewTexture(previewTexRect, item.preview.tex);
 
@@ -526,34 +569,7 @@ namespace TerrainComposer2
 
                 if (drawNode)
                 {
-                    GUI.color = Color.red * TD.editorSkinMulti;
-                    EditorGUILayout.BeginVertical("Box");
-                    GUI.color = Color.white;
-
-                    DrawGlobalScale();
-
-                    TD.DrawProperty(posY, new GUIContent("Height"));
-                    TD.DrawProperty(size);
-                    // TD.DrawProperty(clamp);
-                    if (node.inputKind == InputKind.File)
-                    {
-                        TD.DrawProperty(wrapMode);
-                    }
-                    else
-                    {
-                        WrapMode popup = (WrapMode)Mathf.Clamp(wrapMode.enumValueIndex - 1, 0, 1);
-                        GUI.changed = false;
-                        popup = (WrapMode)EditorGUILayout.EnumPopup("Wrap Mode", popup);
-                        wrapMode.enumValueIndex = (int)popup + 1;
-                        if (GUI.changed)
-                        {
-                            AutoGenerate();
-                        }
-                    }
-
-                    DrawFlipScale(false);
-
-                    EditorGUILayout.EndVertical();
+                    DrawCustomTransform();
                     DrawImageSettings();
                     TD.DrawSpacer();
                 }
@@ -620,6 +636,8 @@ namespace TerrainComposer2
                     EditorGUILayout.EndVertical();
                 }
             }
+
+            bool drawSpacer = true;
 
             if (node != null)
             {
@@ -739,12 +757,18 @@ namespace TerrainComposer2
                         TD.DrawProperty(radius);
                         DrawNoise();
                     }
-                    
-                    if (node.inputCurrent != InputCurrent.Distortion && node.inputCurrent != InputCurrent.EdgeDetect) DrawIntSlider(iterations, 1, 30);
+
+                    if (node.inputCurrent != InputCurrent.Distortion && node.inputCurrent != InputCurrent.EdgeDetect)
+                    {
+                        // DrawIntSlider(iterations, 1, 30);
+                        TD.DrawProperty(iterations);
+                        if (iterations.intValue < 1) iterations.intValue = 1;
+                        else if (iterations.intValue > 1000) iterations.intValue = 1000;
+                    }
                 }
                 else if (node.inputKind == InputKind.Portal)
                 {
-                    DrawCommingSoon("Portals will be added in another release.");
+                    DrawPortal();
                 }
             }
             else if (selectItemGroup != null)
@@ -753,7 +777,7 @@ namespace TerrainComposer2
             }
             else if (selectItem != null)
             {
-                if (selectItem.outputId == TC.colorOutput) DrawColorSelectItem();
+                if (selectItem.outputId == TC.colorOutput) { DrawColorSelectItem(); drawSpacer = false; }
                 else if (selectItem.outputId == TC.splatOutput) DrawSelectItem();
                 else if (selectItem.outputId == TC.grassOutput) DrawSelectItem();
                 else if (selectItem.outputId == TC.treeOutput) DrawTreeSelectItem();
@@ -790,7 +814,9 @@ namespace TerrainComposer2
                 }
             }
 
-            TD.DrawSpacer();
+            DrawUsedAsPortal();
+
+            if (drawSpacer) TD.DrawSpacer();
 
             //if (layer != null)
             //{
@@ -827,6 +853,136 @@ namespace TerrainComposer2
             }
         }
 
+        void DrawUsedAsPortal()
+        {
+            if (item.usedAsPortalList != null && item.usedAsPortalList.Count > 0)
+            {
+                TD.DrawSpacer();
+                TD.DrawLabelWidthUnderline("Used as a Portal", 14);
+                List<TC_ItemBehaviour> usedAsPortalList = item.usedAsPortalList;
+
+                GUI.color = Color.cyan * TD.editorSkinMulti;
+                EditorGUILayout.BeginVertical("Box");
+                GUI.color = Color.white;
+
+                for (int i = 0; i < usedAsPortalList.Count; i++)
+                {
+                    EditorGUILayout.BeginHorizontal();
+                    if (usedAsPortalList[i] == null) { item.isPortalCount--; usedAsPortalList.RemoveAt(i--); EditorUtility.SetDirty(item); continue; }
+                    EditorGUILayout.ObjectField(usedAsPortalList[i], typeof(TC_ItemBehaviour), true);
+                    
+                    if (GUILayout.Button("Select", EditorStyles.miniButtonMid, GUILayout.Width(70)))
+                    {
+                        Selection.activeTransform = usedAsPortalList[i].t;
+                        DoRepaint();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+
+                EditorGUILayout.EndVertical();
+            }
+        }
+
+        void DrawPortal()
+        {
+            EditorGUILayout.BeginHorizontal();
+            {
+                bool guiChangedOld = GUI.changed;
+                GUI.changed = false;
+                TC_ItemBehaviour oldPortalNode = portalNode.objectReferenceValue as TC_ItemBehaviour;
+                EditorGUILayout.PropertyField(portalNode);
+
+                TC_ItemBehaviour _portalNode = portalNode.objectReferenceValue as TC_ItemBehaviour;
+                if (_portalNode != null)
+                {
+                    // EditorGUILayout.LabelField(_portalNode.isPortalCount.ToString(), GUILayout.Width(25));
+                    if (GUILayout.Button("X", EditorStyles.miniButtonMid, GUILayout.Width(25)))
+                    {
+                        portalNode.objectReferenceValue = null;
+                        GUI.changed = true;
+                    }
+                    GUILayout.Space(25);
+                }
+
+                if (GUI.changed)
+                {
+                    _portalNode = portalNode.objectReferenceValue as TC_ItemBehaviour;
+                    bool verifyPortal = TC.VerifyPortal(_portalNode);
+                    
+                    if (oldPortalNode != null && (_portalNode == null || verifyPortal))
+                    {
+                        item.RemoveFromPortalNode();
+                    }
+                    
+                    if (_portalNode != null)
+                    {
+                        if (verifyPortal)
+                        {
+                            _portalNode.isPortalCount++;
+                            if (_portalNode.usedAsPortalList == null) _portalNode.usedAsPortalList = new List<TC_ItemBehaviour>();
+                            _portalNode.usedAsPortalList.Add(item);
+                            item.CopyTransform(_portalNode);
+                        }
+                        else portalNode.objectReferenceValue = oldPortalNode;
+                    }
+                    TC.RefreshOutputReferences(item.outputId);
+
+                    Selection.activeTransform = node.t;
+                    guiChangedOld = true;
+                }
+                GUI.changed = guiChangedOld;
+                if (portalNode.objectReferenceValue != null)
+                {
+                    if (GUILayout.Button("Select", EditorStyles.miniButtonMid, GUILayout.Width(70)))
+                    {
+                        Selection.activeTransform = ((TC_ItemBehaviour)portalNode.objectReferenceValue).t;
+                        DoRepaint();
+                    }
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+
+        void DrawCustomTransform()
+        {
+            GUI.color = Color.red * TD.editorSkinMulti;
+            EditorGUILayout.BeginVertical("Box");
+            GUI.color = Color.white;
+
+            DrawGlobalScale();
+
+            TD.DrawProperty(posY, new GUIContent("Height"));
+            TD.DrawProperty(size);
+            // TD.DrawProperty(clamp);
+
+            bool fileInput = false;
+
+            if (node != null)
+            {
+                if (node.inputKind == InputKind.File) fileInput = true;
+            }
+            else fileInput = true;
+
+            if (fileInput)
+            {
+                TD.DrawProperty(wrapMode);
+            }
+            else
+            {
+                WrapMode popup = (WrapMode)Mathf.Clamp(wrapMode.enumValueIndex - 1, 0, 1);
+                GUI.changed = false;
+                popup = (WrapMode)EditorGUILayout.EnumPopup("Wrap Mode", popup);
+                wrapMode.enumValueIndex = (int)popup + 1;
+                if (GUI.changed)
+                {
+                    AutoGenerate();
+                }
+            }
+
+            DrawFlipScale(false);
+
+            EditorGUILayout.EndVertical();
+        }
         void DrawDistantRules()
         {
             EditorGUILayout.BeginHorizontal();
@@ -934,6 +1090,51 @@ namespace TerrainComposer2
                 EditorGUILayout.EndHorizontal();
             }
         }
+
+        void DrawTerrainDataFiles()
+        {
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.PrefixLabel(" ");
+            if (GUILayout.Button("+", GUILayout.Width(25)))
+            {
+                settings.importTerrains.Add(null);
+            }
+
+            EditorGUILayout.EndHorizontal();
+
+            int tileX = 0;
+            int tileY = 0;
+
+            for (int i = 0; i < settings.importTerrains.Count; i++)
+            {
+                EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.PrefixLabel("Tile x" + tileX + "_y" + tileY);
+                    settings.importTerrains[i] = EditorGUILayout.ObjectField(settings.importTerrains[i], typeof(TerrainData), false) as TerrainData;
+                    if (GUILayout.Button("-", GUILayout.Width(25)))
+                    {
+                        settings.importTerrains.RemoveAt(i--);
+                    }
+                EditorGUILayout.EndHorizontal();
+                if (++tileX >= settings.importTiles.x) { tileX = 0; ++tileY; }
+            }
+
+            GUILayout.Space(5);
+
+            EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Tiles X");
+                settings.importTiles.x = EditorGUILayout.IntField(settings.importTiles.x);
+                if (settings.importTiles.x < 0) settings.importTiles.x = 0;
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Tiles Y");
+                settings.importTiles.y = EditorGUILayout.IntField(settings.importTiles.y);
+                if (settings.importTiles.y < 0) settings.importTiles.y = 0;
+            EditorGUILayout.EndHorizontal();
+
+            GUILayout.Space(10);
+            // TD.DrawSpacer();
+        }
         
         void DrawExport(string filename, int mode)
         {
@@ -947,6 +1148,17 @@ namespace TerrainComposer2
             EditorGUILayout.BeginVertical("Box");
             GUI.color = Color.white;
 
+            if (mode == 0)
+            {
+                EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.PrefixLabel("Export Source");
+                    settings.importSource = (TC_Settings.ImportSource)EditorGUILayout.EnumPopup(settings.importSource);
+                EditorGUILayout.EndHorizontal();
+
+                if (settings.importSource == TC_Settings.ImportSource.TerrainData_Files) DrawTerrainDataFiles();
+            }
+            
+            
             EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.PrefixLabel("Path");
                 EditorGUILayout.LabelField(settings.exportPath);
@@ -985,6 +1197,13 @@ namespace TerrainComposer2
                 else if (mode == 1) generate.ExportSplatmap(settings.exportPath);
                 else if (mode == 2) generate.ExportColormap(settings.exportPath, true);
 
+            }
+            if (mode == 0)
+            {
+                if (GUILayout.Button("Create Layer", GUILayout.Width(100)))
+                {
+                    generate.CreateLayerFromExportedHeightmap(settings.exportPath);
+                }
             }
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.EndVertical();
@@ -1052,6 +1271,9 @@ namespace TerrainComposer2
 
         static public void CheckKeyLockOnSelection(Event eventCurrent)
         {
+            // Debug.Log(EditorWindow.focusedWindow.titleContent.text); 
+            if (EditorWindow.focusedWindow == null) return;
+            if (EditorWindow.focusedWindow.titleContent.text != "Scene") return;
             for (int i = 0; i < Selection.transforms.Length; i++)
             {
                 TC_ItemBehaviour item = Selection.transforms[i].GetComponent<TC_ItemBehaviour>();
@@ -1805,7 +2027,11 @@ namespace TerrainComposer2
                     if (scaleMulti.floatValue < 0.01f) scaleMulti.floatValue = 0.01f;
                 }
 
-                TD.DrawProperty(linkScaleToMask);
+                EditorGUILayout.BeginHorizontal();
+                    TD.DrawProperty(linkScaleToMask);
+                    if (linkScaleToMask.boolValue) DrawSlider(linkScaleToMaskAmount, 0, 1, new GUIContent(""));
+                EditorGUILayout.EndHorizontal();
+
                 EditorGUILayout.EndVertical();
             }
         }
@@ -1835,6 +2061,7 @@ namespace TerrainComposer2
             if (!settings.hasMasterTerrain) return;
 
             TC_Area2D area2D = TC_Area2D.current;
+            if (area2D.currentTerrainArea == null) area2D.currentTerrainArea = area2D.terrainAreas[0];
 
             Vector3 size = area2D.currentTerrainArea.terrainSize;
 
@@ -1877,25 +2104,42 @@ namespace TerrainComposer2
 
             int length = selectItem.GetItemTotalFromTerrain();
 
-            GUI.changed = false;
-            DrawIntSlider(selectIndex, 0, length - 1, new GUIContent(TC.outputNames[selectItem.outputId] + " Texture"));
+            selectIndex.intValue++;
+            DrawIntSlider(selectIndex, 1, length, new GUIContent(TC.outputNames[selectItem.outputId] + " Texture"));
+            // if (GUI.changed) serializedObject.ApplyModifiedProperties();
+            selectIndex.intValue--;
 
-            if (GUI.changed) selectItem.Refresh();
+            if (GUI.changed)
+            {
+                serializedObject.ApplyModifiedProperties();
+                selectItem.Refresh();
+            }
 
             if (selectItem.outputId == TC.splatOutput)
             {
                 //TD.DrawProperty(splatCustom);
-
+                //if (GUI.changed)
+                //{
+                //    serializedObject.ApplyModifiedProperties();
+                //    selectItem.Refresh();
+                //}
+                
                 //if (splatCustom.boolValue)
                 //{
+                //    if (splatCustomValues.arraySize != length) splatCustomValues.arraySize = length;
+
                 //    EditorGUILayout.BeginVertical("Box");
-                //    for (int i = 0; i < length; i++)
+                //    for (int i = 0; i < splatCustomValues.arraySize; i++)
                 //    {
                 //        EditorGUILayout.BeginHorizontal();
                 //        GUILayout.Space(15);
                 //        DrawPreviewTexture(settings.masterTerrain.terrainData.splatPrototypes[i].texture, Color.white, Color.white);
                 //        GUILayout.Space(5);
                 //        DrawSlider(splatCustomValues.GetArrayElementAtIndex(i), 0, 1, new GUIContent(""));
+                //        if (GUI.changed)
+                //        {
+                //            selectItem.parentItem.CreateSplatMixBuffer();
+                //        }
                 //        EditorGUILayout.EndHorizontal();
                 //    }
                 //    GUILayout.Space(5);
@@ -1907,6 +2151,28 @@ namespace TerrainComposer2
         void DrawColorSelectItem()
         {
             // TD.DrawProperty(color);
+            if (selectItem.parentItem.itemList.Count == 1)
+            {
+                if (texColor.objectReferenceValue != null)
+                {
+                    DrawCustomTransform();
+
+                    GUI.color = Color.blue;
+                    EditorGUILayout.BeginVertical("Box");
+                    GUI.color = Color.white;
+
+                    TD.DrawProperty(brightness);
+                    TD.DrawProperty(saturation);
+                    if (saturation.floatValue < 0) saturation.floatValue = 0;
+                }
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Texture");
+                GUI.changed = false;
+                texColor.objectReferenceValue = (Texture)EditorGUILayout.ObjectField((Texture)texColor.objectReferenceValue, typeof(Texture), false, GUILayout.Width(75), GUILayout.Height(75));
+                if (GUI.changed) AutoGenerate();
+                EditorGUILayout.EndHorizontal();
+            }
         }
 
         void DrawLayerGroupOutput()
@@ -2096,6 +2362,7 @@ namespace TerrainComposer2
             // TD.DrawProperty(includeScale); TODO: Is this needed?
             TD.DrawProperty(heightOffset);
             TD.DrawProperty(includeTerrainHeight);
+            TD.DrawProperty(includeTerrainAngle);
             EditorGUILayout.EndVertical();
             
             TD.DrawSpacer();

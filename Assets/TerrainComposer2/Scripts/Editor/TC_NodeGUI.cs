@@ -58,7 +58,7 @@ namespace TerrainComposer2
             AddMenuItem(node, menu, instanceID, node.inputShape);
             AddMenuItem(node, menu, instanceID, node.inputFile);
             AddMenuItem(node, menu, instanceID, node.inputCurrent);
-            AddMenuItem(node, menu, instanceID, node.inputPortal);
+            menu.AddItem(new GUIContent("Portal"), false, ClickMenuInput, instanceID + ":Portal/Portal");
             
             menu.ShowAsContext();
             Event.current.Use();
@@ -127,12 +127,6 @@ namespace TerrainComposer2
                     InputCurrent oldInputCurrent = node.inputCurrent;
                     node.inputCurrent = (InputCurrent)Enum.Parse(typeof(InputCurrent), input);
                     if (node.inputCurrent != oldInputCurrent) changed = true;
-                }
-                else if (inputKind == "Portal")
-                {
-                    InputPortal oldInputPortal = node.inputPortal;
-                    node.inputPortal = (InputPortal)Enum.Parse(typeof(InputPortal), input);
-                    if (node.inputPortal != oldInputPortal) changed = true;
                 }
 
                 if (changed)

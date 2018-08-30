@@ -612,7 +612,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!1 &1499442069421556
 GameObject:
   m_ObjectHideFlags: 1
@@ -1876,8 +1876,8 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1370904177880440}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.42, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -198.26422, y: 469.27, z: 495.3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4740931289937698}
@@ -2815,8 +2815,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e60d39cfff845554dbf4627e88f2fdb7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  invincible: 0
   maxHealth: 100
   currentHealth: 100
+  deathParticles: {fileID: 0}
+  spawnOnDeath: {fileID: 0}
+  minSpawnForce: {x: -1, y: 1, z: -1}
+  maxSpawnForce: {x: 1, y: 2, z: 1}
 --- !u!114 &114854459334492656
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2828,6 +2833,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf61be09bff57d9448fa8082e1749425, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  collider: {fileID: 0}
+  pickupable: {fileID: 0}
   _CanFollowPlayer: 1
   _CanFollowBreadcrumbs: 0
   _CanFollowAi: 0
@@ -2961,7 +2968,7 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 2100000, guid: 28b2e2a9409a67f4eaee9b9525fd048f, type: 2}
+  - {fileID: 2100000, guid: d197b0a08af0c7f45a094635e43e112a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3122,7 +3129,7 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 2100000, guid: 17e3c38673f990e48adc376e6daac481, type: 2}
+  - {fileID: 2100000, guid: d197b0a08af0c7f45a094635e43e112a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3167,8 +3174,8 @@ ParticleSystem:
   simulationSpeed: 1.5
   stopAction: 0
   looping: 1
-  prewarm: 1
-  playOnAwake: 1
+  prewarm: 0
+  playOnAwake: 0
   useUnscaledTime: 0
   autoRandomSeed: 1
   useRigidbodyForVelocity: 1

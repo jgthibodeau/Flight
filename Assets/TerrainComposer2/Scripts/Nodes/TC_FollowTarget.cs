@@ -9,25 +9,60 @@ namespace TerrainComposer2
         public Transform target;
         public Vector3 offset;
         public bool refresh = false;
-        
+        public bool followPosition = true;
+        public bool followRotation = true;
+        public bool followScale = true;
+        public bool followScaleY = true;
+
+        Transform t;
+        TC_ItemBehaviour targetItem;
+        TC_ItemBehaviour item;
+
+        void Start()
+        {
+            t = transform;
+            if (target != null) targetItem = target.GetComponent<TC_ItemBehaviour>();
+            item = GetComponent<TC_ItemBehaviour>();
+        }
+
         #if UNITY_EDITOR
         void OnEnable()
         {
-            UnityEditor.EditorApplication.update += MyUpdate;
+            t = transform;
+            if (target != null) targetItem = target.GetComponent<TC_ItemBehaviour>();
+            item = GetComponent<TC_ItemBehaviour>();
+            UnityEditor.EditorApplication.update += Update;
         }
 
         void OnDisable()
         {
-            UnityEditor.EditorApplication.update -= MyUpdate;
+            UnityEditor.EditorApplication.update -= Update;
         }
         #endif
 
 
-        void MyUpdate()
+        void Update()
         {
             if (target == null) return;
 
-            transform.position = target.position + offset;
+            if (followPosition) t.position = target.position + offset;
+            if (followRotation) t.rotation = target.rotation;
+            if (followScale)
+            {
+                float scaleY;
+                if (followScaleY) scaleY = t.localScale.y; else scaleY = target.lossyScale.y;
+                t.localScale = new Vector3(target.lossyScale.x, scaleY, target.lossyScale.z);
+
+            }
+
+            if (targetItem != null && item != null)
+            {
+                if (item.visible != targetItem.visible)
+                {
+                    item.visible = targetItem.visible;
+                    TC.RefreshOutputReferences(item.outputId);
+                }
+            }
 
             if (refresh)
             {

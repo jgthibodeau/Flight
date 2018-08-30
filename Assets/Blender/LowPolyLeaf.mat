@@ -4,7 +4,7 @@
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: LowPolyLeaf
   m_Shader: {fileID: 4800000, guid: 71eb23e9da518254a9ccf8703018d444, type: 3}
@@ -59,6 +59,8 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
+    - _AO: 2.4
+    - _BaseLight: 1
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
@@ -72,6 +74,7 @@ Material:
     - _MinY: -6.47
     - _Mode: 0
     - _NormalIntensity: 1
+    - _Occlusion: 7.5
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _Scale: 10
@@ -79,6 +82,7 @@ Material:
     - _SpecIntensity: 0.1
     - _SpecularHighlights: 1
     - _Speed: 0.15
+    - _SquashAmount: 1
     - _SrcBlend: 1
     - _Transparency: 1
     - _UVSec: 0
@@ -105,3 +109,5 @@ Material:
     - _Diffusecolor: {r: 0, g: 0.8308824, b: 0.10887415, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _Speccolor: {r: 1, g: 1, b: 1, a: 1}
+    - _TreeInstanceColor: {r: 1, g: 1, b: 1, a: 1}
+    - _TreeInstanceScale: {r: 1, g: 1, b: 1, a: 1}

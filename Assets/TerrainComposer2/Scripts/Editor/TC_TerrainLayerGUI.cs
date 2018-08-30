@@ -8,7 +8,7 @@ namespace TerrainComposer2
     {
         static public void Draw(TC_TerrainLayer terrainLayer)
         {
-            Vector2 pos = new Vector2(Screen.width / 2, Screen.height / 2);
+            Vector2 pos = new Vector2(TC_NodeWindow.window.position.width / 2, TC_NodeWindow.window.position.height / 2);
 
             TD.DrawTextureScaled(pos.x, pos.y, TD.texShelfStart, Color.white, false, StretchMode.None, StretchMode.Screen);
             TD.DrawTextureScaled(pos.x + TD.texShelfStart.width, pos.y, TD.texShelfBackGround2, Color.white, false, StretchMode.Right, StretchMode.Screen);

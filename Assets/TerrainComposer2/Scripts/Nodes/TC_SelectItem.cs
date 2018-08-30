@@ -11,10 +11,16 @@ namespace TerrainComposer2
         
         public Vector2 range;
 
+        public ImageWrapMode wrapMode = ImageWrapMode.Repeat;
+        public Vector3 size = new Vector3(2048, 0, 2048);
+
         public GameObject oldSpawnObject;
         public Tree tree;
         public SpawnObject spawnObject;
         public Color color = Color.white;
+        public Texture texColor;
+        public float brightness = 1;
+        public float saturation = 1;
         public int selectIndex;
         public float[] splatCustomValues;
         public bool splatCustom;
@@ -32,13 +38,15 @@ namespace TerrainComposer2
         {
             // Debug.Log("Awake SelectItem");
             base.Awake();
-            t.hideFlags = HideFlags.NotEditable | HideFlags.HideInInspector;
+            // t.hideFlags = HideFlags.NotEditable | HideFlags.HideInInspector;
+            t.hideFlags = HideFlags.None;
         }
         
         public override void OnEnable()
         {
             base.OnEnable();
-            t.hideFlags = HideFlags.NotEditable | HideFlags.HideInInspector;
+            // t.hideFlags = HideFlags.NotEditable | HideFlags.HideInInspector;
+            t.hideFlags = HideFlags.None;
         }
 
         public void CalcSplatCustomTotal()
@@ -65,8 +73,6 @@ namespace TerrainComposer2
 
         public void SetPreviewColor()
         {
-            if (outputId == TC.colorOutput) return;
-
             TC_GlobalSettings globalSettings = TC_Settings.instance.global;
 
             if (selectIndex == -1) selectIndex = 0;
@@ -218,6 +224,7 @@ namespace TerrainComposer2
             public bool includeScale = false;
             public float heightOffset = 0;
             public bool includeTerrainHeight = true;
+            public bool includeTerrainAngle = false;
             
             public Vector2 rotRangeX = Vector2.zero;
             public Vector2 rotRangeY = Vector2.zero;

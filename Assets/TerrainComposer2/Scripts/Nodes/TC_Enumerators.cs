@@ -15,7 +15,7 @@
     public enum InputShape { Circle, Gradient, Rectangle, Constant };
     public enum InputFile { Image, RawImage };
     public enum InputCurrent { Blur = 0, Expand = 1, Shrink = 2, EdgeDetect = 4, Distortion = 3};
-    public enum InputPortal { Result, PortalList };
+    public enum InputPortal { Portal };
 
     public enum NoiseMode { TextureLookup = 0, Normal = 1, Simplex = 2, Value = 3 };
     public enum NoiseMode2 { Normal = 1, Simplex = 2, Value = 3 }

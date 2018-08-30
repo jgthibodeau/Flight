@@ -51,6 +51,8 @@ namespace TerrainComposer2
             }
             terrainArea = (TC_TerrainArea)target;
 
+            terrainArea.transform.localScale = Vector3.one;
+
             eventCurrent = Event.current;
 
             if (button_splatmap == null) LoadButtonTextures();
@@ -72,7 +74,7 @@ namespace TerrainComposer2
                 // Debug.Log("Set Dirty");
                 EditorUtility.SetDirty(terrainArea);
                 #if !UNITY_5_1 && !UNITY_5_2
-                    EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+                    if (!Application.isPlaying) EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
                 #else
                     EditorApplication.MarkSceneDirty();
                 #endif
@@ -115,8 +117,24 @@ namespace TerrainComposer2
             else
             {
                 GUI.changed = false;
-                settings.autoColormapRTP = EditorGUILayout.Toggle("Assign colormap", settings.autoColormapRTP);
-                settings.autoNormalmapRTP = EditorGUILayout.Toggle("Assign normalmap", settings.autoNormalmapRTP);
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Assign colormap");
+                settings.autoColormapRTP = EditorGUILayout.Toggle(settings.autoColormapRTP, GUILayout.Width(25));
+                if (GUILayout.Button("Reset", EditorStyles.miniButtonMid, GUILayout.Width(55)))
+                {
+                    terrainArea.ResetTextureRTP("ColorGlobal");
+                }
+                EditorGUILayout.EndHorizontal();
+
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Assign normalmap");
+                settings.autoNormalmapRTP = EditorGUILayout.Toggle(settings.autoNormalmapRTP, GUILayout.Width(25));
+                if (GUILayout.Button("Reset", EditorStyles.miniButtonMid, GUILayout.Width(55)))
+                {
+                    terrainArea.ResetTextureRTP("NormalGlobal");
+                }
+                EditorGUILayout.EndHorizontal();
                 if (GUI.changed) EditorUtility.SetDirty(settings);
             }
 
@@ -169,6 +187,23 @@ namespace TerrainComposer2
                         if (eventCurrent.button == 2)
                         {
                             tcTerrain.active = !tcTerrain.active;
+
+                            if (Event.current.shift)
+                            {
+                                for (int i = 0; i < terrainArea.terrains.Count; i++)
+                                {
+                                    TCUnityTerrain tcTerrain2 = terrainArea.terrains[i];
+                                    if (tcTerrain2.terrain != null)
+                                    {
+                                        tcTerrain2.terrain.gameObject.SetActive(tcTerrain.active);
+                                        tcTerrain2.active = tcTerrain.active;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (tcTerrain.terrain != null) tcTerrain.terrain.gameObject.SetActive(tcTerrain.active);
+                            }
                             if (tcTerrain.active) TC.AutoGenerate();
                             continue;
                         }
@@ -567,12 +602,12 @@ namespace TerrainComposer2
                     currentTerrain.legacyShininess = EditorGUILayout.FloatField(currentTerrain.legacyShininess);
                     EditorGUILayout.EndHorizontal();
                 }
-                else if (currentTerrain.materialType == Terrain.MaterialType.Custom)
+                else if (currentTerrain.materialType == Terrain.MaterialType.Custom && currentTerrain.terrain != null) 
                 {
                     EditorGUILayout.BeginHorizontal();
                     GUILayout.Space(75 + space);
                     EditorGUILayout.LabelField("Custom Material", GUILayout.Width(147.0f));
-                    currentTerrain.materialTemplate = (Material)EditorGUILayout.ObjectField(currentTerrain.materialTemplate, typeof(Material), true);
+                    currentTerrain.terrain.materialTemplate = (Material)EditorGUILayout.ObjectField(currentTerrain.terrain.materialTemplate, typeof(Material), true);
                     EditorGUILayout.EndHorizontal();
                 }
 
@@ -733,7 +768,7 @@ namespace TerrainComposer2
                     if (countSplat == 0)
                     {
                         EditorGUILayout.BeginHorizontal();
-                            GUILayout.Space(50 + space);
+                            GUILayout.Space(59 + space);
                             EditorGUILayout.LabelField("Splat", GUILayout.Width(55.0f));
                             EditorGUILayout.LabelField("Normal", GUILayout.Width(55.0f));
                         EditorGUILayout.EndHorizontal();
@@ -741,7 +776,7 @@ namespace TerrainComposer2
 
                     EditorGUILayout.BeginHorizontal();
                         GUILayout.Space(30 + space);
-                        EditorGUILayout.LabelField("" + (countSplat + 1) + ").", GUILayout.Width(16.0f));
+                        EditorGUILayout.LabelField("" + (countSplat + 1) + ")", GUILayout.Width(25.0f));
 
                         currentTerrain.splatPrototypes[countSplat].texture = (Texture2D)EditorGUILayout.ObjectField(currentTerrain.splatPrototypes[countSplat].texture, typeof(Texture), true, GUILayout.Width(55.0f), GUILayout.Height(55.0f));
                         currentTerrain.splatPrototypes[countSplat].normalMap = (Texture2D)EditorGUILayout.ObjectField(currentTerrain.splatPrototypes[countSplat].normalMap, typeof(Texture), true, GUILayout.Width(55.0f), GUILayout.Height(55.0f));
@@ -780,7 +815,7 @@ namespace TerrainComposer2
                         if (currentTerrain.splatSettingsFoldout)
                         {
                             EditorGUILayout.BeginHorizontal();
-                            GUILayout.Space(64 + space);
+                            GUILayout.Space(73 + space);
                             
 
                             float tileSize = currentTerrain.splatPrototypes[countSplat].tileSize.x;
@@ -799,7 +834,7 @@ namespace TerrainComposer2
                             EditorGUILayout.EndHorizontal();
 
                             EditorGUILayout.BeginHorizontal();
-                            GUILayout.Space(64 + space);
+                            GUILayout.Space(73 + space);
                             // EditorGUILayout.LabelField("Tile Offset", GUILayout.Width(125.0f));
                             currentTerrain.splatPrototypes[countSplat].tileOffset = EditorGUILayout.Vector2Field("Tile Offset", currentTerrain.splatPrototypes[countSplat].tileOffset);
                             EditorGUILayout.EndHorizontal();
@@ -1041,12 +1076,12 @@ namespace TerrainComposer2
                     GUILayout.Space(30 + space);
                     if (currentTerrain.detailPrototypes[countGrass].usePrototypeMesh)
                     {
-                        EditorGUILayout.LabelField("" + (countGrass + 1) + ")", GUILayout.Width(16.0f));
+                        EditorGUILayout.LabelField("" + (countGrass + 1) + ")", GUILayout.Width(25.0f));
                         currentTerrain.detailPrototypes[countGrass].prototype = EditorGUILayout.ObjectField(currentTerrain.detailPrototypes[countGrass].prototype, typeof(GameObject), true, GUILayout.Width(143.0f)) as GameObject;
                     }
                     else
                     {
-                        EditorGUILayout.LabelField("" + (countGrass + 1) + ")", GUILayout.Width(15.0f));
+                        EditorGUILayout.LabelField("" + (countGrass + 1) + ")", GUILayout.Width(24.0f));
                         currentTerrain.detailPrototypes[countGrass].prototypeTexture = (Texture2D)EditorGUILayout.ObjectField(currentTerrain.detailPrototypes[countGrass].prototypeTexture, typeof(Texture2D), true, GUILayout.Width(55.0f), GUILayout.Height(55.0f));
                         if (currentTerrain.detailPrototypes[countGrass].prototypeTexture != null)
                         {
@@ -1119,13 +1154,13 @@ namespace TerrainComposer2
                         if (!currentTerrain.detailPrototypes[countGrass].usePrototypeMesh)
                         {
                             EditorGUILayout.BeginHorizontal();
-                            GUILayout.Space(45 + space);
+                            GUILayout.Space(70 + space);
                             currentTerrain.detailPrototypes[countGrass].minWidth = EditorGUILayout.FloatField("Min. Width", currentTerrain.detailPrototypes[countGrass].minWidth);
                             EditorGUILayout.EndHorizontal();
                         }
 
                         EditorGUILayout.BeginHorizontal();
-                        GUILayout.Space(45 + space);
+                        GUILayout.Space(70 + space);
                         if (!currentTerrain.detailPrototypes[countGrass].usePrototypeMesh)
                         {
                             currentTerrain.detailPrototypes[countGrass].maxWidth = EditorGUILayout.FloatField("Max. Width", currentTerrain.detailPrototypes[countGrass].maxWidth);
@@ -1139,13 +1174,13 @@ namespace TerrainComposer2
                         if (!currentTerrain.detailPrototypes[countGrass].usePrototypeMesh)
                         {
                             EditorGUILayout.BeginHorizontal();
-                            GUILayout.Space(45 + space);
+                            GUILayout.Space(70 + space);
                             currentTerrain.detailPrototypes[countGrass].minHeight = EditorGUILayout.FloatField("Min. Height", currentTerrain.detailPrototypes[countGrass].minHeight);
                             EditorGUILayout.EndHorizontal();
                         }
 
                         EditorGUILayout.BeginHorizontal();
-                        GUILayout.Space(45 + space);
+                        GUILayout.Space(70 + space);
                         if (!currentTerrain.detailPrototypes[countGrass].usePrototypeMesh)
                         {
                             currentTerrain.detailPrototypes[countGrass].maxHeight = EditorGUILayout.FloatField("Max. Height", currentTerrain.detailPrototypes[countGrass].maxHeight);
@@ -1157,30 +1192,30 @@ namespace TerrainComposer2
                         EditorGUILayout.EndHorizontal();
 
                         EditorGUILayout.BeginHorizontal();
-                        GUILayout.Space(45 + space);
+                        GUILayout.Space(70 + space);
                         currentTerrain.detailPrototypes[countGrass].noiseSpread = EditorGUILayout.FloatField("Noise Spread", currentTerrain.detailPrototypes[countGrass].noiseSpread);
                         EditorGUILayout.EndHorizontal();
 
                         if (!currentTerrain.detailPrototypes[countGrass].usePrototypeMesh)
                         {
                             EditorGUILayout.BeginHorizontal();
-                            GUILayout.Space(45 + space);
+                            GUILayout.Space(70 + space);
                             currentTerrain.detailPrototypes[countGrass].bendFactor = EditorGUILayout.FloatField("Bend Factor", currentTerrain.detailPrototypes[countGrass].bendFactor);
                             EditorGUILayout.EndHorizontal();
                         }
 
                         EditorGUILayout.BeginHorizontal();
-                        GUILayout.Space(45 + space);
+                        GUILayout.Space(70 + space);
                         currentTerrain.detailPrototypes[countGrass].healthyColor = EditorGUILayout.ColorField("Healthy Color", currentTerrain.detailPrototypes[countGrass].healthyColor);
                         EditorGUILayout.EndHorizontal();
 
                         EditorGUILayout.BeginHorizontal();
-                        GUILayout.Space(45 + space);
+                        GUILayout.Space(70 + space);
                         currentTerrain.detailPrototypes[countGrass].dryColor = EditorGUILayout.ColorField("Dry Color", currentTerrain.detailPrototypes[countGrass].dryColor);
                         EditorGUILayout.EndHorizontal();
 
                         EditorGUILayout.BeginHorizontal();
-                        GUILayout.Space(45 + space);
+                        GUILayout.Space(70 + space);
                         currentTerrain.detailPrototypes[countGrass].renderMode = (DetailRenderMode)EditorGUILayout.EnumPopup("Render Mode", (Enum)currentTerrain.detailPrototypes[countGrass].renderMode);
                         EditorGUILayout.EndHorizontal();
                     }
@@ -1395,7 +1430,7 @@ namespace TerrainComposer2
 
             Rect rect = GUILayoutUtility.GetLastRect();
 
-            if (GUI.Button(new Rect(Screen.width - 98, rect.y, 90, 19), new GUIContent("Change", button_folder)))
+            if (GUI.Button(new Rect(EditorGUIUtility.currentViewWidth - 98, rect.y, 90, 19), new GUIContent("Change", button_folder)))
             {
                 if (!eventCurrent.shift)
                 {
@@ -1473,7 +1508,7 @@ namespace TerrainComposer2
             GUILayout.Space(space);
             EditorGUILayout.LabelField("Tiles X", GUILayout.Width(160.0f));
             int tileX = terrainArea.selectTiles.x;
-            tileX = EditorGUILayout.IntSlider(tileX, 1, 25);
+            tileX = EditorGUILayout.IntSlider(tileX, 1, 32);
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.BeginHorizontal();
@@ -1482,7 +1517,7 @@ namespace TerrainComposer2
             terrainArea.tileLink = EditorGUILayout.Toggle(terrainArea.tileLink, GUILayout.Width(25.0f));
             int tileY;
             if (terrainArea.tileLink) tileY = tileX; else tileY = terrainArea.selectTiles.y;
-            tileY = EditorGUILayout.IntSlider(tileY, 1, 25);
+            tileY = EditorGUILayout.IntSlider(tileY, 1, 32);
             terrainArea.selectTiles = new Int2(tileX, tileY);
             EditorGUILayout.EndHorizontal();
 

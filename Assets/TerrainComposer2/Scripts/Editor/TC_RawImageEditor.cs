@@ -30,7 +30,7 @@ namespace TerrainComposer2
             GUILayout.Space(25);
             Rect rect = GUILayoutUtility.GetLastRect();
 
-            float width = Screen.width - (rect.x * 2);
+            float width = TC_NodeWindow.window.position.width - (rect.x * 2);
             if (width > 768) width = 768;
             float min = (768 - width);
             if (min > 50) min = 50;

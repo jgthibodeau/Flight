@@ -24,6 +24,7 @@ namespace TerrainComposer2
         public Int2 totalHeightmapResolution, heightTexResolution;
 
         public List<TCUnityTerrain> terrains = new List<TCUnityTerrain>();
+        public TCUnityTerrain[,] terrainArray;
         public bool createTerrainTab = false;
         public bool active = true;
         public Color color = new Color(1.5f, 1.5f, 1.5f, 1.0f);
@@ -107,7 +108,25 @@ namespace TerrainComposer2
                 if (c == null) terrain.gameObject.AddComponent(t);
             }
         }
-        
+
+        // TODO
+        public void AssignTerrainArray()
+        {
+            bool create = false;
+            if (terrainArray == null) create = true;
+            else if (terrainArray.Length != tiles.x * tiles.y) create = true;
+
+            if (create)
+            {
+                terrainArray = new TCUnityTerrain[tiles.x, tiles.y];
+
+                int i = 0;
+                for (int y = 0; y < tiles.y; y++)
+                {
+                    for (int x = 0; x < tiles.x; x++) terrainArray[x, y] = terrains[i++];
+                }
+            }
+        }
         //void Start()
         //{
         //    // This is needed for custom terrain material to not turn black
@@ -158,6 +177,13 @@ namespace TerrainComposer2
             terrains.Clear();
         }
 
+        public void ResetTextureRTP(string texName)
+        {
+            for (int i = 0; i < terrains.Count; i++)
+            {
+                terrains[i].AssignTextureRTP(texName, null);
+            }
+        }
         public void ClearToOne()
         {
             int length = terrains.Count;
@@ -269,7 +295,15 @@ namespace TerrainComposer2
 
             return terrains[index].terrain;
         }
-        
+
+        public TCUnityTerrain GetTCUnityTerrainTile(int tileX, int tileZ)
+        {
+            if (tileX < 0 || tileX > tiles.x - 1 || tileZ < 0 || tileZ > tiles.y - 1) return null;
+            int index = (tileZ * tiles.x) + tileX;
+
+            return terrains[index];
+        }
+
         public void SetTerrainsActive(bool invert)
         {
             for (int i = 0; i < terrains.Count; ++i)
@@ -342,6 +376,7 @@ namespace TerrainComposer2
 
                     terrainObject = new GameObject();
                     terrainObject.transform.parent = transform;
+                    // terrainObject.transform.hideFlags = HideFlags.NotEditable;
                     terrain = (Terrain)terrainObject.AddComponent(typeof(Terrain));
                     terrainCollider = (TerrainCollider)terrainObject.AddComponent(typeof(TerrainCollider));
                     
@@ -413,6 +448,7 @@ namespace TerrainComposer2
             tcTerrain.rtHeight = null;
             tcTerrain.texHeight = null;
             tcTerrain.texColormap = null;
+            // tcTerrain.materialTemplate = null;
             DestroyImmediate(go2);
 
             return tcTerrain;

@@ -20,8 +20,7 @@ namespace TerrainComposer2
         [NonSerialized] public MeshTerrain currentMeshTerrain;
         public TC_TerrainArea currentTerrainArea;
         [NonSerialized] public TC_TerrainMeshArea currentMeshTerrainArea;
-        [NonSerialized] public ComputeBuffer layerGroupBuffer;
-
+        
         public TC_PreviewArea previewArea;
         public Rect area, totalArea;
         public Bounds totalTerrainBounds;
@@ -40,7 +39,6 @@ namespace TerrainComposer2
         public float progress;
         public bool showProgressBar;
         public int previewResolution;
-        [NonSerialized] public float resExpandBorderPercentage = 0.0625f;
         [NonSerialized] public int resExpandBorder;
         [NonSerialized] public float resExpandBorderSize;
 
@@ -99,8 +97,8 @@ namespace TerrainComposer2
             }
             else
             {
-                resExpandBorder = Mathf.RoundToInt((terrain.terrainData.heightmapResolution - 1) * resExpandBorderPercentage);
-                resExpandBorderSize = terrain.terrainData.size.x * resExpandBorderPercentage;
+                resExpandBorder = Mathf.RoundToInt((terrain.terrainData.heightmapResolution - 1) * TC_Settings.instance.resExpandBorderPercentage);
+                resExpandBorderSize = terrain.terrainData.size.x * TC_Settings.instance.resExpandBorderPercentage;
             }
 
             // Debug.Log(resExpandBorder);

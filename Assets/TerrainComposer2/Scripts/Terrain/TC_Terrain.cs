@@ -76,8 +76,11 @@ namespace TerrainComposer2
         public Color color_terrain = new Color(2.0f, 2.0f, 2.0f, 1.0f);
         public int copy_terrain = 0;
         public bool copy_terrain_settings = true;
+        public byte generateStatus;
 
         public Transform objectsParent;
+        public Vector3 newPos;
+        public bool updateTerrainPos;
 
         public bool detailSettingsFoldout;
         public bool splatSettingsFoldout;
@@ -172,7 +175,7 @@ namespace TerrainComposer2
 
         public void AddSplatTexture(int index)
         {
-            if (splatPrototypes.Count >= 8) { TC.AddMessage("TC2 supports generating maximum 8 splat textures."); Debug.Log("TC2 supports generating maximum 8 splat textures."); return; }
+            if (splatPrototypes.Count >= TC.splatLimit) { TC.AddMessage("TC2 supports generating maximum " + TC.splatLimit + " splat textures."); Debug.Log("TC2 supports generating maximum " + TC.splatLimit + " splat textures."); return; }
             splatPrototypes.Insert(index, new TC_SplatPrototype());
         }
 
@@ -219,7 +222,7 @@ namespace TerrainComposer2
 
         public void AddDetailPrototype(int detail_number)
         {
-            if (detailPrototypes.Count >= 8) { TC.AddMessage("TC2 supports generating maximum 8 grass textures."); Debug.Log("TC2 supports generating maximum 8 grass textures."); return; }
+            if (detailPrototypes.Count >= TC.grassLimit) { TC.AddMessage("TC2 supports generating maximum " + TC.grassLimit + " grass textures."); Debug.Log("TC2 supports generating maximum " + TC.grassLimit + " grass textures."); return; }
             detailPrototypes.Insert(detail_number, new TC_DetailPrototype());
         }
 
@@ -298,6 +301,7 @@ namespace TerrainComposer2
         public void GetResolutions()
         {
             if (terrain == null) return;
+            if (terrain.terrainData == null) return;
             heightmapResolution = terrain.terrainData.heightmapResolution;
             basemapResolution = terrain.terrainData.baseMapResolution;
             splatmapResolution = terrain.terrainData.alphamapResolution;
@@ -310,7 +314,7 @@ namespace TerrainComposer2
             if (!CheckValidUnityTerrain()) return;
 
             materialType = terrain.materialType;
-            materialTemplate = terrain.materialTemplate;
+            // materialTemplate = terrain.materialTemplate;
 
             basemapDistance = terrain.basemapDistance;
             castShadows = terrain.castShadows;
@@ -374,7 +378,7 @@ namespace TerrainComposer2
             terrain.legacySpecular = sTerrain.legacySpecular;
             terrain.reflectionProbeUsage = sTerrain.reflectionProbeUsage;
             terrain.materialType = sTerrain.materialType;
-            terrain.materialTemplate = sTerrain.materialTemplate;
+            // terrain.materialTemplate = sTerrain.materialTemplate;
             terrain.terrainData.thickness = sTerrain.thickness;
             terrain.basemapDistance = sTerrain.basemapDistance;
             terrain.castShadows = sTerrain.castShadows;
@@ -440,7 +444,7 @@ namespace TerrainComposer2
             
             for (int i = 0; i < sTerrain.splatPrototypes.Count; i++)
             {
-                if (splatPrototypesCleaned.Count >= 8) { tooManySplatsMessage = true; break; }
+                if (splatPrototypesCleaned.Count >= TC.splatLimit) { tooManySplatsMessage = true; break; }
 
                 TC_SplatPrototype s = sTerrain.splatPrototypes[i];
     
@@ -460,7 +464,7 @@ namespace TerrainComposer2
                 }
             }
 
-            if (tooManySplatsMessage) { TC.AddMessage("TC2 supports generating maximum 8 splat textures."); Debug.Log("TC2 supports generating maximum 8 splat textures."); }
+            if (tooManySplatsMessage) { TC.AddMessage("TC2 supports generating maximum " + TC.splatLimit+ " splat textures."); Debug.Log("TC2 supports generating maximum " + TC.splatLimit +" splat textures."); }
 
             terrain.terrainData.splatPrototypes = splatPrototypesCleaned.ToArray();
         }
@@ -574,7 +578,7 @@ namespace TerrainComposer2
 
             for (int i = 0; i < sTerrain.detailPrototypes.Count; i++)
             {
-                if (detailPrototypesCleaned.Count >= 8) { tooManyGrassMessage = true; break; }
+                if (detailPrototypesCleaned.Count >= TC.grassLimit) { tooManyGrassMessage = true; break; }
 
                 TC_DetailPrototype s = sTerrain.detailPrototypes[i];
                 DetailPrototype d = new DetailPrototype();
@@ -597,7 +601,7 @@ namespace TerrainComposer2
                 detailPrototypesCleaned.Add(d);
             }
 
-            if (tooManyGrassMessage) { TC.AddMessage("TC2 supports generating maximum 8 grass textures."); Debug.Log("TC2 supports generating maximum 8 grass textures."); }
+            if (tooManyGrassMessage) { TC.AddMessage("TC2 supports generating maximum " + TC.grassLimit + " grass textures."); Debug.Log("TC2 supports generating maximum " + TC.grassLimit + " grass textures."); }
 
             terrain.terrainData.detailPrototypes = detailPrototypesCleaned.ToArray();
         }

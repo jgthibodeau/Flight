@@ -32,7 +32,11 @@ namespace TerrainComposer2
 
             Rect rectPreview;
             bool isCulled = false;
-            if (selectItem.outputId == TC.colorOutput) rectPreview = TD.DrawNode(selectItem, pos, color, selectItem.color, ref isCulled, activeMulti, nodeFoldout, false, false);
+            if (selectItem.outputId == TC.colorOutput)
+            {
+                if (selectItem.texColor != null && selectItem.parentItem.itemList.Count == 1) rectPreview = TD.DrawNode(selectItem, pos, color, Color.white, ref isCulled, activeMulti, nodeFoldout, false, false);
+                else rectPreview = TD.DrawNode(selectItem, pos, color, selectItem.color, ref isCulled, activeMulti, nodeFoldout, false, false);
+            }
             else rectPreview = TD.DrawNode(selectItem, pos, color, Color.white, ref isCulled, activeMulti, nodeFoldout, false, !selectItem.splatCustom);
             if (isCulled || !nodeFoldout) return;
 
@@ -80,8 +84,7 @@ namespace TerrainComposer2
             if (selectItem.outputId != TC.colorOutput)
             {
                 Rect colorRect = new Rect(rectPreview.x + 0 * TD.scale, rectPreview.y +  0 * TD.scale, 60 * TD.scale, 16f * TD.scale);
-                GUI.color = selectItem.color;
-                GUI.color = new Color(GUI.color.r, GUI.color.g, GUI.color.b, 0.75f);
+                GUI.color = new Color(selectItem.color.r, selectItem.color.g, selectItem.color.b, 0.75f);
                 GUI.DrawTexture(colorRect, Texture2D.whiteTexture);
                 GUI.color = Color.white;
             }

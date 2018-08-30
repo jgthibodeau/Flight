@@ -14,8 +14,7 @@ namespace TerrainComposer2
         [NonSerialized] public TC_ItemBehaviour parentItem;
         static public event RepaintAction DoRepaint;
         public delegate void RepaintAction();
-
-
+        
         public float versionNumber = 0;
         public bool defaultPreset;
         public bool isLocked;
@@ -34,6 +33,10 @@ namespace TerrainComposer2
 
         public TexturePreview preview = new TexturePreview();
         public RenderTexture rtDisplay, rtPreview;
+        public RenderTexture rtPortal;
+        public int isPortalCount = 0;
+        public TC_ItemBehaviour portalNode;
+        public List<TC_ItemBehaviour> usedAsPortalList;
         
         public Method method;
 
@@ -149,6 +152,8 @@ namespace TerrainComposer2
 
         public virtual void OnDestroy()
         {
+            // RemovePortalNodes();
+            RemoveFromPortalNode();
             DisposeTextures();
             // Debug.Log("Destroy");  
             // TCGenerate.singleton.AutoGenerate();   
@@ -158,6 +163,7 @@ namespace TerrainComposer2
         {
             rtDisplay = null;
             TC_Compute.DisposeRenderTexture(ref rtPreview);
+            TC_Compute.DisposeRenderTexture(ref rtPortal);
         }
 
         void RemoveCloneText()
@@ -365,12 +371,51 @@ namespace TerrainComposer2
             newT.localScale = t.localScale;
             TC_ItemBehaviour item = newGo.GetComponent<TC_ItemBehaviour>();
 
+            item.usedAsPortalList = null;
+            item.isPortalCount = 0;
+
+            if (item.portalNode != null)
+            {
+                item.portalNode.usedAsPortalList.Add(item);
+                item.portalNode.isPortalCount++;
+            }
+            
             #if UNITY_EDITOR
                 UnityEditor.Selection.activeObject = newGo;
                 UnityEditor.Undo.RegisterCreatedObjectUndo(newGo, "Duplicate " + newGo.name);
             #endif
             
             return item;
+        }
+
+        public void RemovePortalNodes()
+        {
+            if (usedAsPortalList == null || usedAsPortalList.Count == 0) return;
+
+            for (int i = 0; i < usedAsPortalList.Count; i++)
+            {
+                usedAsPortalList[i].portalNode = null;
+            }
+            usedAsPortalList.Clear();
+        }
+
+        public void RemoveFromPortalNode()
+        {
+            if (portalNode == null) return;
+            if (portalNode.isPortalCount > 0)
+            {
+                portalNode.isPortalCount--;
+                portalNode.usedAsPortalList.Remove(this);
+                if (portalNode.isPortalCount == 0) TC_Compute.DisposeRenderTexture(ref portalNode.rtPortal);
+            }
+            else portalNode.isPortalCount = 0;
+        }
+
+        public void CopyTransform(TC_ItemBehaviour item)
+        {
+            t.position = item.t.position;
+            t.rotation = item.t.rotation;
+            t.localScale = item.t.localScale;
         }
 
         public virtual void GetItems(bool refresh, bool rebuildGlobalLists, bool resetTextures) { }

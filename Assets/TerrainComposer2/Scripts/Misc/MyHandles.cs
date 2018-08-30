@@ -34,7 +34,11 @@ public class MyHandles
         RMBRelease,
     };
 
+    #if UNITY_5_1 || UNITY_5_2 || UNITY_5_3 || UNITY_5_4 || UNITY_5_5
     public static Vector3 DragHandle(Vector3 position, float handleSize, Handles.DrawCapFunction capFunc, Color colorSelected, out DragHandleResult result)
+    #else
+        public static Vector3 DragHandle(Vector3 position, float handleSize, Handles.CapFunction capFunc, Color colorSelected, out DragHandleResult result)
+    #endif
     {
         int id = GUIUtility.GetControlID(s_DragHandleHash, FocusType.Passive);
         lastDragHandleID = id;
@@ -126,7 +130,11 @@ public class MyHandles
                     Handles.color = colorSelected;
 
                 Handles.matrix = Matrix4x4.identity;
+                #if UNITY_5_1 || UNITY_5_2 || UNITY_5_3 || UNITY_5_4 || UNITY_5_5
                 capFunc(id, screenPosition, Quaternion.Euler(0, 0, 0), handleSize);
+                #else
+                capFunc(id, screenPosition, Quaternion.Euler(0, 0, 0), handleSize, EventType.Repaint);
+                #endif
                 Handles.matrix = cachedMatrix;
 
                 Handles.color = currentColour;

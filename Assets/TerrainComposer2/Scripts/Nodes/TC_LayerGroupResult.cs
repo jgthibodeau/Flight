@@ -49,9 +49,7 @@ namespace TerrainComposer2
                             layer.ComputeItem(ref totalBuffer, ref layerMaskBuffer, seedTotal, i == firstActive);
                             if (totalBuffer != null) rtLeftPreview = layer.rtDisplay;
                         }
-
-                        TC_Area2D.current.layerGroupBuffer = totalBuffer; // Portal
-
+                        
                         compute.DisposeBuffer(ref layerMaskBuffer);
                     }
                     else
@@ -67,7 +65,6 @@ namespace TerrainComposer2
                                 rtRightPreview = layer.rtDisplay;
                                 compute.RunComputeObjectMethod(this, layer, totalBuffer, ref layerBuffer, layerMaskBuffer, rtPreview, ref rtsPreview[even++ % 2], ref rtLeftPreview, rtRightPreview);
                             }
-                            TC_Area2D.current.layerGroupBuffer = totalBuffer;
                         }
                         compute.DisposeBuffer(ref layerMaskBuffer);
                     }
@@ -82,8 +79,6 @@ namespace TerrainComposer2
                     {
                         layerMaskBuffer = layerGroup.ComputeSingle(ref totalBuffer, seedTotal, i == firstActive);
                         if (totalBuffer != null) rtLeftPreview = layerGroup.rtDisplay;
-                        
-                        TC_Area2D.current.layerGroupBuffer = totalBuffer;
 
                         compute.DisposeBuffer(ref layerMaskBuffer);
                     }
@@ -99,7 +94,6 @@ namespace TerrainComposer2
                                 rtRightPreview = layerGroup.rtDisplay;
                                 compute.RunComputeObjectMethod(this, layerGroup, totalBuffer, ref layerBuffer, layerMaskBuffer, rtPreview, ref rtsPreview[even++ % 2], ref rtLeftPreview, rtRightPreview);
                             }
-                            TC_Area2D.current.layerGroupBuffer = totalBuffer;
                         }
                         compute.DisposeBuffer(ref layerMaskBuffer);
                     }

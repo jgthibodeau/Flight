@@ -130,8 +130,13 @@ namespace TerrainComposer2
             EditorGUILayout.EndHorizontal();
 
             GUILayout.Space(5);
+            // TD.DrawSpacer();
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Zoom", GUILayout.Width(50));
             mt.textureSize = (int)EditorGUILayout.Slider(mt.textureSize, 25, 150);
-            GUILayout.Space(5);
+            EditorGUILayout.EndHorizontal();
+            //GUILayout.Space(5);
+            TD.DrawSpacer();
 
             if (mt.drawSplat) { DrawSplat(); GUILayout.Space(15); }
             if (mt.drawGrass) DrawGrass();

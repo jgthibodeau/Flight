@@ -39,13 +39,13 @@ public class Burnable : MonoBehaviour {
 		currentFireOutTime = fireOutTime;
 		fireDamage = damage;
 
-		fire.SetActive (true);
+        fire.GetComponent<ParticleSystem>().Play();
 	}
 
 	public void Extinguish() {
 		onFire = false;
 		currentFireOutTime = 0;
-
-		fire.SetActive (false);
-	}
+        
+        fire.GetComponent<ParticleSystem>().Stop();
+    }
 }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 public class DragonAnimator : MonoBehaviour {
 	public float FadeLength;
 	public bool Flapping, Grounded, WingsOut, Walking, Hopping, InWater, Flame, Attack, Healing, Boosting, BoostTriggered;
+    private bool AnimationFlapping;
 	private bool Attacking;
 	public float FlapSpeed;
 	public float MoveSpeed;
@@ -43,6 +44,10 @@ public class DragonAnimator : MonoBehaviour {
 	private Vector3 previousRightWingScale;
 	private bool wingsReset = true;
 
+    public GameObject tailBase;
+    public Vector3 defaultRotation;
+    public Vector3 maxTailAngle;//?
+
 	// Use this for initialization
 	void Start () {
 		animator = GetComponent<Animator> ();
@@ -71,14 +76,26 @@ public class DragonAnimator : MonoBehaviour {
 		animator.SetFloat ("RunSpeed", RunScale * MoveSpeed);
 		animator.SetFloat ("FlapSpeed", FlapSpeed);
 
+        AnimationFlapping |= Flapping;
+
 		if (manuallyAdjustWings) {
-			if (WingsOut && !Grounded && !Flapping && !Boosting) {
+			if (WingsOut && !Grounded  && !IsFlapping() && !Boosting) {
 				UpdateWings ();
 			} else {
 				ResetWings ();
 			}
 		}
+
+        if (!Grounded)
+        {
+            UpdateTail ();
+        }
 	}
+
+    bool IsFlapping()
+    {
+        return Flapping || animator.GetCurrentAnimatorStateInfo(0).IsName("Flap") || animator.GetCurrentAnimatorStateInfo(0).IsName("Back Flap");
+    }
 
 	void ChooseIdle(){
 //		idle = "idle" + Random.Range (1, 3);
@@ -105,11 +122,15 @@ public class DragonAnimator : MonoBehaviour {
 			wingsReset = false;
 		}
 
-		if (Flapping) {
-			UpdateWingsFlap ();
-		} else {
-			UpdateWingsGlide ();
-		}
+        //if (Flapping) {
+        //	UpdateWingsFlap ();
+        //} else {
+        //Debug.Log(AnimationFlapping);
+        //if (!AnimationFlapping)
+        //{
+            UpdateWingsGlide();
+        //}
+		//}
 
 		float lerpAmount = Time.deltaTime * lerpSpeed;
 
@@ -198,7 +219,13 @@ public class DragonAnimator : MonoBehaviour {
 		desiredRightWingRotation.x += flapRotateScale * rollRight;
 	}
 
-	public AudioSource audioSource;
+    void UpdateTail()
+    {
+        //TODO
+    }
+
+
+    public AudioSource audioSource;
 
 	public AudioClip flapAudioClip;
 	public float flapVolume = 1f;

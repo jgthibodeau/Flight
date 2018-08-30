@@ -23,6 +23,10 @@ namespace TerrainComposer2
         public bool debugMode = true;
         public bool hideTerrainGroup = true;
         public bool useTCRuntime = false;
+        public float defaultTerrainHeight = 1000;
+        public Vector3 generateOffset;
+        public float resExpandBorderPercentage = 0.0625f;
+
         public bool showFps = true;
         public bool hideMenuBar = false;
         public Transform dustbinT;
@@ -48,6 +52,11 @@ namespace TerrainComposer2
 
         public List<TC_RawImage> rawFiles = new List<TC_RawImage>();
         public List<TC_Image> imageList = new List<TC_Image>();
+
+        public Int2 importTiles = new Int2(1, 1);
+        public enum ImportSource { TC2_TerrainArea, TerrainData_Files };
+        public ImportSource importSource;
+        public List<TerrainData> importTerrains = new List<TerrainData>();
 
         public bool isRTPDetected;
         public bool autoNormalmapRTP = true, autoColormapRTP = true;
@@ -202,52 +211,61 @@ namespace TerrainComposer2
         public Vector3 scale;
         public float positionYOld;
 
-        public void CopySpecial(TC_Node node)
+        public void CopySpecial(TC_ItemBehaviour item)
         {
-            posOffset = node.posOffset;
-            
-            bool lockPosParent = node.lockPosParent;
+            TC_Node node = item as TC_Node;
 
-            if (node.lockTransform || lockPosParent)
+            bool maskNode = false;
+
+            if (node != null)
+            {
+                if (node.nodeType == NodeGroupType.Mask) maskNode = true;
+            }
+
+            posOffset = item.posOffset;
+
+            bool lockPosParent = item.lockPosParent;
+
+            if (item.lockTransform || lockPosParent)
             {
                 Vector3 posTemp = Vector3.zero;
                 Quaternion rotTemp;
                 Vector3 scaleTemp = Vector3.zero;
 
-                if (!(node.lockPosX || lockPosParent)) posTemp.x = node.t.position.x; else posTemp.x = position.x;
-                if (!(node.lockPosY || lockPosParent)) posTemp.y = node.posY * scale.y; else posTemp.y = position.y;
-                if (!(node.lockPosZ || lockPosParent)) posTemp.z = node.t.position.z; else posTemp.z = position.z;
+                if (!(item.lockPosX || lockPosParent)) posTemp.x = item.t.position.x; else posTemp.x = position.x;
+                if (!(item.lockPosY || lockPosParent)) posTemp.y = item.posY * scale.y; else posTemp.y = position.y;
+                if (!(item.lockPosZ || lockPosParent)) posTemp.z = item.t.position.z; else posTemp.z = position.z;
 
-                if (!(node.lockRotY && node.lockTransform)) rotTemp = Quaternion.Euler(0, node.t.eulerAngles.y, 0); else rotTemp = rotation;
+                if (!(item.lockRotY && item.lockTransform)) rotTemp = Quaternion.Euler(0, item.t.eulerAngles.y, 0); else rotTemp = rotation;
 
-                if (!(node.lockScaleX && node.lockTransform)) scaleTemp.x = node.t.lossyScale.x; else scaleTemp.x = scale.x;
-                if (!(node.lockScaleY && node.lockTransform))
+                if (!(item.lockScaleX && item.lockTransform)) scaleTemp.x = item.t.lossyScale.x; else scaleTemp.x = scale.x;
+                if (!(item.lockScaleY && item.lockTransform))
                 {
-                    if (node.nodeType == NodeGroupType.Mask) scaleTemp.y = node.t.localScale.y; else scaleTemp.y = node.t.lossyScale.y * node.opacity;
+                    if (maskNode) scaleTemp.y = item.t.localScale.y; else scaleTemp.y = item.t.lossyScale.y * item.opacity;
                 }
                 else scaleTemp.y = scale.y;
-                if (!(node.lockScaleZ && node.lockTransform)) scaleTemp.z = node.t.lossyScale.z; else scaleTemp.z = scale.z;
-                
+                if (!(item.lockScaleZ && item.lockTransform)) scaleTemp.z = item.t.lossyScale.z; else scaleTemp.z = scale.z;
+
                 position = posTemp;
                 rotation = rotTemp;
                 scale = scaleTemp;
 
-                if (node.t.position != position) node.t.position = position;
-                if (node.t.rotation != rotation) node.t.rotation = rotation;
-                
-                node.t.hasChanged = false;
+                if (item.t.position != position) item.t.position = position;
+                if (item.t.rotation != rotation) item.t.rotation = rotation;
+
+                item.t.hasChanged = false;
             }
             else
             {
-                rotation = Quaternion.Euler(0, node.t.eulerAngles.y, 0);
-                scale.x = node.t.lossyScale.x;
-                scale.z = node.t.lossyScale.z;
+                rotation = Quaternion.Euler(0, item.t.eulerAngles.y, 0);
+                scale.x = item.t.lossyScale.x;
+                scale.z = item.t.lossyScale.z;
 
-                if (node.nodeType == NodeGroupType.Mask) scale.y = node.t.localScale.y; else scale.y = node.t.lossyScale.y;
-                    
-                scale.y *= node.opacity;
-                position = node.t.position;
-                position.y = node.posY * scale.y;
+                if (maskNode) scale.y = item.t.localScale.y; else scale.y = item.t.lossyScale.y;
+
+                scale.y *= item.opacity;
+                position = item.t.position;
+                position.y = item.posY * scale.y;
             }
 
             // if (scale.x == 0) scale.x = 1;

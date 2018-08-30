@@ -5,9 +5,12 @@ using System.Collections.Generic;
 namespace BreadcrumbAi{
 	[System.Serializable]
 	public class Ai : MonoBehaviour {
-		
-		#region Editor Variables
-		// *****EDITOR VARIABLES***** //
+
+        #region Editor Variables
+        // *****EDITOR VARIABLES***** //
+        public Collider collider;
+        public Pickupable pickupable;
+
 		public bool _CanFollowPlayer, _CanFollowBreadcrumbs, _CanFollowAi, _CanWander, _CanPatrol,
 					_CanIgnoreAi, // coming soon
 					_CanWanderAnywhere,
@@ -52,7 +55,8 @@ namespace BreadcrumbAi{
 			IsFollowingAi,
 			IsFollowingAiTierTwo,
 			IsWandering,
-			IsPatrolling};
+			IsPatrolling,
+            IsPanicking};
 		public MOVEMENT_STATE moveState = MOVEMENT_STATE.IsIdle;
 		
 		public enum ATTACK_STATE{
@@ -101,7 +105,14 @@ namespace BreadcrumbAi{
 			StartCoroutine(this.Ai_Lists());
 			StartCoroutine(this.Ai_Layers());
 
-			prevPosition = GetComponent<Rigidbody> ().position;
+            if (collider == null)
+            {
+                collider = GetComponentInChildren<Collider>();
+            }
+
+            pickupable = GetComponentInChildren<Pickupable>();
+
+            prevPosition = GetComponent<Rigidbody> ().position;
 		}
 	
 		void Update(){
@@ -112,9 +123,15 @@ namespace BreadcrumbAi{
 		}
 	
 		void FixedUpdate (){
-			Ai_Controller(); 	// Controls Ai Movement & Attack States
-			Ai_Avoidance(~(breadcrumbLayer | enemyLayer | playerLayer | waypointLayer));	// Controls Ai wall avoidance
-			Ai_Hover();
+            if (!pickupable.IsHeld())
+            {
+                Ai_Controller();    // Controls Ai Movement & Attack States
+                Ai_Avoidance(~(breadcrumbLayer | enemyLayer | playerLayer | waypointLayer));    // Controls Ai wall avoidance
+                Ai_Hover();
+            } else
+            {
+                moveState = MOVEMENT_STATE.IsPanicking;
+            }
 
 			Vector3 position = GetComponent<Rigidbody> ().position;
 			currentSpeed = Vector3.Distance (position, prevPosition) / Time.fixedDeltaTime;
@@ -312,6 +329,7 @@ namespace BreadcrumbAi{
 				} else {
 					moveState = MOVEMENT_STATE.IsIdle;
 				}
+                Debug.DrawLine(transform.position, wanderPos, Color.red);
 			}
 		}
 
@@ -346,7 +364,7 @@ namespace BreadcrumbAi{
 				} 
 				
 				// This raycast helps avoid other Ai that are directly infront
-				if(Physics.Raycast(transform.position,transform.forward, out hit, transform.GetComponent<Collider>().bounds.extents.z + 0.1f)){
+				if(Physics.Raycast(transform.position,transform.forward, out hit, collider.bounds.extents.z + 0.1f)){
 					if(hit.collider.tag == AiManager.enemyString){
 						GetComponent<Rigidbody>().AddForce(transform.right * avoidSpeed);
 						_IsAvoiding = true;
@@ -401,8 +419,8 @@ namespace BreadcrumbAi{
 		// This checks if the Ai is grounded, collider is required on the GameObject that has this script
 		// TODO: add customizable collider in case users have different collider gameobject.
 		public bool IsGrounded(){
-			if(GetComponent<Collider>() != null){
-				return Physics.Raycast(transform.position, -Vector3.up, GetComponent<Collider>().bounds.extents.y + 0.1f);
+			if(collider != null){
+				return Physics.Raycast(transform.position, -Vector3.up, collider.bounds.extents.y + 0.1f);
 			} else {
 				return true;
 			}
