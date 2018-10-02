@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class Quality : MonoBehaviour {
 	public Dropdown qualityDropdown;
@@ -32,20 +33,42 @@ public class Quality : MonoBehaviour {
 		qualityDropdown.value = QualitySettings.GetQualityLevel ();
 
 		reflectionToggle.isOn = doReflection;
-		SetReflections (doReflection);
-
 		fogToggle.isOn = doFog;
-		SetFog (doFog);
-
 		drawDistanceSlider.value = drawDistance;
-		SetDrawDistance (drawDistance);
-
 		foliageDistanceSlider.value = foliageDistance;
-		SetFoliageDistance (foliageDistance);
-
 		grassDensitySlider.value = grassDensity;
-		SetGrassDensity (grassDensity);
-	}
+
+        RefreshComponents();
+        ResetAll();
+    }
+    
+    void RefreshComponents()
+    {
+        if (cameraQuality == null)
+        {
+            Debug.Log("refreshing cameraQuality");
+            cameraQuality = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CameraQuality>();
+        }
+
+        while (parentTerrain == null)
+        {
+            Debug.Log("refreshing parentTerrain");
+            parentTerrain = GameObject.FindGameObjectWithTag("MainTerrain");
+        }
+
+    }
+
+    private void ResetAll()
+    {
+        Debug.Log("Reseting quality...");
+        RefreshComponents();
+
+        SetReflections(doReflection);
+        SetFog(doFog);
+        SetDrawDistance(drawDistance);
+        SetFoliageDistance(foliageDistance);
+        SetGrassDensity(grassDensity);
+    }
 
 	public void SetQuality (int newQuality) {
 		QualitySettings.SetQualityLevel (newQuality, true);
@@ -58,18 +81,26 @@ public class Quality : MonoBehaviour {
 	}
 
 	public void SetFog(bool newFog) {
-		doFog = newFog;
+        RefreshComponents();
+
+        doFog = newFog;
 		cameraQuality.SetFog(newFog);
 	}
 
-	public void SetDrawDistance (float newDrawDistance) {
-		drawDistance = newDrawDistance;
-		cameraQuality.SetDrawDistance (newDrawDistance);
+	public void SetDrawDistance (float newDrawDistance)
+    {
+        RefreshComponents();
+
+        drawDistance = newDrawDistance;
+		cameraQuality.SetDrawDistance (newDrawDistance, parentTerrain);
 //		PlayerPrefs.SetFloat (DRAW_DISTANCE, newDrawDistance);
 	}
 
-	public void SetFoliageDistance (float newFoliageDistance) {
-		foliageDistance = newFoliageDistance;
+	public void SetFoliageDistance (float newFoliageDistance)
+    {
+        RefreshComponents();
+
+        foliageDistance = newFoliageDistance;
 		Terrain[] terrains = parentTerrain.GetComponentsInChildren<Terrain> ();
 		foreach (Terrain terrain in terrains) {
 			terrain.detailObjectDistance = newFoliageDistance;
@@ -77,8 +108,11 @@ public class Quality : MonoBehaviour {
 //		PlayerPrefs.SetFloat (FOLIAGE_DISTANCE, newFoliageDistance);
 	}
 
-	public void SetGrassDensity (float newGrassDensity) {
-		grassDensity = newGrassDensity;
+	public void SetGrassDensity (float newGrassDensity)
+    {
+        RefreshComponents();
+
+        grassDensity = newGrassDensity;
 		Terrain[] terrains = parentTerrain.GetComponentsInChildren<Terrain> ();
 		foreach (Terrain terrain in terrains) {
 			terrain.detailObjectDensity = newGrassDensity;

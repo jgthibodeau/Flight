@@ -83,10 +83,13 @@ public class Fire : MonoBehaviour {
 
     public void FanFlame(float amount)
     {
-        killScript.remainingLifeTime += amount;
-        if (killScript.remainingLifeTime > maxLifetime)
+        if (!killScript.IsDying())
         {
-            killScript.remainingLifeTime = maxLifetime;
+            killScript.remainingLifeTime += amount;
+            if (killScript.remainingLifeTime > maxLifetime)
+            {
+                killScript.remainingLifeTime = maxLifetime;
+            }
         }
     }
 

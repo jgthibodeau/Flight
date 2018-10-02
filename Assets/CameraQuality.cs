@@ -13,7 +13,8 @@ public class CameraQuality : MonoBehaviour {
 	void Start () {
 	}
 	
-	public void SetDrawDistance(float percent){
+	public void SetDrawDistance(float percent, GameObject parentTerrain)
+    {
 		drawDistance = percent;
 		float newFarClip = minFarClip + (maxFarClip - minFarClip) * percent;
 //		cameras = GetComponentsInChildren<Camera> ();
@@ -23,7 +24,17 @@ public class CameraQuality : MonoBehaviour {
 
 		float newFog = minFog - (minFog - maxFog) * percent;
 		lSky.unityFogDensity.inputValue = newFog;
-	}
+        
+        Terrain[] terrains = parentTerrain.GetComponentsInChildren<Terrain>();
+        foreach (Terrain terrain in terrains)
+        {
+            TreeTerrain treeTerrain = terrain.GetComponent<TreeTerrain>();
+            if (treeTerrain != null)
+            {
+                treeTerrain.SetTreeDistance(newFarClip);
+            }
+        }
+    }
 
 	public float GetDrawDistance(){
 		return drawDistance;

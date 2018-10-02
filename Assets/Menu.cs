@@ -6,13 +6,26 @@ using UnityEngine.UI;
 public class Menu : MonoBehaviour {
 	public Menu previous;
 	public Selectable firstSelected;
+    public bool hideOnStart = true;
+
+    void Start()
+    {
+        //if (hideOnStart)
+        //{
+        //    Hide();
+        //}
+    }
 
 	private void Show() {
 		this.gameObject.SetActive (true);
-		firstSelected.Select ();
+        if (firstSelected != null)
+        {
+            firstSelected.Select();
+        }
 	}
 
 	public void Show(Menu current) {
+        Debug.Log("Showing " + this.gameObject.name);
 		previous = current;
 		if (previous != null) {
 			previous.Hide ();
@@ -27,7 +40,9 @@ public class Menu : MonoBehaviour {
 		}
 	}
 
-	public void Hide(){
-		this.gameObject.SetActive (false);
+	public void Hide()
+    {
+        Debug.Log("Hiding " + this.gameObject.name);
+        this.gameObject.SetActive (false);
 	}
 }

@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 //[ExecuteInEditMode]
 [RequireComponent(typeof(GamepadButtons))]
 public class SetControlButtons : MonoBehaviour {
 	public GameObject inputMappingPrefab;
-	public GameObject keyboardMenu;
-	public GameObject gamepadMenu;
+    public GameObject keyboardMenu;
+    public Transform keyboardContent;
+    public GameObject gamepadMenu;
+    public Transform gamepadContent;
 
-	private GamepadButtons gamepadButtons;
+    private GamepadButtons gamepadButtons;
 
 	// Use this for initialization
 	void Start () {
@@ -27,10 +30,9 @@ public class SetControlButtons : MonoBehaviour {
 
 	void ResetKeyboard(){
 		Debug.Log ("reseting keyboard");
-		Transform content = keyboardMenu.transform.Find ("Scroll View/Viewport/Content");
-		int childCount = content.childCount;
+		int childCount = keyboardContent.childCount;
 		for (int i = 0; i < childCount; i++) {
-			GameObject.Destroy (content.GetChild (0).gameObject);
+			GameObject.Destroy (keyboardContent.GetChild (0).gameObject);
 		}
 
 		//add an instance of inputMappingPrefab for each axis
@@ -39,7 +41,12 @@ public class SetControlButtons : MonoBehaviour {
 		for (int i=0; i<keyboard.axes.Count; i++) {
 			TeamUtility.IO.AxisConfiguration keyboardAxis = keyboard.axes [i];
 
-			bool isAxis = keyboardAxis.type == TeamUtility.IO.InputType.AnalogAxis ||
+            if (!keyboardAxis.rebindable)
+            {
+                continue;
+            }
+
+            bool isAxis = keyboardAxis.type == TeamUtility.IO.InputType.AnalogAxis ||
 			            keyboardAxis.type == TeamUtility.IO.InputType.DigitalAxis ||
 			            keyboardAxis.type == TeamUtility.IO.InputType.AnalogAxis ||
 			            keyboardAxis.type == TeamUtility.IO.InputType.RemoteAxis;
@@ -50,7 +57,7 @@ public class SetControlButtons : MonoBehaviour {
 				string[] descriptionTokens = keyboardAxis.description.Split('%');
 
 				InstanceKeyMapping (
-					content,
+                    keyboardContent,
 					keyboard.name,
 					keyboardAxis.name,
 					descriptionTokens [0] + descriptionTokens [1],
@@ -66,7 +73,7 @@ public class SetControlButtons : MonoBehaviour {
 
 				if (doubleAxis) {
 					InstanceKeyMapping (
-						content,
+                        keyboardContent,
 						keyboard.name,
 						keyboardAxis.name,
 						descriptionTokens [0] + descriptionTokens [2],
@@ -82,7 +89,7 @@ public class SetControlButtons : MonoBehaviour {
 				}
 			} else {
 				InstanceKeyMapping (
-					content,
+                    keyboardContent,
 					keyboard.name,
 					keyboardAxis.name,
 					keyboardAxis.description,
@@ -101,10 +108,9 @@ public class SetControlButtons : MonoBehaviour {
 
 	void ResetGamepad(){
 		Debug.Log ("reseting gamepad");
-		Transform content = gamepadMenu.transform.Find ("Scroll View/Viewport/Content");
-		int childCount = content.childCount;
+		int childCount = gamepadContent.childCount;
 		for (int i = 0; i < childCount; i++) {
-			GameObject.Destroy (content.GetChild (0).gameObject);
+			GameObject.Destroy (gamepadContent.GetChild (0).gameObject);
 		}
 
 		//add an instance of inputMappingPrefab for each axis
@@ -112,6 +118,11 @@ public class SetControlButtons : MonoBehaviour {
 
 		for (int i=0; i<gamepad.axes.Count; i++) {
 			TeamUtility.IO.AxisConfiguration gamepadAxis = gamepad.axes [i];
+
+            if (!gamepadAxis.rebindable)
+            {
+                continue;
+            }
 
 			bool isAxis = gamepadAxis.type == TeamUtility.IO.InputType.AnalogAxis ||
 				gamepadAxis.type == TeamUtility.IO.InputType.DigitalAxis ||
@@ -121,7 +132,7 @@ public class SetControlButtons : MonoBehaviour {
 
 			if (isAxis) {
 				InstanceKeyMapping (
-					content,
+                    gamepadContent,
 					gamepad.name,
 					gamepadAxis.name,
 					gamepadAxis.description,
@@ -136,7 +147,7 @@ public class SetControlButtons : MonoBehaviour {
 				);
 			} else {
 				InstanceKeyMapping (
-					content,
+                    gamepadContent,
 					gamepad.name,
 					gamepadAxis.name,
 					gamepadAxis.description,
@@ -167,9 +178,9 @@ public class SetControlButtons : MonoBehaviour {
 		bool invert,
 		TeamUtility.IO.Examples.RebindInput.RebindType rebindType
 	){
-		GameObject inputMapping = GameObject.Instantiate (inputMappingPrefab);
+		GameObject inputMapping = GameObject.Instantiate (inputMappingPrefab, parent);
+        inputMapping.name = "Input - " + configName + " " + axisName;
 		Transform inputMappingTransform = inputMapping.transform;
-		inputMappingTransform.parent = parent;
 
 		Transform descriptionTransform = inputMappingTransform.Find ("Name/Name");
 		Transform inputTransform = inputMappingTransform.Find ("Input/Input");
@@ -177,9 +188,9 @@ public class SetControlButtons : MonoBehaviour {
 		Transform invertTransform = inputMappingTransform.Find ("Invert/Invert");
 
 		//names and keys
-		descriptionTransform.GetComponentInChildren<Text> ().text = descriptionText;
-		inputTransform.GetComponentInChildren<Text> ().text = inputText;
-		altTransform.GetComponentInChildren<Text> ().text = altText;
+		descriptionTransform.GetComponentInChildren<TextMeshProUGUI> ().text = descriptionText;
+		inputTransform.GetComponentInChildren<TextMeshProUGUI> ().text = inputText;
+		altTransform.GetComponentInChildren<TextMeshProUGUI> ().text = altText;
 
 		//invert
 		if (allowInvert) {

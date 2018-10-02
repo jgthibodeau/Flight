@@ -4,11 +4,14 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class FireBar : MonoBehaviour {
-	public Image image;
+	public Image[] images;
 	public FlameBreath breath;
 
 	// Update is called once per frame
 	void Update () {
-		image.fillAmount = breath.Percentage ();
+        foreach (Image img in images)
+        {
+            img.fillAmount = breath.Percentage();
+        }
 	}
 }

@@ -9,6 +9,8 @@ public class Health : MonoBehaviour, IHittable {
 
     public GameObject deathParticles;
     public GameObject spawnOnDeath;
+    //public bool keepDeathRotation;
+    //public bool keepDeathScale;
     public Vector3 minSpawnForce = new Vector3 (-1, 1, -1);
     public Vector3 maxSpawnForce = new Vector3(1, 2, 1);
 
@@ -60,23 +62,59 @@ public class Health : MonoBehaviour, IHittable {
 	public void Kill() {
 		Debug.Log ("Killed " + gameObject);
 
-        SpawnDeathObject();
+        foreach(Collider c in GetComponentsInChildren<Collider>())
+        {
+            c.enabled = false;
+        }
 
-        GameObject.Destroy (gameObject);
-	}
+        //StartCoroutine("KillAndSpawn");
+        GameObject.Destroy(gameObject);
+
+        SpawnDeathObject();
+    }
+
+    IEnumerator KillAndSpawn()
+    {
+        yield return null;
+        Debug.Break();
+        yield return null;
+        Debug.Break();
+
+        GameObject.Destroy(gameObject);
+
+        SpawnDeathObject();
+    }
 
     public void SpawnDeathObject()
     {
-        GameObject inst = GameObject.Instantiate(spawnOnDeath, transform.position + Vector3.up * 0.1f, transform.rotation);
-        Rigidbody[] rbs = inst.GetComponentsInChildren<Rigidbody>();
-        foreach (Rigidbody rb in rbs)
+        if (spawnOnDeath == null)
         {
-            Vector3 force = new Vector3(
-                Random.Range(minSpawnForce.x, maxSpawnForce.x),
-                Random.Range(minSpawnForce.y, maxSpawnForce.y),
-                Random.Range(minSpawnForce.z, maxSpawnForce.z)
-                );
-            rb.AddForce(force);
+            return;
+        }
+
+        GameObject inst = GameObject.Instantiate(spawnOnDeath, transform.position + Vector3.up * 0.1f, transform.rotation);
+
+        if (minSpawnForce.magnitude > 0 && maxSpawnForce.magnitude > 0)
+        {
+            Rigidbody[] rbs = inst.GetComponentsInChildren<Rigidbody>();
+            foreach (Rigidbody rb in rbs)
+            {
+                Vector3 force = new Vector3(
+                    Random.Range(minSpawnForce.x, maxSpawnForce.x),
+                    Random.Range(minSpawnForce.y, maxSpawnForce.y),
+                    Random.Range(minSpawnForce.z, maxSpawnForce.z)
+                    );
+                rb.AddForce(force);
+            }
+        }
+
+        Burnable burnable = GetComponent<Burnable>();
+        if (burnable != null && burnable.onFire)
+        {
+            foreach(Burnable deathBurnable in inst.GetComponentsInChildren<Burnable>())
+            {
+                deathBurnable.SetOnFire(burnable.fireDamage);
+            }
         }
     }
 

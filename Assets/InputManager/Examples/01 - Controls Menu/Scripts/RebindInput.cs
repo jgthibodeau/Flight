@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 using System.Collections;
+using TMPro;
 
 namespace TeamUtility.IO.Examples
 {
@@ -24,7 +25,7 @@ namespace TeamUtility.IO.Examples
 
 		[SerializeField]
 		[FormerlySerializedAs("m_keyDescription")]
-		public Text _keyDescription;
+		public TextMeshProUGUI _keyDescription;
 
 		[SerializeField]
 		[FormerlySerializedAs("m_inputConfigName")]
@@ -80,7 +81,7 @@ namespace TeamUtility.IO.Examples
 		{
 			_image = GetComponent<Image>();
 			_image.overrideSprite = _normalState;
-			InitializeAxisConfig();
+			//InitializeAxisConfig();
 			
 			//	The axis config needs to be reinitialized because loading can invalidate
 			//	the input configurations
@@ -98,8 +99,10 @@ namespace TeamUtility.IO.Examples
 		}
 		
 		public void InitializeAxisConfig()
-		{
-			_axisConfig = InputManager.GetAxisConfiguration(_inputConfigName, _axisConfigName);
+        {
+            //Debug.Log(this.transform.parent.parent.gameObject);
+            //Debug.Log("Initializing axis config for " + _inputConfigName + " " + _axisConfigName);
+            _axisConfig = InputManager.GetAxisConfiguration(_inputConfigName, _axisConfigName);
 			if(_axisConfig != null)
 			{
 				if (_rebindType == RebindType.Keyboard) {

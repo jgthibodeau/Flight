@@ -1089,8 +1089,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   invincible: 0
-  maxHealth: 100
-  currentHealth: 100
+  maxHealth: 300
+  currentHealth: 300
   deathParticles: {fileID: 0}
   spawnOnDeath: {fileID: 1125269442124082, guid: dd7e0226db10ce043898615999edff47,
     type: 2}
@@ -4765,13 +4765,13 @@ ParticleSystem:
       type: 0
       properties: 0
   LightsModule:
-    enabled: 0
-    ratio: 0
-    light: {fileID: 0}
+    enabled: 1
+    ratio: 0.5
+    light: {fileID: 108064351222898016, guid: 8d4eae95c15365444be5727d079804b1, type: 2}
     randomDistribution: 1
     color: 1
     range: 1
-    intensity: 1
+    intensity: 0
     rangeCurve:
       serializedVersion: 2
       minMaxState: 0
@@ -4878,7 +4878,7 @@ ParticleSystem:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-    maxLights: 20
+    maxLights: 3
   TrailModule:
     enabled: 0
     mode: 0

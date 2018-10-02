@@ -43,7 +43,7 @@ public class Cloud : MonoBehaviour {
 		//move cloud
 		transform.position += speed * Time.deltaTime;
 
-		Vector3 playerPos = Util.RigidBodyPosition (player.GetComponent<Rigidbody> ());
+        Vector3 playerPos = player.transform.position;
 		if (Vector3.Distance (playerPos, transform.position) < toggleDistance) {
 			if (!colliders.activeSelf) {
 				colliders.gameObject.SetActive (true);

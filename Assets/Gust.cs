@@ -24,24 +24,19 @@ public class Gust : MonoBehaviour {
         killScript = GetComponent<Kill>();
 		currentScale = minScale;
 		transform.localScale = new Vector3 (currentScale, currentScale, currentScale);
-	}
+
+        Vector3 movementDir = transform.forward * moveSpeed.z + transform.right * moveSpeed.x + transform.up * moveSpeed.y;
+        GetComponent<Rigidbody>().velocity += movementDir;
+    }
 
     // Update is called once per frame
     void Update()
     {
-        Vector3 movementDir = transform.forward * moveSpeed.z + transform.right * moveSpeed.x + transform.up * moveSpeed.y;
-        transform.position += movementDir * Time.deltaTime;
-
         currentScale += growSpeed * Time.deltaTime;
         if (currentScale < maxScale)
         {
             transform.localScale = new Vector3(currentScale, currentScale, currentScale);
-
         }
-        //else
-        //{
-        //    GameObject.Destroy(gameObject);
-        //}
     }
 
     void OnTriggerStay(Collider other)
@@ -51,12 +46,12 @@ public class Gust : MonoBehaviour {
             return;
         }
 
-        if (isFire(other.gameObject))
+        Fire fire;
+        Burnable burnable;
+        if (isFire(other.gameObject, out fire, out burnable))
         {
-            if (canCollide(other.gameObject))
-            {
-                other.gameObject.GetComponent<Fire>().FanFlame(fanFlameAmount);
-            }
+            FanFire(fire);
+            FanFire(burnable);
         }
         else
         {
@@ -66,16 +61,36 @@ public class Gust : MonoBehaviour {
                 ApplyForce(otherRb);
             }
         }
-
-        if (!collidedObjects.Contains(other.gameObject))
-        {
-            
-        }
 	}
 
-    private bool isFire(GameObject go)
+    private void FanFire(Fire fire)
     {
-        return (go.tag == "Fire");
+        if (fire != null && canCollide(fire.gameObject))
+        {
+            fire.FanFlame(fanFlameAmount);
+        }
+    }
+
+    private void FanFire(Burnable burnable)
+    {
+        if (burnable != null && canCollide(burnable.gameObject))
+        {
+            burnable.FanFlame(fanFlameAmount);
+        }
+    }
+
+    private bool isFire(GameObject go, out Fire fire, out Burnable burnable)
+    {
+        if (go.tag == "Fire")
+        {
+            fire = go.GetComponent<Fire>();
+            burnable = null;
+            return true;
+        }
+
+        fire = null;
+        burnable = go.GetComponentInParent<Burnable>();
+        return burnable != null;
     }
 
     private bool canCollide(GameObject go)

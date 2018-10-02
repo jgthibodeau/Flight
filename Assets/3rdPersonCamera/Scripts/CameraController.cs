@@ -18,6 +18,7 @@ namespace ThirdPersonCamera
     {
         #region Public Unity Variables
         public Transform target;
+        public Rigidbody targetRb;
         public Vector3 offsetVector;
 		public Vector3 cameraRecenterOffset;
 
@@ -32,7 +33,8 @@ namespace ThirdPersonCamera
 		public float minMoveDistance = 0.02f;
 		public float moveSpeed = 2.0f;
 		public float recenterSpeed = 5f;
-		public bool slerpPosition = false;
+
+        public float followSharpness = 0.1f;
 
         public float collisionDistance = 0.5f;
         public float maxThickness = 0.3f;
@@ -81,6 +83,72 @@ namespace ThirdPersonCamera
         private List<RayCastWithMags> rcms;
         #endregion
 
+        public void CloneFrom(CameraController other)
+        {
+            //target = other.target;
+            offsetVector = other.offsetVector;
+            cameraRecenterOffset = other.cameraRecenterOffset;
+
+            cameraCenter = other.cameraCenter;
+
+            smartPivot = other.smartPivot;
+            occlusionCheck = other.occlusionCheck;
+            thicknessCheck = other.thicknessCheck;
+
+            desiredDistance = other.desiredDistance;
+            maxDistance = other.maxDistance;
+            minMoveDistance = other.minMoveDistance;
+            moveSpeed = other.moveSpeed;
+            recenterSpeed = other.recenterSpeed;
+
+            //followSharpness = other.followSharpness;
+
+        //public float collisionDistance = 0.5f;
+        //public float maxThickness = 0.3f;
+        //public int maxThicknessIterations = 5;
+        //public float zoomOutStepValue = 1.0f;
+        //public float zoomOutStepValuePerFrame = 0.1f;
+
+        //public LayerMask collisionLayer;
+        //public int playerLayer = 8;
+
+//        [HideInInspector]
+//        public bool playerCollision;
+//        [HideInInspector]
+//        public bool cameraNormalMode;
+//        [HideInInspector]
+//        public bool bGroundHit;
+//        [HideInInspector]
+//        public float startingY;
+
+        //#region Private Variables
+        //// usually allocated in update, moved to avoid GC problems
+        //private bool initDone;
+        //private Vector3 prevTargetPos;
+        //private Vector3 prevPosition;
+
+        //private SkinnedMeshRenderer[] smrs;
+        //private float distance;
+        //private float thickness;
+
+        //private Vector3 targetPosWithOffset;
+        //private Vector3 dirToTarget;
+        //private Vector3 dirToTargetSmartPivot;
+        //private Vector3 thicknessStartPoint;
+        //private Vector3 thicknessEndPoint;
+
+        //private RaycastHit? occlusionHit = null;
+        //private RaycastHit groundHit;
+        //private RaycastHit thicknessHit;
+        //private RaycastHit hitSmartPivot;
+        //private RaycastHit offsetTest;
+
+        //private int currentIterations;
+        //private Dictionary<string, RaycastHit> thicknessStarts;
+        //private Dictionary<string, RaycastHit> thicknessEnds;
+        //private List<RayCastWithMags> rcms;
+    }
+
         #region Public Get/Set Variables
         public float Distance
         {
@@ -120,13 +188,21 @@ namespace ThirdPersonCamera
             initDone = true;
         }
 
-        void FixedUpdate()
+        void LateUpdate()
         {
             if (!initDone)
+            {
                 return;
+            }
+
+            targetRb = target.GetComponentInParent<Rigidbody>();
+
+            Vector3 targetPosition = target.position;// targetRb.position;// + (target.position - targetRb.transform.position);
 
             if (distance < 0)
+            {
                 distance = 0;
+            }
 
             // disable player character when too close
             if (smrs != null)
@@ -160,19 +236,19 @@ namespace ThirdPersonCamera
             }
 
             Vector3 offsetVectorTransformed = target.transform.rotation * offsetVector;
-			Vector3 desiredPosition = transform.position + (target.position - prevTargetPos);
-            targetPosWithOffset = (target.position + offsetVectorTransformed);
+            Vector3 desiredPosition = transform.position + (targetPosition - prevTargetPos);
+            targetPosWithOffset = (targetPosition + offsetVectorTransformed);
 
-            Vector3 dirToTargetOffset = targetPosWithOffset - target.position;
+            Vector3 dirToTargetOffset = targetPosWithOffset - targetPosition;
 
-            if (Physics.SphereCast(target.position, collisionDistance, dirToTargetOffset, out offsetTest, dirToTargetOffset.magnitude + collisionDistance, collisionLayer))
+            if (Physics.SphereCast(targetPosition, collisionDistance, dirToTargetOffset, out offsetTest, dirToTargetOffset.magnitude + collisionDistance, collisionLayer))
             {
                 // offset clips into geometry, move the offset
                 float newDistance = offsetTest.distance - collisionDistance - 0.1f;
-                targetPosWithOffset = (target.position + offsetVectorTransformed.normalized * newDistance);
+                targetPosWithOffset = (targetPosition + offsetVectorTransformed.normalized * newDistance);
             }
 
-            dirToTarget = (transform.rotation * new Vector3(0, 0, -distance) + offsetVectorTransformed + target.position) - targetPosWithOffset;
+            dirToTarget = (transform.rotation * new Vector3(0, 0, -distance) + offsetVectorTransformed + targetPosition) - targetPosWithOffset;
             float cameraToPlayerDistance = Mathf.Min(dirToTarget.magnitude, desiredDistance);            
             dirToTarget = dirToTarget.normalized;
 
@@ -306,16 +382,16 @@ namespace ThirdPersonCamera
 						desiredPosition = occlusionHit.Value.point + occlusionHit.Value.normal.normalized * collisionDistance;
                     }
                     else
-						desiredPosition = transform.rotation * new Vector3(0, 0, -distance) + offsetVectorTransformed + target.position;
+						desiredPosition = transform.rotation * new Vector3(0, 0, -distance) + offsetVectorTransformed + targetPosition;
                 }
             }
             else if (cameraNormalMode)
 			{
-//				Debug.Log (desiredPosition+" "+transform.position+" "+transform.rotation +" "+ new Vector3(0, 0, -distance) +" "+ offsetVectorTransformed +" "+ target.position);
+//				Debug.Log (desiredPosition+" "+transform.position+" "+transform.rotation +" "+ new Vector3(0, 0, -distance) +" "+ offsetVectorTransformed +" "+ targetPosition);
 //				Debug.Log (transform.rotation * new Vector3(0, 0, -distance));
 //				Debug.Log (transform.rotation * new Vector3(0, 0, -distance));
-//				Debug.Log (transform.rotation * new Vector3(0, 0, -distance) + offsetVectorTransformed + target.position);
-				desiredPosition = transform.rotation * new Vector3(0, 0, -distance) + offsetVectorTransformed + target.position;
+//				Debug.Log (transform.rotation * new Vector3(0, 0, -distance) + offsetVectorTransformed + targetPosition);
+				desiredPosition = transform.rotation * new Vector3(0, 0, -distance) + offsetVectorTransformed + targetPosition;
 //				Debug.Log (desiredPosition + " "+Vector3.Distance(transform.position, desiredPosition));
 				Debug.DrawLine (transform.position, desiredPosition, Color.red);
             }
@@ -326,7 +402,7 @@ namespace ThirdPersonCamera
                 Vector3 tmpEuler = transform.rotation.eulerAngles;
                 tmpEuler.x = startingY;
 
-                dirToTargetSmartPivot = (Quaternion.Euler(tmpEuler) * new Vector3(0, 0, -distance) + offsetVectorTransformed + target.position) - targetPosWithOffset;
+                dirToTargetSmartPivot = (Quaternion.Euler(tmpEuler) * new Vector3(0, 0, -distance) + offsetVectorTransformed + targetPosition) - targetPosWithOffset;
                
                 if (Physics.SphereCast(targetPosWithOffset, collisionDistance, dirToTargetSmartPivot.normalized, out hitSmartPivot, dirToTargetSmartPivot.magnitude + collisionDistance, collisionLayer))
                 {                   
@@ -363,37 +439,41 @@ namespace ThirdPersonCamera
                 }
             }
 
-            prevTargetPos = target.position;
+            prevTargetPos = targetPosition;
 
 			Debug.DrawRay (transform.position, transform.rotation.eulerAngles, Color.blue);
 
-			Vector3 directionFromTargetToCamera = transform.position - target.position;
+			Vector3 directionFromTargetToCamera = transform.position - targetPosition;
 			if (cameraCenter && Util.GetButton ("Center Camera")) {
 				Vector3 cameraRecenterOffsetTransformed = (target.transform.rotation * cameraRecenterOffset).normalized * desiredDistance;
-				desiredPosition = target.position + offsetVectorTransformed + cameraRecenterOffsetTransformed;
-				transform.position = Vector3.Slerp (transform.position, desiredPosition, Time.fixedDeltaTime * recenterSpeed);
+				desiredPosition = targetPosition + offsetVectorTransformed + cameraRecenterOffsetTransformed;
+				transform.position = Vector3.Slerp (transform.position, desiredPosition, CalculateCameraBlend(recenterSpeed));
 
-				transform.LookAt (target.position + offsetVectorTransformed);
+				transform.LookAt (targetPosition + offsetVectorTransformed);
 			} else {
 				if (directionFromTargetToCamera.magnitude > maxDistance) {
-					Vector3 directionFromTargetToDesired = desiredPosition - target.position;
-					Vector3 maxPosition = target.position + directionFromTargetToDesired.normalized * maxDistance;
-//					Vector3 maxPosition = target.position + directionFromTargetToCamera.normalized * maxDistance;
+					Vector3 directionFromTargetToDesired = desiredPosition - targetPosition;
+					Vector3 maxPosition = targetPosition + directionFromTargetToDesired.normalized * maxDistance;
+//					Vector3 maxPosition = targetPosition + directionFromTargetToCamera.normalized * maxDistance;
 //					transform.position = maxPosition;
-					transform.position = Vector3.Slerp (transform.position, maxPosition, Time.fixedDeltaTime * 2 * moveSpeed);
-				} else if (Vector3.Distance (transform.position, desiredPosition) > minMoveDistance) {
-					transform.position = Vector3.Slerp (transform.position, desiredPosition, Time.fixedDeltaTime * moveSpeed);
+                    transform.position = Vector3.Slerp (transform.position, maxPosition, CalculateCameraBlend(2 * moveSpeed));
+				} else if (Vector3.Distance (transform.position, desiredPosition) > minMoveDistance)
+                {
+                    Vector3 newPosition = Vector3.Slerp(transform.position, desiredPosition, CalculateCameraBlend(moveSpeed));
+                    if (Vector3.Distance(newPosition, desiredPosition) > Vector3.Distance(transform.position, desiredPosition))
+                    {
+                        newPosition = desiredPosition;
+                    }
+                    transform.position = newPosition;
 				}
 			}
 
-
-//			if (slerpPosition) {
-//				transform.position = Vector3.Slerp (transform.position, desiredPosition, Time.fixedDeltaTime * moveSpeed);
-//			} else {
-//				transform.position = desiredPosition;
-//			}
-
             prevPosition = transform.position;
+        }
+
+        public float CalculateCameraBlend(float speed)
+        {
+            return 1f - Mathf.Pow(1f - followSharpness, Time.deltaTime * speed);
         }
 
         public void RotateTo(Quaternion targetRotation, float timeModifier)

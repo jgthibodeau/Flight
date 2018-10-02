@@ -14,14 +14,14 @@ public class FollowTransformLate : MonoBehaviour {
 	}
 	// Move this ParticleSystem to the target's last frame position before it emits
 	void Update() {
-		if (useLateUpdate) {
-//			transform.position = targetPosition;
-			transform.position = targetBase.position + targetOffset;
-			transform.rotation = targetRotation;
-		} else {
-			transform.position = target.position;
-			transform.rotation = target.rotation;
-		}
+//		if (useLateUpdate) {
+////			transform.position = targetPosition;
+//			transform.position = targetBase.position + targetOffset;
+//			transform.rotation = targetRotation;
+//		} else {
+//			transform.position = target.position;
+//			transform.rotation = target.rotation;
+//		}
 	}
 	// Read the world space position and rotation of the target after procedural effects have been applied
 	// NB! Make sure this script is set to a higher value than FinalIK components in the Script Execution Order!
@@ -29,5 +29,12 @@ public class FollowTransformLate : MonoBehaviour {
 		targetOffset = target.position - targetBase.position;
 		targetPosition = target.position;
 		targetRotation = target.rotation;
-	}
+
+
+        //transform.position = targetBase.position + targetOffset;
+        //transform.rotation = targetRotation;
+
+        transform.position = target.position;
+        transform.localRotation = Quaternion.LookRotation(targetBase.transform.InverseTransformDirection(target.forward), targetBase.transform.up);
+    }
 }

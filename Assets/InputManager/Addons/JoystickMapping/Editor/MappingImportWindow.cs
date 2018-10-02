@@ -257,8 +257,9 @@ namespace TeamUtilityEditor.IO
 					axisConfig.axis = am.JoystickAxis;
 					axisConfig.joystick = 0;
 					axisConfig.deadZone = 0.0f;
-					axisConfig.sensitivity = 1.0f;
-					inputConfig.axes.Add(axisConfig);
+                    axisConfig.sensitivity = 1.0f;
+                    axisConfig.rebindable = true;
+                    inputConfig.axes.Add(axisConfig);
 				}
 			}
 

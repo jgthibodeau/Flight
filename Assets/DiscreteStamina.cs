@@ -40,9 +40,15 @@ public class DiscreteStamina : MonoBehaviour {
 			currentStamina += 1;
 			staminaRegainCurrentDelay = 0;
 		}
-	}
+    }
 
-	public float GetCurrentStaminaRechargePercent () {
-		return Mathf.Clamp (staminaRegainCurrentDelay / staminaRegainDelay, 0, 1f);
-	}
+    public float GetCurrentStaminaRechargePercent()
+    {
+        return Mathf.Clamp(staminaRegainCurrentDelay / staminaRegainDelay, 0, 1f);
+    }
+
+    public float GetCurrentStaminaPercent()
+    {
+        return Mathf.Clamp(((float)currentStamina) / maxStamina, 0, 1f);
+    }
 }

@@ -23,6 +23,7 @@ public class Player : MonoBehaviour {
 	private FlameBreath flameBreathScript;
 	private Health healthScript;
     public PlayerCameraController playerCameraController;
+    public FreeFormCameraTarget freeFormCameraTarget;
     public PrefabSpawner gustSpawner;
 
     private int PerchableLayer;
@@ -30,9 +31,7 @@ public class Player : MonoBehaviour {
 	private int PreyLayer;
 
 	public bool twoStickFlight = true;
-	public bool flameAdjustCamera = true;
-	public bool useHeadCamera = false;
-    public Transform headCameraTarget;
+    public Transform[] headCameraTargets;
 
 	public ThirdPersonCamera.Follow follow;
 
@@ -47,8 +46,7 @@ public class Player : MonoBehaviour {
 	public bool isUpright;
 	public bool isFlaming;
 	public bool isGusting;
-	public bool gustTriggered;
-	public float uprightThreshold;
+    public float uprightThreshold;
 	public float speed;
 	public float ragdollSpeed;
 	public Vector3 groundNormal;
@@ -81,8 +79,12 @@ public class Player : MonoBehaviour {
 	public Vector3 centerOfMass = new Vector3 (0, 0, 0);
 	public Vector3 inertiaTensor = new Vector3 (0, 0, 0);
 	public Quaternion inertiaTensorRotation = new Quaternion (0.3f, 0, 0, 1f);
+    
+    public float stickYTriggersBackflap = -0.9f;
+    public float stickYReleaseBackflap = 0.9f;
+    public bool backflapTriggered;
 
-	[Range(0, 1)]
+    [Range(0, 1)]
 	public float leftRightWiggle = 0.01f;
 
 	// Use this for initialization
@@ -169,7 +171,30 @@ public class Player : MonoBehaviour {
 		WaterSound ();
 
 		rigidBody.freezeRotation = isGrounded;
+
+        if (!isGrounded && wasGrounded)
+        {
+            if (delayPitchRollInstance != null)
+            {
+                StopCoroutine(delayPitchRollInstance);
+            }
+            delayPitchRollInstance = StartCoroutine(DelayPitchRoll());
+        } else if (isGrounded)
+        {
+            canPitchRoll = false;
+        }
+        wasGrounded = isGrounded;
 	}
+    public float flapDelayTime = 1f;
+    public bool canPitchRoll;
+    public bool wasGrounded;
+    Coroutine delayPitchRollInstance;
+    IEnumerator DelayPitchRoll()
+    {
+        canPitchRoll = false;
+        yield return new WaitForSeconds(flapDelayTime);
+        canPitchRoll = true;
+    }
 
 	void WaterSound(){
 //		if ((inWater || NearWater()) && !waterAudioSource.isPlaying) {
@@ -320,22 +345,6 @@ public class Player : MonoBehaviour {
 
 		dragonAnimator.InWater = inWater;
 		dragonAnimator.Grounded = isGrounded;
-
-		if (useHeadCamera) {
-			if (Util.GetButtonDown ("Center Camera")) {
-				playerCameraController.ToggleCamera ();
-			}
-		}
-
-		if (flameAdjustCamera) {
-			if (isFlaming && rigidBody.velocity.magnitude < 5f) {
-				playerCameraController.EnableHeadCamera ();
-			} else {
-				playerCameraController.EnableMainCamera ();
-			}
-		}
-
-		playerCameraController.SetMainCameraTight (glideV2Script.isBackFlapping);
 	}
 
 	public void GetInput () {
@@ -348,7 +357,7 @@ public class Player : MonoBehaviour {
 		walkScript.forward = 0;
 		walkScript.right = 0;
 
-		glideV2Script.flapSpeed = 0;
+		glideV2Script.setFlapSpeed(0);
 
 		bool heal = Util.GetButton ("Heal");
 		bool isHealing = heal && isGrounded && !glideV2Script.IsFlapping() && speed <= 5f;
@@ -374,20 +383,32 @@ public class Player : MonoBehaviour {
 			rotateHead = false;
 		}
 
-		if (twoStickFlight) {
-			TwoStickFlight ();
-		} else {
-			OneStickFlight ();
-		}
+        if (canPitchRoll)
+        {
+            //if (twoStickFlight)
+            //{
+            //    TwoStickFlight();
+            //}
+            //else
+            //{
+                OneStickFlight();
+            //}
+        } else
+        {
+            glideV2Script.ResetInput();
+        }
 
-		walkScript.forward = Util.GetAxis ("Vertical");
-		walkScript.right = Util.GetAxis ("Horizontal");
+        if (!isGusting)
+        {
+            walkScript.forward = Util.GetAxis("Vertical");
+            walkScript.right = Util.GetAxis("Horizontal");
+        }
 
 		float flapSpeed = Util.GetAxis ("Flap");
 		if (staminaScript.HasStamina ()) {
-			glideV2Script.flapSpeed = Util.GetAxis ("Flap");
-		} else {
-			glideV2Script.flapSpeed = 0;
+            glideV2Script.setFlapSpeed(flapSpeed);
+        } else {
+			glideV2Script.setFlapSpeed(0);
 		}
 		staminaScript.usingStamina = flapSpeed != 0;
 
@@ -412,60 +433,89 @@ public class Player : MonoBehaviour {
             }
         }
 
-		isGusting = Util.GetButton ("Gust");
-		gustTriggered = Util.GetButtonDown ("Gust");
+		bool gustHeld = Util.GetButton ("Gust");
+        bool gustTriggered = Util.GetButtonDown ("Gust");
 
-		glideV2Script.boostHeld = isGusting && !glideV2Script.isBackFlapping;
+        if (backflapTriggered)
+        {
+            backflapTriggered = !isGrounded && (flapSpeed > 0) && Util.GetAxis("Vertical") < stickYReleaseBackflap;
+            //TODO if released, wait some time to see if it is held down again
+        }
+        else if (!isGrounded && flapSpeed > 0)
+        {
+            backflapTriggered = (flapSpeed > 0) && Util.GetAxis("Vertical") < stickYTriggersBackflap;
+        } else
+        {
+            backflapTriggered = false;
+        }
 
-		if (gustTriggered) {
-			if (!isGrounded) {
-				if (!glideV2Script.isBackFlapping) {
-					if (glideV2Script.CanBoost () && discreteStaminaScript.HasStamina ()) {
-						glideV2Script.boostTriggered = true;
-						discreteStaminaScript.UseStamina ();
-					}
-				} else {
-                    //TODO backflap gusts
-                    if (gustSpawner.Spawn())
+        glideV2Script.backFlapTriggered = backflapTriggered;
+
+        //if (backflapTriggered)
+        //{
+        //    glideV2Script.boostHeld = false;
+        //} else
+        //{
+            glideV2Script.boostHeld = gustHeld;
+
+            if (gustTriggered && discreteStaminaScript.HasStamina())
+            {
+                if (!isGrounded)
+                {
+                    if (!glideV2Script.isBackFlapping)
                     {
-                        discreteStaminaScript.UseStamina();
+                        if (glideV2Script.CanBoost())
+                        {
+                            glideV2Script.boostTriggered = true;
+                            discreteStaminaScript.UseStamina();
+                        }
+                    }
+                    else
+                    {
+                        SpawnGust();
                     }
                 }
-			} else {
-                //TODO ground gusts
-                if (gustSpawner.Spawn())
+                else
                 {
-                    discreteStaminaScript.UseStamina();
+                    SpawnGust();
                 }
-			}
-//			glideV2Script.boostHeld = true;
-		} else if (!isGusting || isGrounded) {
-//			glideV2Script.boostHeld = false;
-		}
+            }
+        //}
 	}
 
-	void TwoStickFlight() {
-		glideV2Script.pitchLeft = Util.GetAxis ("Vertical");
-		glideV2Script.rollLeft = -Util.GetAxis ("Horizontal");
+    void SpawnGust()
+    {
+        if (!isGusting)
+        {
+            isGusting = true;
+            gustSpawner.Spawn();
+            discreteStaminaScript.UseStamina();
+            dragonAnimator.GustTriggered = true;
+        }
+    }
 
-		glideV2Script.pitchRight = Util.GetAxis ("Vertical Right");
-		glideV2Script.rollRight = -Util.GetAxis ("Horizontal Right");
+	//void TwoStickFlight() {
+	//	glideV2Script.wingAngleLeft = Util.GetAxis ("Vertical");
+	//	glideV2Script.wingOutAmountLeft = -Util.GetAxis ("Horizontal");
 
-		float pitchDiff = glideV2Script.pitchLeft - glideV2Script.pitchRight;
-		if (pitchDiff > -leftRightWiggle && pitchDiff < leftRightWiggle) {
-			float halfDiff = pitchDiff / 2;
-			glideV2Script.pitchLeft -= halfDiff;
-			glideV2Script.pitchRight += halfDiff;
-		}
+	//	glideV2Script.wingAngleRight = Util.GetAxis ("Vertical Right");
+	//	glideV2Script.wingOutAmountRight = -Util.GetAxis ("Horizontal Right");
 
-		float rollDiff = glideV2Script.rollLeft - glideV2Script.rollRight;
-		if (rollDiff > -leftRightWiggle && rollDiff < leftRightWiggle) {
-			float halfDiff = rollDiff / 2;
-			glideV2Script.rollLeft -= halfDiff;
-			glideV2Script.rollRight += halfDiff;
-		}
-		glideV2Script.rollRight *= -1;
-	}
+	//	float pitchDiff = glideV2Script.wingAngleLeft - glideV2Script.wingAngleRight;
+	//	if (pitchDiff > -leftRightWiggle && pitchDiff < leftRightWiggle) {
+	//		float halfDiff = pitchDiff / 2;
+	//		glideV2Script.wingAngleLeft -= halfDiff;
+	//		glideV2Script.wingAngleRight += halfDiff;
+	//	}
+
+	//	float rollDiff = glideV2Script.wingOutAmountLeft - glideV2Script.wingOutAmountRight;
+	//	if (rollDiff > -leftRightWiggle && rollDiff < leftRightWiggle) {
+	//		float halfDiff = rollDiff / 2;
+	//		glideV2Script.wingOutAmountLeft -= halfDiff;
+	//		glideV2Script.wingOutAmountRight += halfDiff;
+	//	}
+	//	glideV2Script.wingOutAmountRight *= -1;
+	//}
 
 	public float oneStickRollScale = 0.5f;
 	public float oneStickForwardPitchScale = 1f;
@@ -479,114 +529,253 @@ public class Player : MonoBehaviour {
 	public float minPitch = -1f;
 	public float maxPitch = 0.75f;
 
-	void OneStickFlight() {
-		OneStickFlightV2 ();
-		return;
+	void OneStickFlight()
+    {
+        //OneStickFlightClassic();
+        //OneStickFlightYaw();
+        OneStickFlightCleanup();
+  //      return;
 
-		Vector2 input = new Vector2 (Util.GetAxis ("Horizontal"), Util.GetAxis ("Vertical"));
-		input = Vector2.ClampMagnitude (input, 1);
-		float vert = input.y;
-		float horiz = -input.x;
+		//Vector2 input = new Vector2 (Util.GetAxis ("Horizontal"), Util.GetAxis ("Vertical"));
+		//input = Vector2.ClampMagnitude (input, 1);
+		//float vert = input.y;
+		//float horiz = -input.x;
 
-		//left/right -> more lift on that side and less on the opposite side
-		if (horiz > 0) {
-			glideV2Script.pitchLeft = 0;
-			glideV2Script.pitchRight = -horiz * oneStickRollScale;
-		} else if (horiz < 0) {
-			glideV2Script.pitchLeft = horiz * oneStickRollScale;
-			glideV2Script.pitchRight = 0;
-		} else {
-			glideV2Script.pitchLeft = 0;
-			glideV2Script.pitchRight = 0;
-		}
+		////left/right -> more lift on that side and less on the opposite side
+		//if (horiz > 0) {
+		//	glideV2Script.wingAngleLeft = 0;
+		//	glideV2Script.wingAngleRight = -horiz * oneStickRollScale;
+		//} else if (horiz < 0) {
+		//	glideV2Script.wingAngleLeft = horiz * oneStickRollScale;
+		//	glideV2Script.wingAngleRight = 0;
+		//} else {
+		//	glideV2Script.wingAngleLeft = 0;
+		//	glideV2Script.wingAngleRight = 0;
+		//}
 
-		//forward/back -> wings in/out
-		if (vert > 0) {
-			glideV2Script.pitchLeft += vert * oneStickForwardPitchScale;
-			glideV2Script.pitchRight += vert * oneStickForwardPitchScale;
+		////forward/back -> wings in/out
+		//if (vert > 0) {
+		//	glideV2Script.wingAngleLeft += vert * oneStickForwardPitchScale;
+		//	glideV2Script.wingAngleRight += vert * oneStickForwardPitchScale;
 
-			float wingScale = oneStickWingInScale;
-			float percent = 0;
-			if (transform.forward.y < oneStickWingMinYToPointDown) {
-				percent = (1 + transform.forward.y) / (1 + oneStickWingMinYToPointDown);
-				wingScale = Mathf.Lerp (oneStickWingInScale, oneStickWingInScalePointingDown, 1 - percent);
-			}
+		//	float wingScale = oneStickWingInScale;
+		//	float percent = 0;
+		//	if (transform.forward.y < oneStickWingMinYToPointDown) {
+		//		percent = (1 + transform.forward.y) / (1 + oneStickWingMinYToPointDown);
+		//		wingScale = Mathf.Lerp (oneStickWingInScale, oneStickWingInScalePointingDown, 1 - percent);
+		//	}
 
-			glideV2Script.rollLeft = -vert * wingScale;
-			glideV2Script.rollRight = -vert * wingScale;
+		//	glideV2Script.wingOutAmountLeft = -vert * wingScale;
+		//	glideV2Script.wingOutAmountRight = -vert * wingScale;
 
-		} else {
-			glideV2Script.pitchLeft += vert * oneStickBackwardPitchScale;
-			glideV2Script.pitchRight += vert * oneStickBackwardPitchScale;
+		//} else {
+		//	glideV2Script.wingAngleLeft += vert * oneStickBackwardPitchScale;
+		//	glideV2Script.wingAngleRight += vert * oneStickBackwardPitchScale;
 
-			glideV2Script.rollLeft = -vert * oneStickWingOutScale;
-			glideV2Script.rollRight = -vert * oneStickWingOutScale;
-		}
+		//	glideV2Script.wingOutAmountLeft = -vert * oneStickWingOutScale;
+		//	glideV2Script.wingOutAmountRight = -vert * oneStickWingOutScale;
+		//}
 
-		glideV2Script.pitchLeft = Mathf.Clamp (glideV2Script.pitchLeft, minPitch, maxPitch);
-		glideV2Script.pitchRight = Mathf.Clamp (glideV2Script.pitchRight, minPitch, maxPitch);
+		//glideV2Script.wingAngleLeft = Mathf.Clamp (glideV2Script.wingAngleLeft, minPitch, maxPitch);
+		//glideV2Script.wingAngleRight = Mathf.Clamp (glideV2Script.wingAngleRight, minPitch, maxPitch);
 	}
 
-	void OneStickFlightV2() {
-		//TODO clean up input so rolling is smoother
-		Vector2 input = new Vector2 (Util.GetAxis ("Horizontal"), Util.GetAxis ("Vertical"));
-		input = Vector2.ClampMagnitude (input, 1);
-		float vert = input.y;
-		float horiz = -input.x;
+    //void OneStickFlightClassic()
+    //{
+    //    //TODO clean up input so rolling is smoother
+    //    Vector2 input = new Vector2(Util.GetAxis("Horizontal"), Util.GetAxis("Vertical"));
+    //    input = Vector2.ClampMagnitude(input, 1);
+    //    float vert = input.y;
+    //    float horiz = -input.x;
 
-		//forward/back -> wings in/out
-		if (vert > 0) {
-			glideV2Script.pitchLeft = vert * oneStickForwardPitchScale;
-			glideV2Script.pitchRight = vert * oneStickForwardPitchScale;
+    //    //forward/back -> wings in/out
+    //    if (vert > 0)
+    //    {
+    //        glideV2Script.wingAngleLeft = vert * oneStickForwardPitchScale;
+    //        glideV2Script.wingAngleRight = vert * oneStickForwardPitchScale;
 
-			float wingScale = oneStickWingInScale;
-			float percent = 0;
-			if (transform.forward.y < oneStickWingMinYToPointDown) {
-				percent = (1 + transform.forward.y) / (1 + oneStickWingMinYToPointDown);
-				wingScale = Mathf.Lerp (oneStickWingInScale, oneStickWingInScalePointingDown, 1 - percent);
-			}
+    //        float wingScale = oneStickWingInScale;
+    //        if (transform.forward.y < oneStickWingMinYToPointDown)
+    //        {
+    //            float percent = (1 + transform.forward.y) / (1 + oneStickWingMinYToPointDown);
+    //            wingScale = Mathf.Lerp(oneStickWingInScale, oneStickWingInScalePointingDown, 1 - percent);
+    //        }
 
-			glideV2Script.rollLeft = -vert * wingScale;
-			glideV2Script.rollRight = -vert * wingScale;
+    //        glideV2Script.wingOutAmountLeft = vert * wingScale;
+    //        glideV2Script.wingOutAmountRight = vert * wingScale;
+            
+    //        if (transform.forward.y < oneStickWingMaxYToPointDown)
+    //        {
+    //            glideV2Script.wingOutAmountLeft = -1;
+    //            glideV2Script.wingOutAmountRight = -1;
+    //        }
+    //    }
+    //    else
+    //    {
+    //        glideV2Script.wingAngleLeft = vert * oneStickBackwardPitchScale;
+    //        glideV2Script.wingAngleRight = vert * oneStickBackwardPitchScale;
+
+    //        glideV2Script.wingOutAmountLeft = -vert * oneStickWingOutScale;
+    //        glideV2Script.wingOutAmountRight = -vert * oneStickWingOutScale;
+    //    }
+
+    //    //		left/right -> more lift on that side and less on the opposite side
+    //    if (horiz > 0)
+    //    {
+    //        glideV2Script.wingAngleRight -= horiz * oneStickRollScale;
+    //        glideV2Script.wingAngleLeft += horiz * oneStickRollScale;
+    //    }
+    //    else if (horiz < 0)
+    //    {
+    //        glideV2Script.wingAngleRight -= horiz * oneStickRollScale;
+    //        glideV2Script.wingAngleLeft += horiz * oneStickRollScale;
+    //    }
+
+    //    glideV2Script.wingAngleLeft = Mathf.Clamp(glideV2Script.wingAngleLeft, minPitch, maxPitch);
+    //    glideV2Script.wingAngleRight = Mathf.Clamp(glideV2Script.wingAngleRight, minPitch, maxPitch);
+    //}
+
+    //void OneStickFlightYaw()
+    //{
+    //    float vert = Util.GetAxis("Vertical");
+    //    float yaw = Util.GetAxis("Horizontal");
+    //    float horizLeft = Util.GetAxis("Wing Left");
+    //    float horizRight = Util.GetAxis("Wing Right");
+
+    //    //forward/back -> wings in/out
+    //    if (vert > 0)
+    //    {
+    //        glideV2Script.wingAngleLeft = vert * oneStickForwardPitchScale;
+    //        glideV2Script.wingAngleRight = vert * oneStickForwardPitchScale;
+
+    //        float wingScale = oneStickWingInScale;
+    //        float percent = 0;
+    //        if (transform.forward.y < oneStickWingMinYToPointDown)
+    //        {
+    //            percent = (1 + transform.forward.y) / (1 + oneStickWingMinYToPointDown);
+    //            wingScale = Mathf.Lerp(oneStickWingInScale, oneStickWingInScalePointingDown, 1 - percent);
+    //        }
+
+    //        glideV2Script.wingOutAmountLeft = -vert * wingScale;
+    //        glideV2Script.wingOutAmountRight = -vert * wingScale;
 
 
 
-			if (transform.forward.y < oneStickWingMaxYToPointDown) {
-				glideV2Script.rollLeft = -1;
-				glideV2Script.rollRight = -1;
-			}
+    //        if (transform.forward.y < oneStickWingMaxYToPointDown)
+    //        {
+    //            glideV2Script.wingOutAmountLeft = -1;
+    //            glideV2Script.wingOutAmountRight = -1;
+    //        }
 
-//			if (transform.forward.y < oneStickWingMinYToPointDown) {
-//				glideV2Script.rollLeft = -1;
-//				glideV2Script.rollRight = -1;
-//				pointingDown = true;
-//			} else {
-//				glideV2Script.rollLeft = -vert * oneStickWingInScale;
-//				glideV2Script.rollRight = -vert * oneStickWingInScale;
-//			}
+    //    }
+    //    else
+    //    {
+    //        glideV2Script.wingAngleLeft = vert * oneStickBackwardPitchScale;
+    //        glideV2Script.wingAngleRight = vert * oneStickBackwardPitchScale;
 
-		} else {
-			glideV2Script.pitchLeft = vert * oneStickBackwardPitchScale;
-			glideV2Script.pitchRight = vert * oneStickBackwardPitchScale;
+    //        glideV2Script.wingOutAmountLeft = -vert * oneStickWingOutScale;
+    //        glideV2Script.wingOutAmountRight = -vert * oneStickWingOutScale;
+    //    }
+    //    glideV2Script.wingAngleRight += horizLeft * oneStickRollScale;
+    //    glideV2Script.wingAngleLeft += horizRight * oneStickRollScale;
 
-			glideV2Script.rollLeft = -vert * oneStickWingOutScale;
-			glideV2Script.rollRight = -vert * oneStickWingOutScale;
-		}
-			
-//		left/right -> more lift on that side and less on the opposite side
-		if (horiz > 0) {
-			glideV2Script.pitchRight -= horiz * oneStickRollScale;
-			glideV2Script.pitchLeft += horiz * oneStickRollScale;
-		} else if (horiz < 0) {
-			glideV2Script.pitchRight -= horiz * oneStickRollScale;
-			glideV2Script.pitchLeft += horiz * oneStickRollScale;
-		}
+    //    glideV2Script.yawV2 = yaw;
+    //    glideV2Script.yaw = yaw;
 
-		glideV2Script.pitchLeft = Mathf.Clamp (glideV2Script.pitchLeft, minPitch, maxPitch);
-		glideV2Script.pitchRight = Mathf.Clamp (glideV2Script.pitchRight, minPitch, maxPitch);
-	}
+    //    glideV2Script.wingAngleLeft = Mathf.Clamp(glideV2Script.wingAngleLeft, minPitch, maxPitch);
+    //    glideV2Script.wingAngleRight = Mathf.Clamp(glideV2Script.wingAngleRight, minPitch, maxPitch);
+    //}
 
-	void OnTriggerEnter(Collider collisionInfo) {
+    public float minSpeedForYaw, maxSpeedForYaw;
+    void OneStickFlightCleanup()
+    {
+        //TODO clean up input so rolling is smoother
+        Vector2 input = new Vector2(Util.GetAxis("Roll"), Util.GetAxis("Pitch"));
+        input = Vector2.ClampMagnitude(input, 1);
+        float vert = input.y;
+        float horiz = -input.x;
+
+        float wingAngleLeft = 0;
+        float wingAngleRight = 0;
+        float wingOutAmountLeft = 0;
+        float wingOutAmountRight = 0;
+
+        //forward/back -> wings in/out
+        float percent = 1f;
+        if (vert > 0)
+        {
+            wingAngleLeft = vert * oneStickForwardPitchScale;
+            wingAngleRight = vert * oneStickForwardPitchScale;
+
+            float wingScale = oneStickWingInScale;
+            if (transform.forward.y < oneStickWingMinYToPointDown)
+            {
+                percent = (1 + transform.forward.y) / (1 + oneStickWingMinYToPointDown);
+                wingScale = Mathf.Lerp(oneStickWingInScale, oneStickWingInScalePointingDown, 1 - percent);
+            }
+
+            //glideV2Script.wingOutAmountLeft = vert * wingScale;
+            //glideV2Script.wingOutAmountRight = vert * wingScale;
+
+            if (transform.forward.y < oneStickWingMaxYToPointDown)
+            {
+                //glideV2Script.wingOutAmountLeft = -1;
+                //glideV2Script.wingOutAmountRight = -1;
+                wingOutAmountLeft = oneStickWingMaxYToPointDown;
+                wingOutAmountRight = oneStickWingMaxYToPointDown;
+
+
+                wingAngleLeft = 0.1f;
+                wingAngleRight = 0.1f;
+            }
+        }
+        else
+        {
+            wingAngleLeft = vert * oneStickBackwardPitchScale;
+            wingAngleRight = vert * oneStickBackwardPitchScale;
+
+            wingOutAmountLeft = -vert * oneStickWingOutScale;
+            wingOutAmountRight = -vert * oneStickWingOutScale;
+        }
+
+        //		left/right -> more lift on that side and less on the opposite side
+        if (horiz > 0)
+        {
+            wingAngleRight -= horiz * oneStickRollScale * percent;
+            //glideV2Script.wingAngleLeft += horiz * oneStickRollScale;
+        }
+        else if (horiz < 0)
+        {
+            //glideV2Script.wingAngleRight -= horiz * oneStickRollScale;
+            wingAngleLeft += horiz * oneStickRollScale * percent;
+        }
+
+        wingAngleLeft = Mathf.Clamp(wingAngleLeft, minPitch, maxPitch);
+        wingAngleRight = Mathf.Clamp(wingAngleRight, minPitch, maxPitch);
+
+        float yaw = input.x;
+        if (speed < minSpeedForYaw)
+        {
+            yaw *= Util.ConvertScale(0, minSpeedForYaw, 0, 1, speed);
+        }
+        else if (speed < maxSpeedForYaw)
+        {
+            yaw *= Util.ConvertScale(minSpeedForYaw, maxSpeedForYaw, 1, 0, speed);
+        }
+        else
+        {
+            yaw = 0;
+        }
+        
+        glideV2Script.setYaw(yaw);
+        
+        glideV2Script.setWingAngleLeft(wingAngleLeft);
+        glideV2Script.setWingAngleRight(wingAngleRight);
+        glideV2Script.setWingOutAmountLeft(wingOutAmountLeft);
+        glideV2Script.setWingOutAmountRight(wingOutAmountRight);
+    }
+
+    void OnTriggerEnter(Collider collisionInfo) {
 		Debug.Log (collisionInfo+" "+collisionInfo.gameObject.tag);
 		if (collisionInfo.gameObject.CompareTag ("Edible")) {
 			Edible edible = collisionInfo.gameObject.GetComponent<Edible> ();
@@ -628,8 +817,8 @@ public class Player : MonoBehaviour {
 		}
 
         float rotateSpeed = isFlaming ? flameHeadRotateSpeed : regularHeadRotateSpeed;
-        headHoriz = Mathf.Lerp (headHoriz, desiredHeadHoriz, rotateSpeed * Time.deltaTime);
-		headVert = Mathf.Lerp (headVert, desiredHeadVert, rotateSpeed * Time.deltaTime);
+        headHoriz = Mathf.SmoothStep(headHoriz, desiredHeadHoriz, rotateSpeed * Time.deltaTime);
+		headVert = Mathf.SmoothStep(headVert, desiredHeadVert, rotateSpeed * Time.deltaTime);
 
 		foreach (Transform t in headComponents) {
 			Vector3 rot = t.eulerAngles;
@@ -638,10 +827,15 @@ public class Player : MonoBehaviour {
 			t.eulerAngles = rot;
 		}
 
-        Vector3 headCameraTargetRot = headCameraTarget.localEulerAngles;
-        headCameraTargetRot.y = headHoriz * headComponents.Length;
-        headCameraTargetRot.x = -headVert * headComponents.Length;
+        float rotY = headHoriz * headComponents.Length;
+        float rotX = -headVert * headComponents.Length;
 
-        headCameraTarget.localEulerAngles = headCameraTargetRot;
+        foreach (Transform t in headCameraTargets)
+        {
+            Vector3 headCameraTargetRot = t.localEulerAngles;
+            headCameraTargetRot.y = rotY;
+            headCameraTargetRot.x = rotX;
+            t.localEulerAngles = headCameraTargetRot;
+        }
     }
 }

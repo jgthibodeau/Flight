@@ -63,11 +63,22 @@ public class Util : MonoBehaviour {
 	}
 
 	public static float GetAxis(string axis){
-		return TeamUtility.IO.InputManager.GetAxis (axis);
+        float val = TeamUtility.IO.InputManager.GetAxis(axis);
+        if (val == 0f && TeamUtility.IO.InputManager.GetButton(axis))
+        {
+            val = 1f;
+        }
+        return val;
 	}
-	public static bool GetButton(string button){
-		return TeamUtility.IO.InputManager.GetButton (button);
-	}
+	public static bool GetButton(string button)
+    {
+        bool val = TeamUtility.IO.InputManager.GetButton(button);
+        if (!val && TeamUtility.IO.InputManager.GetAxis(button) != 0)
+        {
+            val = true;
+        }
+        return val;
+    }
 	public static bool GetButtonDown(string button){
 		return TeamUtility.IO.InputManager.GetButtonDown (button);
 	}
@@ -81,6 +92,7 @@ public class Util : MonoBehaviour {
 
     public static float ConvertScale(float oldMin, float oldMax, float newMin, float newMax, float value)
     {
+        value = Mathf.Clamp(value, oldMin, oldMax);
         return (((value - oldMin) * (newMax - newMin)) / (oldMax - oldMin)) + newMin;
     }
 
@@ -88,5 +100,17 @@ public class Util : MonoBehaviour {
     {
         Collider[] colliders = Physics.OverlapCapsule(position - Vector3.up * height, position + Vector3.up * height, radius, layer);
         return colliders.Length == 0;
+    }
+
+    public static Vector3 TransformPointUnscaled(Transform transform, Vector3 position)
+    {
+        var localToWorldMatrix = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
+        return localToWorldMatrix.MultiplyPoint3x4(position);
+    }
+
+    public static Vector3 InverseTransformPointUnscaled(Transform transform, Vector3 position)
+    {
+        var worldToLocalMatrix = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one).inverse;
+        return worldToLocalMatrix.MultiplyPoint3x4(position);
     }
 }

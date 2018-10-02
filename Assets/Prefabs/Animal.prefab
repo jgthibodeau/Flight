@@ -1519,6 +1519,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   collider: {fileID: 0}
+  pickupable: {fileID: 0}
   _CanFollowPlayer: 1
   _CanFollowBreadcrumbs: 0
   _CanFollowAi: 0
@@ -1633,8 +1634,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e60d39cfff845554dbf4627e88f2fdb7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  invincible: 0
   maxHealth: 100
   currentHealth: 100
+  deathParticles: {fileID: 0}
   spawnOnDeath: {fileID: 1206660408059822, guid: 25764b26d6841b9478fa43dbd87e5230,
     type: 2}
   minSpawnForce: {x: 0, y: 0, z: 0}
@@ -5340,13 +5343,13 @@ ParticleSystem:
       type: 0
       properties: 0
   LightsModule:
-    enabled: 0
+    enabled: 1
     ratio: 0
-    light: {fileID: 0}
+    light: {fileID: 108064351222898016, guid: 8d4eae95c15365444be5727d079804b1, type: 2}
     randomDistribution: 1
     color: 1
     range: 1
-    intensity: 1
+    intensity: 0
     rangeCurve:
       serializedVersion: 2
       minMaxState: 0
@@ -5453,7 +5456,7 @@ ParticleSystem:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-    maxLights: 20
+    maxLights: 3
   TrailModule:
     enabled: 0
     mode: 0

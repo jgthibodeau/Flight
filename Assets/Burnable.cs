@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Health))]
 public class Burnable : MonoBehaviour {
 	Health health;
 
@@ -17,7 +16,11 @@ public class Burnable : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		health = GetComponent<Health> ();
+		health = GetComponentInParent<Health> ();
+        if (onFire)
+        {
+            SetOnFire(fireDamage);
+        }
 	}
 	
 	// Update is called once per frame
@@ -35,17 +38,38 @@ public class Burnable : MonoBehaviour {
 	}
 
 	public void SetOnFire(float damage){
-		onFire = true;
-		currentFireOutTime = fireOutTime;
-		fireDamage = damage;
+        if (!onFire)
+        {
+            onFire = true;
+            currentFireOutTime = fireOutTime;
+            fireDamage = damage;
 
-        fire.GetComponent<ParticleSystem>().Play();
+            foreach (ParticleSystem ps in fire.GetComponentsInChildren<ParticleSystem>())
+            {
+                ps.Play();
+            }
+        }
+        else if (currentFireOutTime < fireOutTime)
+        {
+            currentFireOutTime = fireOutTime;
+        }
 	}
 
-	public void Extinguish() {
+    public void FanFlame(float amount)
+    {
+        if (onFire)
+        {
+            currentFireOutTime += amount;
+        }
+    }
+
+    public void Extinguish() {
 		onFire = false;
 		currentFireOutTime = 0;
         
-        fire.GetComponent<ParticleSystem>().Stop();
+        foreach (ParticleSystem ps in fire.GetComponentsInChildren<ParticleSystem>())
+        {
+            ps.Stop();
+        }
     }
 }

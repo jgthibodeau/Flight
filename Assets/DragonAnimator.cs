@@ -3,8 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class DragonAnimator : MonoBehaviour {
+    public Player player;
+
 	public float FadeLength;
-	public bool Flapping, Grounded, WingsOut, Walking, Hopping, InWater, Flame, Attack, Healing, Boosting, BoostTriggered;
+	public bool Flapping, BackFlap, Grounded, WingsOut, Walking, Hopping, InWater, Flame, Attack, Healing, Boosting, BoostTriggered, Gusting, GustTriggered;
     private bool AnimationFlapping;
 	private bool Attacking;
 	public float FlapSpeed;
@@ -20,7 +22,7 @@ public class DragonAnimator : MonoBehaviour {
 
 	public bool manuallyAdjustWings = true;
 
-	[HideInInspector]
+	//[HideInInspector]
 	public float pitchLeft, pitchRight, rollLeft, rollRight, tailPitch, liftLeft, liftRight;
 
 	public float lerpSpeed;
@@ -51,12 +53,13 @@ public class DragonAnimator : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		animator = GetComponent<Animator> ();
+        player = GetComponentInParent<Player>();
 	}
 	
 	// Update is called once per frame
 	void LateUpdate () {
 		animator.SetBool ("Flapping", FlapSpeed != 0);
-		animator.SetBool ("FlapBack", FlapSpeed != 0 && liftLeft > 0 && liftRight > 0);
+		animator.SetBool ("BackFlap", FlapSpeed != 0 && BackFlap);
 		animator.SetBool ("Grounded", Grounded);
 		animator.SetBool ("WingsOut", WingsOut);
 		animator.SetBool ("Walking", MoveSpeed != 0);
@@ -70,6 +73,12 @@ public class DragonAnimator : MonoBehaviour {
 			animator.SetTrigger ("BoostTriggered");
 			BoostTriggered = false;
 		}
+
+        if (GustTriggered)
+        {
+            animator.SetTrigger("GustTriggered");
+            GustTriggered = false;
+        }
 
 		animator.SetFloat ("MoveSpeed", MoveSpeed);
 		animator.SetFloat ("WalkSpeed", WalkScale * MoveSpeed);
@@ -85,10 +94,14 @@ public class DragonAnimator : MonoBehaviour {
 				ResetWings ();
 			}
 		}
-
-        if (!Grounded)
+        
+        if (tailV1)
         {
-            UpdateTail ();
+            UpdateTail();
+        }
+        else
+        {
+            UpdateTailV2();
         }
 	}
 
@@ -163,47 +176,100 @@ public class DragonAnimator : MonoBehaviour {
 		UpdateRightWingFlap ();
 	}
 
-	void UpdateLeftWingGlide() {
-		bool wingsIn = liftLeft < 0;
-		bool wingsOut = liftLeft > 0;
+    public float minYToPointDown;
+    bool leftWingIn;
+    bool rightWingIn;
+    void UpdateLeftWingGlide() {
+        //float pointDownScale = 1 - Util.ConvertScale(-1f, minYToPointDown, 0, 1, transform.forward.y);
 
-		float liftRollScale = 1f;
-		if (wingsIn) {
-			desiredLeftWingRotation.y -= wingsInScale * liftLeft;
+        //desiredLeftWingRotation.y += wingsInScale * pointDownScale;
 
-			desiredLeftWingScale.z += wingsInSizeScale * liftLeft;
-			desiredLeftWingScale.x += wingsInLengthScale * liftLeft;
+        //desiredLeftWingScale.z -= wingsInSizeScale * pointDownScale;
+        //desiredLeftWingScale.x -= wingsInLengthScale * pointDownScale;
 
-			liftRollScale += liftLeft;
-		} else if (wingsOut) {
-			desiredLeftWingRotation.y -= wingsOutScale * liftLeft;
 
-			desiredLeftWingScale.z += wingsOutSizeScale * liftLeft;
-			desiredLeftWingScale.x += wingsOutLengthScale * liftLeft;
-		}
 
-		desiredLeftWingRotation.z -= rollScale * rollLeft * liftRollScale;
+        //desiredLeftWingRotation.z -= rollScale * rollLeft * (1 + liftLeft);
 
-		desiredLeftWingRotation.x -= pitchUpScale * pitchLeft;
-	}
+        //if (pitchLeft < 0)
+        //{
+        //    desiredLeftWingRotation.x += pitchUpScale * pitchLeft;
+
+        //    desiredLeftWingRotation.y -= wingsOutScale * liftLeft;
+        //    desiredLeftWingScale.z += wingsOutSizeScale * liftLeft;
+        //    desiredLeftWingScale.x += wingsOutLengthScale * liftLeft;
+        //}
+        //else
+        //{
+        //    desiredLeftWingRotation.x += pitchDownScale * pitchLeft;
+        //}
+
+
+        if (transform.forward.y < minYToPointDown)
+        {
+            leftWingIn = true;
+        }
+        if (pitchLeft < 0 || transform.forward.y >= minYToPointDown)
+        {
+            leftWingIn = false;
+        }
+
+        float liftRollScale = 1f;
+        if (leftWingIn)
+        {
+            float pointDownScale = 1 - Util.ConvertScale(-1f, minYToPointDown, 0, 1, transform.forward.y);
+            desiredLeftWingRotation.y += wingsInScale * pointDownScale;
+
+            desiredLeftWingScale.z -= wingsInSizeScale * pointDownScale;
+            desiredLeftWingScale.x -= wingsInLengthScale * pointDownScale;
+
+            liftRollScale += liftLeft;
+        }
+        else {
+            desiredLeftWingRotation.y -= wingsOutScale * liftLeft;
+
+            desiredLeftWingScale.z += wingsOutSizeScale * liftLeft;
+            desiredLeftWingScale.x += wingsOutLengthScale * liftLeft;
+        }
+
+        desiredLeftWingRotation.z -= rollScale * rollLeft * liftRollScale;
+
+        if (pitchLeft < 0)
+        {
+            desiredLeftWingRotation.x += pitchUpScale * pitchLeft;
+        }
+        else
+        {
+            desiredLeftWingRotation.x += pitchDownScale * pitchLeft;
+        }
+    }
 
 	void UpdateLeftWingFlap() {
 		desiredLeftWingRotation.x -= flapRotateScale * rollLeft;
 	}
 
 	void UpdateRightWingGlide() {
-		bool wingsIn = liftRight < 0;
-		bool wingsOut = liftRight > 0;
+        if (transform.forward.y < minYToPointDown)
+        {
+            rightWingIn = true;
+        }
+        if (pitchRight < 0 || transform.forward.y >= minYToPointDown)
+        {
+            rightWingIn = false;
+        }
 
-		float liftRollScale = 1f;
-		if (wingsIn) {
-			desiredRightWingRotation.y += wingsInScale * liftRight;
+        float liftRollScale = 1f;
+        if (rightWingIn)
+        {
+            float pointDownScale = 1 - Util.ConvertScale(-1f, minYToPointDown, 0, 1, transform.forward.y);
+            desiredRightWingRotation.y -= wingsInScale * pointDownScale;
 
-			desiredRightWingScale.z += wingsInSizeScale * liftRight;
-			desiredRightWingScale.x += wingsInLengthScale * liftRight;
+            desiredRightWingScale.z -= wingsInSizeScale * pointDownScale;
+            desiredRightWingScale.x -= wingsInLengthScale * pointDownScale;
 
-			liftRollScale += liftRight;
-		} else if (wingsOut) {
+            liftRollScale += liftRight;
+        }
+        else {
 			desiredRightWingRotation.y += wingsOutScale * liftRight;
 
 			desiredRightWingScale.z += wingsOutSizeScale * liftRight;
@@ -211,17 +277,174 @@ public class DragonAnimator : MonoBehaviour {
 		}
 
 		desiredRightWingRotation.z -= rollScale * rollRight * liftRollScale;
-
-		desiredRightWingRotation.x += pitchUpScale * pitchRight;
-	}
+        
+        if (pitchRight < 0)
+        {
+            desiredRightWingRotation.x -= pitchUpScale * pitchRight;
+        }
+        else
+        {
+            desiredRightWingRotation.x -= pitchDownScale * pitchRight;
+        }
+    }
 
 	void UpdateRightWingFlap() {
 		desiredRightWingRotation.x += flapRotateScale * rollRight;
 	}
 
+    public Transform tailRoot;
+    public bool tailV1;
+    public bool exactTailAngle;
+
+    public float tailRotateScaleVertAir;
+    public float tailRotateScaleHorizAir;
+
+    public float tailRotateHorizSpeed;
+    public float tailRotateVertSpeed;
+    private float tailHoriz = 0;
+    private float tailVert = 0;
+
+    public float minVelocityForTail;
+
     void UpdateTail()
     {
-        //TODO
+        if (Grounded || transform.GetComponentInParent<Rigidbody>().velocity.magnitude < minVelocityForTail)
+        {
+            return;
+        }
+
+        float zAnglePct = (Util.ConvertScale(0, 360, 1, -1, player.transform.eulerAngles.z));
+        if (zAnglePct > 0.5f)
+        {
+            zAnglePct = Util.ConvertScale(0.5f, 1f, 0.5f, 0f, zAnglePct);
+        }
+        if (zAnglePct < -0.5f)
+        {
+            zAnglePct = Util.ConvertScale(-1f, -0.5f, 0f, -0.5f, zAnglePct);
+        }
+        float desiredHoriz = zAnglePct * tailRotateScaleHorizAir;
+
+
+        float desiredVert = 0;
+        //Vector3 velocity = transform.GetComponentInParent<Rigidbody>().velocity;
+        //Vector3 upVelocity = Vector3.ProjectOnPlane(velocity, transform.right);
+        //desiredVert = Vector3.SignedAngle(transform.forward, upVelocity, transform.right) * tailRotateScaleVertAir;
+        Vector3 velocity = transform.GetComponentInParent<Rigidbody>().angularVelocity;
+        desiredVert = velocity.z * tailRotateScaleVertAir;
+
+        tailHoriz = Mathf.Lerp(tailHoriz, desiredHoriz, tailRotateHorizSpeed * Time.deltaTime);
+        tailVert = Mathf.Lerp(tailVert, desiredVert, tailRotateVertSpeed * Time.deltaTime);
+        
+
+        UpdateTailTransform(tailRoot);
+
+        if (exactTailAngle)
+        {
+            Vector3 rot = tailRoot.localEulerAngles;
+            rot.z += 90;
+            tailRoot.localEulerAngles = rot;
+        }
+    }
+
+    void UpdateTailTransform(Transform t)
+    {
+        if (t == null)
+        {
+            return;
+        }
+
+        if (exactTailAngle)
+        {
+            Vector3 rot = t.localEulerAngles;
+            rot.x = 0;
+            rot.y = tailHoriz;
+            rot.z = tailVert;
+            t.localEulerAngles = rot;
+        }
+        else
+        {
+            Vector3 rot = t.localEulerAngles;
+            rot.y += tailHoriz;
+            rot.z += tailVert;
+            t.localEulerAngles = rot;
+        }
+
+        foreach (Transform child in t)
+        {
+            UpdateTailTransform(child);
+        }
+    }
+
+    void UpdateTailV2()
+    {
+        if (Grounded || transform.GetComponentInParent<Rigidbody>().velocity.magnitude < minVelocityForTail)
+        {
+            return;
+        }
+
+        Vector3 back = -transform.forward;
+        Vector3 desiredBack = Vector3.RotateTowards(back, Vector3.down, tailRotateScaleHorizAir, 0).normalized;
+        Vector3 localBack = desiredBack;// transform.InverseTransformDirection(desiredBack);
+        Debug.Log(localBack);
+
+        Debug.DrawRay(transform.position, desiredBack * 20, Color.yellow);
+
+        //tailHoriz = Mathf.Lerp(tailHoriz, localBack.x * 360, tailRotateHorizSpeed * Time.deltaTime);
+        //tailVert = Mathf.Lerp(tailVert, localBack.y * 360, tailRotateVertSpeed * Time.deltaTime);
+
+        UpdateTailTransformV2(tailRoot, desiredBack);
+
+        //if (exactTailAngle)
+        //{
+        Vector3 rot = tailRoot.localEulerAngles;
+        rot.z += 90;
+        tailRoot.localEulerAngles = new Vector3(0, 0, 90);
+        //}
+    }
+
+    void UpdateTailTransformV2(Transform t, Vector3 desiredBack)
+    {
+        if (t == null)
+        {
+            return;
+        }
+
+        foreach (Transform child in t)
+        {
+            //Vector3 rot = transform.forward;
+            //rot = Vector3.RotateTowards(rot, -desiredBack, tailRotateScaleVertAir, 0);
+            //rot.y -= 90;
+            //child.eulerAngles = rot;
+
+
+            //Quaternion lookRotation = Quaternion.LookRotation(-desiredBack);
+            //child.rotation = Quaternion.Slerp(child.rotation, lookRotation, 0.1f);
+
+            //if (exactTailAngle)
+            //{
+            //????
+            //}
+            //else
+            //{
+            //    Vector3 rot = t.eulerAngles;
+            //    rot.y += tailHoriz;
+            //    rot.x += tailVert;
+            //    t.eulerAngles = rot;
+            //}
+
+            child.localEulerAngles = new Vector3(0, 0, 0);
+
+            //Quaternion down = Quaternion.LookRotation(Vector3.down);
+            //child.rotation = Quaternion.RotateTowards(child.rotation, down, tailRotateScaleHorizAir);
+
+            child.right = Vector3.RotateTowards(child.right, Vector3.up, tailRotateScaleHorizAir, 0);
+
+            Vector3 rot = child.localEulerAngles;
+            rot.x = 0;
+            child.localEulerAngles = rot;
+
+            UpdateTailTransformV2(child, desiredBack);
+        }
     }
 
 
@@ -252,6 +475,12 @@ public class DragonAnimator : MonoBehaviour {
 	public float runMinPitch = 1f;
 	public float runMaxPitch = 1f;
 
+    public AudioClip gustAudioClip;
+    public float groundGustVolume = 1f;
+    public float airGustVolume = 1f;
+    public float gustMinPitch = 0.6f;
+    public float gustMaxPitch = 1.2f;
+
 	void PlayFlapAudio() {
 		audioSource.volume = flapVolume;
 		audioSource.pitch = Random.Range (flapMinPitch, flapMaxPitch);
@@ -281,4 +510,17 @@ public class DragonAnimator : MonoBehaviour {
 		audioSource.pitch = Random.Range (runMinPitch, runMaxPitch);
 		audioSource.PlayOneShot (runAudioClips[Random.Range(0, runAudioClips.Count - 1)]);
 	}
+
+    void PlayGustAudio()
+    {
+        audioSource.volume = Grounded ? groundGustVolume : airGustVolume;
+        audioSource.pitch = Random.Range(gustMinPitch, gustMaxPitch);
+        audioSource.PlayOneShot(gustAudioClip);
+    }
+
+    void StopGusting()
+    {
+        Debug.Log("gusting stopped");
+        player.isGusting = false;
+    }
 }

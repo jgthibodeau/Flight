@@ -16,6 +16,7 @@ TagManager:
   - Waypoint
   - Gold
   - Breadcrumb
+  - MainTerrain
   layers:
   - Default
   - TransparentFX
@@ -46,9 +47,9 @@ TagManager:
   - Breadcrumb
   - Gust
   - TerrainCollideOnly
-  - 
-  - 
-  - 
+  - Treasure
+  - Hoard
+  - Tree
   m_SortingLayers:
   - name: Default
     uniqueID: 0

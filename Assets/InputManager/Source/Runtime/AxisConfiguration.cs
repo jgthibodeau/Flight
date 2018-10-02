@@ -52,15 +52,19 @@ namespace TeamUtility.IO
 		/// The speed(in units/sec) at which a digital axis falls towards neutral.
 		/// </summary>
 		public float gravity = 1.0f;
-		/// <summary>
-		/// The speed(in units/sec) at which a digital axis moves towards the target value.
-		/// </summary>
-		public float sensitivity = 1.0f;
-		/// <summary>
-		/// If input switches direction, do we snap to neutral and continue from there?
-		///	Only for digital axes.
-		/// </summary>
-		public bool snap;
+        /// <summary>
+        /// The speed(in units/sec) at which a digital axis moves towards the target value.
+        /// </summary>
+        public float sensitivity = 1.0f;
+        /// <summary>
+        /// Determines if this input will appear in rebindable key menus.
+        /// </summary>
+        public bool rebindable = true;
+        /// <summary>
+        /// If input switches direction, do we snap to neutral and continue from there?
+        ///	Only for digital axes.
+        /// </summary>
+        public bool snap;
 		public bool invert;
 		public InputType type = InputType.DigitalAxis;
 		public int axis;
@@ -139,8 +143,9 @@ namespace TeamUtility.IO
 			altNegative = KeyCode.None;
 			type = InputType.Button;
 			gravity = 1.0f;
-			sensitivity = 1.0f;
-		}
+            sensitivity = 1.0f;
+            rebindable = true;
+        }
 		
 		public void Initialize()
 		{
@@ -422,7 +427,8 @@ namespace TeamUtility.IO
 			deadZone = source.deadZone;
 			gravity = source.gravity;
 			sensitivity = source.sensitivity;
-			snap = source.snap;
+            rebindable = source.rebindable;
+            snap = source.snap;
 			invert = source.invert;
 			type = source.type;
 			axis = source.axis;
@@ -511,7 +517,8 @@ namespace TeamUtility.IO
 			axisConfig.deadZone = source.deadZone;
 			axisConfig.gravity = source.gravity;
 			axisConfig.sensitivity = source.sensitivity;
-			axisConfig.snap = source.snap;
+            axisConfig.rebindable = source.rebindable;
+            axisConfig.snap = source.snap;
 			axisConfig.invert = source.invert;
 			axisConfig.type = source.type;
 			axisConfig.axis = source.axis;

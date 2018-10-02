@@ -4,12 +4,28 @@ using UnityEngine;
 
 public class PrefabSpawner: MonoBehaviour {
     public List<GameObject> spawnables;
+    public bool inheritVelocity;
+
+    public bool useCoolDown;
     public float coolDown;
     public float currentCoolDown;
 
+    private Rigidbody rb;
+
+    public Transform spawnOrigin;
+
+    void Start()
+    {
+        rb = GetComponentInParent<Rigidbody>();
+        if (spawnOrigin == null)
+        {
+            spawnOrigin = transform;
+        }
+    }
+
     void Update()
     {
-        if (currentCoolDown > 0)
+        if (useCoolDown && currentCoolDown > 0)
         {
             currentCoolDown -= Time.deltaTime;
         }
@@ -17,7 +33,7 @@ public class PrefabSpawner: MonoBehaviour {
 
     public bool CanSpawn()
     {
-        return currentCoolDown <= 0;
+        return !useCoolDown || currentCoolDown <= 0;
     }
 
     public bool Spawn(int index)
@@ -37,8 +53,13 @@ public class PrefabSpawner: MonoBehaviour {
         }
 
         GameObject inst = GameObject.Instantiate(spawnables[index]);
-        inst.transform.position = transform.position;
-        inst.transform.rotation = transform.rotation;
+        inst.transform.position = spawnOrigin.position;
+        inst.transform.rotation = spawnOrigin.rotation;
+
+        if (inheritVelocity && inst.GetComponent<Rigidbody>() != null && rb != null)
+        {
+            inst.GetComponent<Rigidbody>().velocity = rb.velocity;
+        }
 
         currentCoolDown = coolDown;
 

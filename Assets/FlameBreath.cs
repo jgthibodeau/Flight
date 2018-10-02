@@ -8,13 +8,16 @@ public class FlameBreath : MonoBehaviour {
 	public bool flameOn;
 
 	public ParticleSystem flameParticles;
-//	public ParticleSystem flameDepletedParticles;
-	public ParticleVelocity flameParticleVelocity;
+    //	public ParticleSystem flameDepletedParticles;
+    public ParticleVelocity flameParticleVelocity;
+    public Transform flameStart;
 
-	public float flameParticleMaxEmission = 100;
+    public float flameParticleMaxEmission = 100;
 	public float flameParticleMaxLifetime = 2;
 	public float flameParticleMaxSpeed = 20;
 	public float flameParticleMaxScale = 1;
+
+    public bool customInheritVelocity;
 
 //	public float flameParticleMinEmission = 50;
 //	public float flameParticleMinLifetime = 1;
@@ -41,8 +44,9 @@ public class FlameBreath : MonoBehaviour {
 	public float rampDownSpeed = 2f;
 
 	private ParticleSystem.MainModule mm;
-	private ParticleSystem.EmissionModule em;
-	private ParticleSystem.MinMaxCurve rateOverTime;
+    private ParticleSystem.EmissionModule em;
+    private ParticleSystem.ShapeModule sm;
+    private ParticleSystem.MinMaxCurve rateOverTime;
 	private ParticleSystem.MinMaxCurve sizeOverTime;
 	public float originalRate;
 	public float rateMultiplier;
@@ -59,8 +63,13 @@ public class FlameBreath : MonoBehaviour {
 	public float breathRegainDelay;
 	public float currentRegainDelay;
 
+    private Rigidbody rb;
+
 	void Start() {
-		mm = flameParticles.main;
+        rb = GetComponent<Rigidbody>();
+
+        mm = flameParticles.main;
+        sm = flameParticles.shape;
 		em = flameParticles.emission;
 		rateOverTime = em.rateOverTime;
 
@@ -90,11 +99,30 @@ public class FlameBreath : MonoBehaviour {
 		flameAudio.volume = Mathf.Clamp(volume, 0, maxFlameVolume);
 
 		mm.startLifetime = flameParticleMaxLifetime * diminishedPercent * rateMultiplier;
-		mm.startSpeed = flameParticleMaxSpeed * diminishedPercent * rateMultiplier;
 		mm.startSize = rateMultiplier * diminishedPercent;
-	}
 
-	public void StartFlame () {
+        float startSpeed = flameParticleMaxSpeed *diminishedPercent * rateMultiplier;
+        if (customInheritVelocity)
+        {
+            float forwardVelocity = Vector3.Dot(rb.velocity, flameParticles.transform.forward);
+            //			float forwardVelocity = Vector3.Dot (rb.velocity, rb.transform.forward) * scale;
+            //			particleSpeed.constant = originalSpeed + forwardVelocity;
+            //			mm.startSpeed = particleSpeed;
+            startSpeed += forwardVelocity;
+        }
+        mm.startSpeed = startSpeed;
+    }
+
+    void LateUpdate()
+    {
+        //Vector3 offset = transform.InverseTransformPoint(flameStart.position);
+        //sm.position = offset;
+        ////sm.rotation = flameStart.localEulerAngles;
+        //Vector3 forward = transform.InverseTransformDirection(flameStart.forward);
+        //sm.rotation = Quaternion.LookRotation(forward, transform.up).eulerAngles;
+    }
+
+    public void StartFlame () {
 		if (currentUseDelay > 0) {
 			currentUseDelay -= Time.deltaTime;
 		} else {

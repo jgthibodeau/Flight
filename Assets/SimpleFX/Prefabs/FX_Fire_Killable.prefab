@@ -225,6 +225,9 @@ MonoBehaviour:
   fireLayer:
     serializedVersion: 2
     m_Bits: 4194304
+  waterLayer:
+    serializedVersion: 2
+    m_Bits: 0
   spreadableFire: {fileID: 1158248402795780}
   killScript: {fileID: 0}
   cc: {fileID: 0}
@@ -235,6 +238,7 @@ MonoBehaviour:
   minPitch: 0.8
   maxPitch: 1
   damage: 20
+  waterLifeDecreaseRate: 0
   startLifetime: 6
   maxLifetime: 20
   minScale: 0.5

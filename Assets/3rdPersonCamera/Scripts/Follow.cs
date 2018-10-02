@@ -8,7 +8,10 @@ namespace ThirdPersonCamera
 	}
     public class Follow : MonoBehaviour
     {
-		public bool adjustFollowTypeWithSpeed = false;
+        public FreeFormCameraTarget freeFormCameraTarget;
+
+        public bool keepUpright = true;
+        public bool adjustFollowTypeWithSpeed = false;
 		public float minTightFollowSpeed = 5f;
 		public FOLLOW_TYPE followType = FOLLOW_TYPE.TIGHT;
         public bool alignOnSlopes = true;
@@ -25,49 +28,71 @@ namespace ThirdPersonCamera
 
         public CameraController cc;
 		Rigidbody targetRb;
+        
+        public void CloneFrom(Follow other)
+        {
+            keepUpright = other.keepUpright;
+            adjustFollowTypeWithSpeed = other.adjustFollowTypeWithSpeed;
+            followType = other.followType;
+            minTightFollowSpeed = other.minTightFollowSpeed;
+            alignOnSlopes = other.alignOnSlopes;
+            minTightAngle = other.minTightAngle;
+            minAngleToTurn = other.minAngleToTurn;
+            rotationSpeed = other.rotationSpeed;
+            rotationSpeedSlopes = other.rotationSpeedSlopes;
+            tiltVector = other.tiltVector;
+            layerMask = other.layerMask;
+        }
 
         void Start()
         {
-//            cc = GetComponent<CameraController>();
-			targetRb = cc.target.GetComponent<Rigidbody> ();
+            cc = GetComponent<CameraController>();
+            targetRb = cc.target.GetComponent<Rigidbody> ();
         }
 
 		Vector3 prevTargetPosition;
 		Vector3 movementDirection;
 
-        void FixedUpdate()
+        void LateUpdate()
 		{
 			movementDirection = transform.position - prevTargetPosition;
 //			movementDirection = targetRb.velocity;
 			prevTargetPosition = transform.position;
 
 			RaycastHit raycastHit;
-			Vector3 upVector = Vector3.up;
+            Vector3 upVector = Vector3.up;
+            if (!keepUpright)
+            {
+                upVector = cc.target.up;
+            }
 			Quaternion toRotation;
-
-//			if (adjustFollowTypeWithSpeed && targetRb != null) {
-			if (adjustFollowTypeWithSpeed) {
-				if (movementDirection.magnitude > minTightFollowSpeed) {
-					followType = FOLLOW_TYPE.TIGHT;
-				} else {
-					followType = FOLLOW_TYPE.LOOSE;
-				}
-			}
+            
+            if (freeFormCameraTarget != null && freeFormCameraTarget.freeFormActive)
+            {
+                followType = FOLLOW_TYPE.TIGHT;
+            }
+            else if (adjustFollowTypeWithSpeed)
+            {
+                if (movementDirection.magnitude > minTightFollowSpeed)
+                {
+                    followType = FOLLOW_TYPE.TIGHT;
+                }
+                else
+                {
+                    followType = FOLLOW_TYPE.LOOSE;
+                }
+            }
 
 			switch(followType) {
 			case FOLLOW_TYPE.TIGHT:
-				cc.slerpPosition = true;
-
 				toRotation = Quaternion.LookRotation (cc.target.forward + tiltVector, upVector);
 
-				toRotation = Quaternion.Slerp (cc.transform.rotation, toRotation, Time.fixedDeltaTime * rotationSpeed);
+				toRotation = Quaternion.Slerp (cc.transform.rotation, toRotation, cc.CalculateCameraBlend(rotationSpeed));
 				cc.transform.rotation = toRotation;
 
 				break;
 
 			case FOLLOW_TYPE.LOOSE:
-				cc.slerpPosition = true;
-
 				Vector3 targetDirection = cc.target.transform.position - cc.transform.position;
 				if (movementDirection.magnitude > 0.1f) {
 					targetDirection += Vector3.ClampMagnitude(movementDirection, 1);
@@ -85,10 +110,10 @@ namespace ThirdPersonCamera
 
 					float angle = AngleSigned (Vector3.up, upVector, cc.target.transform.right);
 
-					toRotation = Quaternion.Slerp (toRotation, toRotation * Quaternion.AngleAxis (angle, Vector3.right), Time.fixedDeltaTime * rotationSpeedSlopes);
+					toRotation = Quaternion.Slerp (toRotation, toRotation * Quaternion.AngleAxis (angle, Vector3.right), cc.CalculateCameraBlend(rotationSpeedSlopes));
 				}
 
-				toRotation = Quaternion.Slerp (cc.transform.rotation, toRotation, Time.fixedDeltaTime * rotationSpeed);
+				toRotation = Quaternion.Slerp (cc.transform.rotation, toRotation, cc.CalculateCameraBlend(rotationSpeed));
 				if (Quaternion.Angle (cc.transform.rotation, toRotation) > minAngleToTurn) {
 					cc.transform.rotation = toRotation;
 				}

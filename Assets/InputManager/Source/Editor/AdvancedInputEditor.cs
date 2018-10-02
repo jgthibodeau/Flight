@@ -938,8 +938,9 @@ namespace TeamUtilityEditor.IO
 		private void DisplayAxisConfigurationFields(InputConfiguration inputConfigx, AxisConfiguration axisConfig, Rect screenRect)
 		{
 			GUIContent gravityInfo = new GUIContent("Gravity", "The speed(in units/sec) at which a digital axis falls towards neutral.");
-			GUIContent sensitivityInfo = new GUIContent("Sensitivity", "The speed(in units/sec) at which an axis moves towards the target value.");
-			GUIContent snapInfo = new GUIContent("Snap", "If input switches direction, do we snap to neutral and continue from there? For digital axes only.");
+            GUIContent sensitivityInfo = new GUIContent("Sensitivity", "The speed(in units/sec) at which an axis moves towards the target value.");
+            GUIContent rebindableInfo = new GUIContent("Rebindable", "Determines if this input will appear in rebindable key menus.");
+            GUIContent snapInfo = new GUIContent("Snap", "If input switches direction, do we snap to neutral and continue from there? For digital axes only.");
 			GUIContent deadZoneInfo = new GUIContent("Dead Zone", "Size of analog dead zone. Values within this range map to neutral.");
 			
 			GUILayout.BeginArea(screenRect);
@@ -966,8 +967,9 @@ namespace TeamUtilityEditor.IO
 			
 			axisConfig.gravity = EditorGUILayout.FloatField(gravityInfo, axisConfig.gravity);
 			axisConfig.deadZone = EditorGUILayout.FloatField(deadZoneInfo, axisConfig.deadZone);
-			axisConfig.sensitivity = EditorGUILayout.FloatField(sensitivityInfo, axisConfig.sensitivity);
-			axisConfig.snap = EditorGUILayout.Toggle(snapInfo, axisConfig.snap);
+            axisConfig.sensitivity = EditorGUILayout.FloatField(sensitivityInfo, axisConfig.sensitivity);
+            axisConfig.rebindable = EditorGUILayout.Toggle(rebindableInfo, axisConfig.rebindable);
+            axisConfig.snap = EditorGUILayout.Toggle(snapInfo, axisConfig.snap);
 			axisConfig.invert = EditorGUILayout.Toggle("Invert", axisConfig.invert);
 			axisConfig.type = (InputType)EditorGUILayout.EnumPopup("Type", axisConfig.type);
 			axisConfig.axis = EditorGUILayout.Popup("Axis", axisConfig.axis, _axisOptions);

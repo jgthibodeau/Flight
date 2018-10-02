@@ -1,6 +1,6 @@
 {
-"companyName": "Mystical Pidgeon",
-"productName": "Flight",
+"companyName": "Mystical Pidgeons",
+"productName": "Dragon's Fire",
 "dataUrl": "docs.data.unityweb",
 "wasmCodeUrl": "docs.wasm.code.unityweb",
 "wasmFrameworkUrl": "docs.wasm.framework.unityweb",
@@ -8,5 +8,5 @@
 "graphicsAPI": ["WebGL 2.0", "WebGL 1.0"],
 "webglContextAttributes": {"preserveDrawingBuffer": false},
 "splashScreenStyle": "Dark",
-"backgroundColor": "#231F20"
+"backgroundColor": "#000000"
 }

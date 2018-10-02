@@ -25,6 +25,7 @@ public class DiscreteStaminaBar : MonoBehaviour {
 			DiscreteStaminaIcon icon = go.GetComponent<DiscreteStaminaIcon> ();
 
 			if (i < stamina.currentStamina) {
+				icon.rechargeImg.fillAmount = 0f;
 				icon.mainImg.fillAmount = 1f;
 			} else if (i == stamina.currentStamina) {
 				icon.rechargeImg.fillAmount = stamina.GetCurrentStaminaRechargePercent ();

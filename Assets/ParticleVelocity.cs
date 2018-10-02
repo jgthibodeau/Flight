@@ -90,7 +90,20 @@ public class ParticleVelocity : MonoBehaviour {
             }
         //}
 
+        DestroyableTree destroyableTree = other.GetComponentInParent<DestroyableTree>();
+        if (destroyableTree != null && !destroyableTree.treeIsActive)
+        {
+            float distance = Vector3.Distance(other.transform.position, transform.position) + 10f;
+            destroyableTree.Replace(distance, transform);
+        }
+
         Burnable burnable = other.GetComponentInParent<Burnable>();
+        if (burnable != null)
+        {
+            burnable.SetOnFire(damage);
+        }
+        
+        burnable = other.GetComponentInChildren<Burnable>();
         if (burnable != null)
         {
             burnable.SetOnFire(damage);
