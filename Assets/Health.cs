@@ -113,7 +113,7 @@ public class Health : MonoBehaviour, IHittable {
         {
             foreach(Burnable deathBurnable in inst.GetComponentsInChildren<Burnable>())
             {
-                deathBurnable.SetOnFire(burnable.fireDamage);
+                deathBurnable.TriggerFire(burnable.fireDamage);
             }
         }
     }

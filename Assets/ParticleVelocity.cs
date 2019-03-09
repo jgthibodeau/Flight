@@ -10,6 +10,9 @@ public class ParticleVelocity : MonoBehaviour {
 	public float scale = 2f;
     public LayerMask fireLayer;
 
+    [Range(0, 1)]
+    public float fireSpawnChance;
+
     private ParticleSystem ps;
 	private ParticleSystem.MainModule mm;
 	private ParticleSystem.CollisionModule cm;
@@ -63,7 +66,7 @@ public class ParticleVelocity : MonoBehaviour {
 
 		Burnable burnable = other.GetComponentInParent<Burnable> ();
 		if (burnable != null) {
-			burnable.SetOnFire (damage);
+			burnable.TriggerFire (damage);
 		}
 	}
 
@@ -84,7 +87,7 @@ public class ParticleVelocity : MonoBehaviour {
             int i = Random.Range(0, eventCount - 1);
             ParticleCollisionEvent pevent = CollisionEvents[i];
             Vector3 position = pevent.intersection;
-            if (Util.CanSpawn(position, 0.5f, 10f, fireLayer))
+            if (Util.CanSpawn(position, 0.5f, 10f, fireLayer) && Util.Probability(fireSpawnChance))
             {
                 GameObject.Instantiate(particleSpawned, position, Quaternion.identity);
             }
@@ -100,13 +103,13 @@ public class ParticleVelocity : MonoBehaviour {
         Burnable burnable = other.GetComponentInParent<Burnable>();
         if (burnable != null)
         {
-            burnable.SetOnFire(damage);
+            burnable.TriggerFire(damage);
         }
         
         burnable = other.GetComponentInChildren<Burnable>();
         if (burnable != null)
         {
-            burnable.SetOnFire(damage);
+            burnable.TriggerFire(damage);
         }
     }
 }

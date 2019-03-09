@@ -42,6 +42,27 @@ public class Quality : MonoBehaviour {
         ResetAll();
     }
     
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+    
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        Invoke("Refresh", 0.05f);
+    }
+
+    void Refresh()
+    {
+        RefreshComponents();
+        ResetAll();
+    }
+    
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
     void RefreshComponents()
     {
         if (cameraQuality == null)

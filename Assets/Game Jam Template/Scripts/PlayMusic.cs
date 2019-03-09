@@ -18,14 +18,14 @@ public class PlayMusic : MonoBehaviour {
 	public AudioMixerSnapshot volumeUp;				//Reference to Audio mixer snapshot in which the master volume of main mixer is turned up
 
 
-	private AudioSource musicSource;				//Reference to the AudioSource which plays music
+	public AudioSource musicSource;				//Reference to the AudioSource which plays music
 	private float resetTime = .01f;					//Very short time used to fade in near instantly without a click
 
 
 	void Awake () 
 	{
 		//Get a component reference to the AudioSource attached to the UI game object
-		musicSource = GetComponent<AudioSource> ();
+		//musicSource = GetComponent<AudioSource> ();
 		//Call the PlayLevelMusic function to start playing music
 	}
 

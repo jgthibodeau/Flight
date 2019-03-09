@@ -60,8 +60,9 @@ public class FlameBreath : MonoBehaviour {
 	public float currentUseDelay;
 
 	public float breathRegainRate;
-	public float breathRegainDelay;
-	public float currentRegainDelay;
+    public float breathRegainDelay;
+    public float breathMaxedOutRegainDelay;
+    public float currentRegainDelay;
 
     private Rigidbody rb;
 
@@ -111,6 +112,8 @@ public class FlameBreath : MonoBehaviour {
             startSpeed += forwardVelocity;
         }
         mm.startSpeed = startSpeed;
+
+        flameParticleVelocity.collisionsEnabled = currentBreath > 0;
     }
 
     void LateUpdate()
@@ -129,7 +132,8 @@ public class FlameBreath : MonoBehaviour {
 			currentBreath -= breathUseRate * Time.deltaTime;
 			currentBreath = Mathf.Clamp (currentBreath, 0, maxBreath);
 		}
-		currentRegainDelay = breathRegainDelay;
+
+        currentRegainDelay = currentBreath > 0 ? breathRegainDelay : breathMaxedOutRegainDelay;
 
 		if (rateMultiplier == 0) {
 			flameParticles.Play ();
@@ -137,11 +141,10 @@ public class FlameBreath : MonoBehaviour {
 		}
 
 		rateMultiplier = Mathf.Clamp01 (rateMultiplier + Time.deltaTime * rampUpSpeed);
-		flameParticleVelocity.collisionsEnabled = true;
 	}
 	
 	public void StopFlame () {
-		if (currentRegainDelay > 0 && currentBreath <= 0) {
+		if (currentRegainDelay > 0) {
 			currentRegainDelay -= Time.deltaTime;
 		} else {
 			currentBreath += breathRegainRate * Time.deltaTime;

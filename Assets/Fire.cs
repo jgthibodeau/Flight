@@ -114,7 +114,7 @@ public class Fire : MonoBehaviour {
 	void OnTriggerStay(Collider collision) {
 		Burnable burnable = collision.gameObject.GetComponentInParent<Burnable> ();
 		if (burnable != null) {
-			burnable.SetOnFire (damage);
+			burnable.TriggerFire (damage);
 		}
         
         if (collision.gameObject.layer == waterLayer)

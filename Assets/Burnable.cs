@@ -7,19 +7,25 @@ public class Burnable : MonoBehaviour {
 
 	public float fireDamage;
 
-	public bool onFire = false;
+    public float timeToCatchFire;
+    public float currentTimeToCatchFire;
+    private bool fireTriggered = false;
+    
+    public bool onFire = false;
 	public float fireOutTime = 5f;
 	public float currentFireOutTime = 0f;
 
 	public GameObject fire;
-	public GameObject steam;
 
 	// Use this for initialization
 	void Start () {
 		health = GetComponentInParent<Health> ();
         if (onFire)
         {
-            SetOnFire(fireDamage);
+            SetOnFire();
+        } else
+        {
+            Extinguish();
         }
 	}
 	
@@ -34,15 +40,43 @@ public class Burnable : MonoBehaviour {
 
 		if (onFire) {
 			health.Hit (fireDamage * Time.deltaTime, this.gameObject);
-		}
+            if (fireTriggered)
+            {
+                SetOnFire();
+            }
+		} else
+        {
+            if (fireTriggered)
+            {
+                currentTimeToCatchFire += Time.deltaTime;
+            } else
+            {
+                currentTimeToCatchFire -= Time.deltaTime;
+            }
+
+            if (currentTimeToCatchFire >= timeToCatchFire)
+            {
+                SetOnFire();
+            } else if (currentTimeToCatchFire < 0)
+            {
+                currentTimeToCatchFire = 0;
+            }
+        }
+
+        fireTriggered = false;
 	}
 
-	public void SetOnFire(float damage){
+    public void TriggerFire(float damage)
+    {
+        fireTriggered = true;
+        fireDamage = damage;
+    }
+
+	private void SetOnFire(){
         if (!onFire)
         {
             onFire = true;
             currentFireOutTime = fireOutTime;
-            fireDamage = damage;
 
             foreach (ParticleSystem ps in fire.GetComponentsInChildren<ParticleSystem>())
             {

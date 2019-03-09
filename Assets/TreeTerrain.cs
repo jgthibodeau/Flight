@@ -106,8 +106,11 @@ public class TreeTerrain : MonoBehaviour {
 
     public void SetTreeDistance(float newDistance)
     {
-        treeBillboardDistance = newDistance;
-        terrain.treeDistance = treeBillboardDistance;
+        if (terrain != null)
+        {
+            treeBillboardDistance = newDistance;
+            terrain.treeDistance = treeBillboardDistance;
+        }
     }
 
     void OnApplicationQuit() {

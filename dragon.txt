@@ -1,0 +1,33 @@
+dragon
+
+next goals:
+- work on enemies
+- create basic village to attack
+- eat something to restore flame, like more traditional ammo?
+
+
+horde
+- bring gold back here
+
+town
+- needs gold to rebuild
+- calls for help from castle when under attack and needing to rebuild
+- when low on gold, castle will be weakened
+- sends adventurers to horde to steal back gold
+
+castle
+- final goal is to destroy the castle
+- well guarded unless under-stocked because units sent to aid towns
+
+
+enemies
+- archer
+	- fires arrows at you
+- swordsman
+	- tries to melee attack you
+- seige weapons
+	- launches large projectiles
+- adventurer
+	- steals treasure
+- courier(?)
+	- alerts castle that backup is needed

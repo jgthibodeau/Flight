@@ -43,9 +43,14 @@ public class Player : MonoBehaviour {
     public float groundCheckRadius = 1f;
     public bool inWater;
 	public bool isGrounded;
+    public bool isFlying;
 	public bool isUpright;
 	public bool isFlaming;
 	public bool isGusting;
+
+    private Coroutine takeOffTransition;
+    private Coroutine landTransition;
+
     public float uprightThreshold;
 	public float speed;
 	public float ragdollSpeed;
@@ -147,23 +152,105 @@ public class Player : MonoBehaviour {
 //			}
 		}
 
-        glideV2Script.isGrounded = isGrounded;// && !glideV2Script.IsFlapping();
-        walkScript.isGrounded = isGrounded;// && !glideV2Script.IsFlapping();
+        //glideV2Script.isGrounded = isGrounded;// && !glideV2Script.IsFlapping();
+        //walkScript.isGrounded = isGrounded;// && !glideV2Script.IsFlapping();
 
-//		walkScript.isGrounded = isGrounded && !isFlapping;
-//		if (isFlapping) {
-//			glideV2Script.isGrounded = false;
-//		} else if (isGrounded) {
-//			glideV2Script.isGrounded = true;
-//		}
-//		if (isGrounded) {
-//			glideV2Script.wingsOut = false;
-//		}
-	}
+        //if isGrounded, then walkScript.isGrounded is true and glideV2Script.isFlying is false by default
+
+        if (isGrounded)
+        {
+            if (takeOffTransition != null)
+            {
+                Debug.Log("isGrounded and takeOffTransition running - killing takeOffTransition");
+                StopCoroutine(takeOffTransition);
+                //takeOffTransition = null;
+                FinishTakeOffTransition();
+            }
+
+            if (isFlying && landTransition == null)
+            {
+                Debug.Log("isGrounded, isFlying, and landTransition null - starting landTransition");
+                landTransition = StartCoroutine(StartLandTransition());
+            }// else if (!isFlying && landTransition != null)
+            //{
+            //    Debug.Log("isGrounded, !isFlying, and landTransition running - killing landTransition");
+            //    StopCoroutine(landTransition);
+            //    landTransition = null;
+            //}
+        } else
+        {
+            if (landTransition != null)
+            {
+                Debug.Log("!isGrounded and landTransition running - killing landTransition");
+                StopCoroutine(landTransition);
+                //landTransition = null;
+                FinishLandTransition();
+            }
+            if (!isFlying && takeOffTransition == null)
+            {
+                Debug.Log("!isGrounded, !isFlying, and takeOffTransition null - starting takeOffTransition");
+                takeOffTransition = StartCoroutine(StartTakeOffTransition());
+            }// else if (isFlying && takeOffTransition != null)
+            //{
+            //    Debug.Log("!isGrounded, isFlying, and takeOffTransition running - killing takeOffTransition");
+            //    StopCoroutine(takeOffTransition);
+            //    takeOffTransition = null;
+            //}
+        }
 
 
-	// Update is called once per frame
-	void Update () {
+
+        //		walkScript.isGrounded = isGrounded && !isFlapping;
+        //		if (isFlapping) {
+        //			glideV2Script.isGrounded = false;
+        //		} else if (isGrounded) {
+        //			glideV2Script.isGrounded = true;
+        //		}
+        //		if (isGrounded) {
+        //			glideV2Script.wingsOut = false;
+        //		}
+    }
+
+    public float landTime = 0.5f, takeOffTime = 0.5f;
+    IEnumerator StartLandTransition()
+    {
+        Debug.Log("StartLandTransition");
+        glideV2Script.isGrounded = true;
+        yield return new WaitForSeconds(landTime);
+        FinishLandTransition();
+    }
+
+    void FinishLandTransition()
+    {
+        Debug.Log("FinishLandTransition");
+        walkScript.isGrounded = true;
+        walkScript.isFlying = false;
+
+        isFlying = false;
+        landTransition = null;
+    }
+
+    IEnumerator StartTakeOffTransition()
+    {
+        Debug.Log("StartTakeOffTransition");
+        walkScript.isGrounded = false;
+        yield return new WaitForSeconds(takeOffTime);
+        FinishTakeOffTransition();
+    }
+
+    void FinishTakeOffTransition()
+    {
+        Debug.Log("FinishTakeOffTransition");
+        glideV2Script.isGrounded = false;
+        walkScript.isFlying = true;
+
+        isFlying = true;
+        takeOffTransition = null;
+    }
+
+
+    // Update is called once per frame
+    void Update () {
 		GetInput ();
 
 		UpdateRendering ();
@@ -438,12 +525,13 @@ public class Player : MonoBehaviour {
 
         if (backflapTriggered)
         {
-            backflapTriggered = !isGrounded && (flapSpeed > 0) && Util.GetAxis("Vertical") < stickYReleaseBackflap;
-            //TODO if released, wait some time to see if it is held down again
+            //backflapTriggered = !isGrounded && (flapSpeed > 0) && Util.GetAxis("Vertical") < stickYReleaseBackflap;
+            backflapTriggered = !isGrounded && gustHeld && Util.GetAxis("Vertical") < stickYReleaseBackflap;
         }
-        else if (!isGrounded && flapSpeed > 0)
+        else if (!isGrounded && /*flapSpeed > 0*/gustHeld)
         {
-            backflapTriggered = (flapSpeed > 0) && Util.GetAxis("Vertical") < stickYTriggersBackflap;
+            //backflapTriggered = (flapSpeed > 0) && Util.GetAxis("Vertical") < stickYTriggersBackflap;
+            backflapTriggered = gustHeld && Util.GetAxis("Vertical") < stickYTriggersBackflap;
         } else
         {
             backflapTriggered = false;
@@ -456,9 +544,10 @@ public class Player : MonoBehaviour {
         //    glideV2Script.boostHeld = false;
         //} else
         //{
-            glideV2Script.boostHeld = gustHeld;
+            //glideV2Script.boostHeld = gustHeld;
+            glideV2Script.boostHeld = gustHeld && !backflapTriggered;
 
-            if (gustTriggered && discreteStaminaScript.HasStamina())
+            if (gustTriggered && !backflapTriggered && discreteStaminaScript.HasStamina())
             {
                 if (!isGrounded)
                 {
@@ -485,13 +574,13 @@ public class Player : MonoBehaviour {
 
     void SpawnGust()
     {
-        if (!isGusting)
-        {
-            isGusting = true;
-            gustSpawner.Spawn();
-            discreteStaminaScript.UseStamina();
-            dragonAnimator.GustTriggered = true;
-        }
+        //if (!isGusting)
+        //{
+        //    isGusting = true;
+        //    gustSpawner.Spawn();
+        //    discreteStaminaScript.UseStamina();
+        //    dragonAnimator.GustTriggered = true;
+        //}
     }
 
 	//void TwoStickFlight() {
@@ -787,7 +876,11 @@ public class Player : MonoBehaviour {
 	}
 
 	public Transform[] headComponents;
-	public float headRotateUpScaleAir;
+    public float headRotateUpScaleBackflap;
+    public float headRotateDownScaleBackflap;
+    public float headRotateSideScaleBackflap;
+
+    public float headRotateUpScaleAir;
 	public float headRotateDownScaleAir;
 	public float headRotateSideScaleAir;
 
@@ -808,12 +901,12 @@ public class Player : MonoBehaviour {
 		float desiredHeadHoriz = 0f;
 		float desiredHeadVert = 0f;
 
-		desiredHeadHoriz = Util.GetAxis ("Horizontal Right") * (isGrounded ? headRotateSideScaleGround : headRotateSideScaleAir);
+		desiredHeadHoriz = Util.GetAxis ("Horizontal Right") * (isGrounded ? headRotateSideScaleGround : backflapTriggered ? headRotateSideScaleBackflap : headRotateSideScaleAir);
 		desiredHeadVert = Util.GetAxis ("Vertical Right");
 		if (desiredHeadVert > 0) {
-			desiredHeadVert *= (isGrounded ? headRotateUpScaleGround : headRotateUpScaleAir);
+			desiredHeadVert *= (isGrounded ? headRotateUpScaleGround : backflapTriggered ? headRotateUpScaleBackflap : headRotateUpScaleAir);
 		} else {
-			desiredHeadVert *= (isGrounded ? headRotateDownScaleGround : headRotateDownScaleAir);
+			desiredHeadVert *= (isGrounded ? headRotateDownScaleGround : backflapTriggered ? headRotateDownScaleBackflap :  headRotateDownScaleAir);
 		}
 
         float rotateSpeed = isFlaming ? flameHeadRotateSpeed : regularHeadRotateSpeed;

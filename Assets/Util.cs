@@ -113,4 +113,9 @@ public class Util : MonoBehaviour {
         var worldToLocalMatrix = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one).inverse;
         return worldToLocalMatrix.MultiplyPoint3x4(position);
     }
+
+    public static bool Probability(float chance)
+    {
+        return Random.value <= chance;
+    }
 }

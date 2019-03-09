@@ -10,13 +10,10 @@ public class Walk : MonoBehaviour {
 	public Rigidbody rigidBody;
 	[HideInInspector]
 	public Vector3 groundNormal;
-	[HideInInspector]
-	public bool isGrounded;
-	[HideInInspector]
+    public bool isGrounded;
+    public bool isFlying;
 	public bool isFlaming;
-	[HideInInspector]
 	public bool isRunning;
-	[HideInInspector]
 	public bool isAttacking;
 
 	public float rigidBodyDrag = 1f;
@@ -42,20 +39,39 @@ public class Walk : MonoBehaviour {
 
 	public ForceMode walkForceMode = ForceMode.Force;
 
+    public float jumpForce;
+
 	//Inputs
 	[HideInInspector]
 	public float right, forward;
+    [HideInInspector]
+    public bool jump;
 
 	// Use this for initialization
 	void Start () {
 	}
 
+    /*
+     * if grounded -> do walk/run and jump
+     * if flying -> reset walking speeds
+     * if !grounded, but !flying -> do gravity
+     */
 	void FixedUpdate () {
+		//if (isGrounded) {
+		//	RigidbodyWalk ();
+		//} else {
+		//	ResetWalkSpeed ();
+		//}
 		if (isGrounded) {
 			RigidbodyWalk ();
-		} else {
+		} else if (isFlying) {
 			ResetWalkSpeed ();
-		}
+		} else
+        {
+            right = 0;
+            forward = 0;
+            RigidbodyWalk();
+        }
 	}
 
 	void ResetWalkSpeed() {
