@@ -11,7 +11,7 @@ public class FireBar : MonoBehaviour {
 	void Update () {
         foreach (Image img in images)
         {
-            img.fillAmount = breath.Percentage();
+            img.fillAmount = 1 - breath.Percentage();
         }
 	}
 }

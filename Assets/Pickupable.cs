@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Panda;
 
 public class Pickupable : Tag {
 	public bool removeRigidbody;
@@ -172,6 +173,7 @@ public class Pickupable : Tag {
 		}
 	}
 
+    [Task]
 	public bool IsHeld() {
 		return (itemHolder != null);
 	}

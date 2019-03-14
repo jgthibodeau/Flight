@@ -1,0 +1,5 @@
+tree("Flee")
+	sequence
+		GetTarget_Flee
+		hasTarget_flee
+		Flee

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Panda;
 
 public class Health : MonoBehaviour, IHittable {
     public bool invincible = false;
@@ -14,14 +15,32 @@ public class Health : MonoBehaviour, IHittable {
     public Vector3 minSpawnForce = new Vector3 (-1, 1, -1);
     public Vector3 maxSpawnForce = new Vector3(1, 2, 1);
 
+    private bool tookDamage = false;
+
     void Start() {
 //		Reset ();
 //		respawnable = GetComponent<Respawnable> ();
 	}
 
-	public void Hit(float damage, GameObject hitter) {
+	public void Hit(float damage, GameObject hitter)
+    {
+        tookDamage = true;
+
         TakeDamage(damage);
 	}
+
+    [Task]
+    public bool TookDamage()
+    {
+        if (tookDamage)
+        {
+            tookDamage = false;
+            return true;
+        } else
+        {
+            return false;
+        }
+    }
 
 	private float previouslyHealedHealth;
 	public bool Heal(float amount) {

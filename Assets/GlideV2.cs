@@ -30,7 +30,11 @@ public class GlideV2 : MonoBehaviour {
 	public float rigidBodyDrag = 0f;
     public float minRigidBodyAngularDrag = 1f;
     public float rigidBodyAngularDrag = 10f;
-	public float inducedDragCoef;
+
+    public float minRigidBodyAngularDragFlapping = 1f;
+    public float rigidBodyAngularDragFlapping = 10f;
+
+    public float inducedDragCoef;
 	public float parasiticDragCoef;
     public float backFlapDragCoef = 2f;
     public float dragForwardDistance;
@@ -294,13 +298,16 @@ public class GlideV2 : MonoBehaviour {
             if (isBackFlapping && speed < 5)
             {
                 rigidBody.angularDrag = rigidBodyAngularDrag;
+            } else if (IsFlapping())
+            {
+                rigidBody.angularDrag = Util.ConvertScale(0, 30, minRigidBodyAngularDragFlapping, rigidBodyAngularDragFlapping, speed);
             } else
             {
                 rigidBody.angularDrag = Util.ConvertScale(0, 30, minRigidBodyAngularDrag, rigidBodyAngularDrag, speed);
             }
 
-			//rotate towards motion
-			if (rotateTowardsMotion && flapSpeed == 0) {
+            //rotate towards motion
+            if (rotateTowardsMotion && flapSpeed == 0) {
 				Vector3 rotation = Quaternion.LookRotation (rigidBody.velocity, transform.up).eulerAngles;
 				transform.rotation = Quaternion.Euler (rotation);
 			}
@@ -583,7 +590,8 @@ public class GlideV2 : MonoBehaviour {
         //base direction off forward velocity and pitch
         if ((isGrounded && limitFlapWhenGrounded) || rigidBody.velocity.magnitude < minVelToFlapForward)
         {
-            return transform.up + transform.forward;
+            //return transform.up + transform.forward;
+            return transform.up;
         } else
         {
             float forwardPercent;
