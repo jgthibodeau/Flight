@@ -75,6 +75,8 @@ public class Burnable : MonoBehaviour {
 	private void SetOnFire(){
         if (!onFire)
         {
+            Debug.Log("Set on fire");
+
             onFire = true;
             currentFireOutTime = fireOutTime;
 

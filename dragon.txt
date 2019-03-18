@@ -21,12 +21,16 @@ castle
 
 
 enemies
+	fix them halting the player when dropped in mid-air
+
 - archer
 	- fires arrows at you
 - swordsman
 	- tries to melee attack you
 - seige weapons
-	- launches large projectiles
+	- large explosives
+	- grappling hook
+	- net
 - adventurer
 	- steals treasure
 - courier(?)

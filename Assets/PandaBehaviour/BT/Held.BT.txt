@@ -1,3 +1,7 @@
 tree("Held")
 	sequence
 		IsHeld
+		ResetDestination_Wander
+		SetGrounded(false)
+		Stop
+		SetScared(true)

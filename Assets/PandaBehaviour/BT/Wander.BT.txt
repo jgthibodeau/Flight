@@ -1,12 +1,7 @@
 tree("Wander")
 	sequence
 		SetDestination_Wander
+		SetAnimationTrigger("Move")
+		PlayAnimation("walk_fast")
+		SetAnimationMoveSpeed
 		MoveToDestination_Wander
-		//random
-			//Wait 0
-			//Wait 1.0
-			//Wait 2.0
-			//Wait 3.0
-			//Wait 4.0
-			//Wait 5.0
-

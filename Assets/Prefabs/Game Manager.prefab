@@ -10474,6 +10474,21 @@ MonoBehaviour:
       type: 0
       axis: 0
       joystick: 0
+    - name: Backflap
+      description: Hover
+      positive: 122
+      negative: 0
+      altPositive: 0
+      altNegative: 0
+      deadZone: 0
+      gravity: 0
+      sensitivity: 3
+      rebindable: 1
+      snap: 1
+      invert: 0
+      type: 0
+      axis: 0
+      joystick: 0
     - name: Center Camera
       description: Center Camera
       positive: 99
@@ -10689,7 +10704,7 @@ MonoBehaviour:
       joystick: 0
     - name: Flap
       description: Flap
-      positive: 358
+      positive: 350
       negative: 0
       altPositive: 0
       altNegative: 0
@@ -10699,7 +10714,7 @@ MonoBehaviour:
       rebindable: 1
       snap: 0
       invert: 0
-      type: 3
+      type: 6
       axis: 8
       joystick: 0
     - name: Flame
@@ -10719,7 +10734,7 @@ MonoBehaviour:
       joystick: 0
     - name: Attack
       description: Attack
-      positive: 350
+      positive: 354
       negative: 0
       altPositive: 0
       altNegative: 0
@@ -10734,7 +10749,7 @@ MonoBehaviour:
       joystick: 0
     - name: Grab
       description: Grab
-      positive: 355
+      positive: 353
       negative: 0
       altPositive: 0
       altNegative: 0
@@ -10749,7 +10764,22 @@ MonoBehaviour:
       joystick: 0
     - name: Gust
       description: Gust
-      positive: 354
+      positive: 352
+      negative: 0
+      altPositive: 0
+      altNegative: 0
+      deadZone: 0
+      gravity: 0
+      sensitivity: 0
+      rebindable: 1
+      snap: 0
+      invert: 0
+      type: 0
+      axis: 0
+      joystick: 0
+    - name: Backflap
+      description: Hover
+      positive: 351
       negative: 0
       altPositive: 0
       altNegative: 0
@@ -10794,7 +10824,7 @@ MonoBehaviour:
       joystick: 0
     - name: Heal
       description: Heal
-      positive: 351
+      positive: 355
       negative: 0
       altPositive: 0
       altNegative: 0
@@ -15000,6 +15030,7 @@ MonoBehaviour:
   mainMusicVolume: 0.25
   volumeDown: {fileID: 24519918, guid: 0ac7fb39e445048d89688f69c2a1839a, type: 2}
   volumeUp: {fileID: 24500003, guid: 0ac7fb39e445048d89688f69c2a1839a, type: 2}
+  musicSource: {fileID: 0}
 --- !u!114 &114477161282486148
 MonoBehaviour:
   m_ObjectHideFlags: 0

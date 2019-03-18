@@ -334,7 +334,8 @@ public class Player : MonoBehaviour {
         float groundCapsuleHeight = 0;
 
 		//if in air
-		if (!isGrounded || glideV2Script.IsFlapping()) {
+		//if (!isGrounded || glideV2Script.IsFlapping()) {
+        if (!glideV2Script.isGrounded) {
 			//check for ground with small distance below player
 			groundCheckDistance = airGroundDistance;
         }
@@ -343,7 +344,8 @@ public class Player : MonoBehaviour {
 			groundCheckDistance = groundDistance;
         }
 
-        if (!isGrounded)
+        //if (!isGrounded)
+        if (!glideV2Script.isGrounded)
         {
             groundCapsuleHeight = 1f;
         }
@@ -431,8 +433,9 @@ public class Player : MonoBehaviour {
 		birdAnimator.Grounded = landed;//isGrounded && !isFlapping;
 
 		dragonAnimator.InWater = inWater;
-		dragonAnimator.Grounded = isGrounded;
-	}
+        //dragonAnimator.Grounded = isGrounded;
+        dragonAnimator.Grounded = walkScript.isGrounded;
+    }
 
 	public void GetInput () {
 		flameBreathScript.flameOn = false;
@@ -503,13 +506,24 @@ public class Player : MonoBehaviour {
 
 		bool grabHeld = Util.GetButton ("Grab");
 		bool grab = Util.GetButtonDown ("Grab");
-//		grabScript.grab = grab;
-		if (grab) {
-			interactorScript.Pickup ();
-		}
-		if (!grabHeld) {
-			interactorScript.Drop ();
-		}
+        //		grabScript.grab = grab;
+        //if (grab) {
+        //	interactorScript.Pickup ();
+        //}
+        //if (!grabHeld) {
+        //	interactorScript.Drop ();
+        //}
+        if (grab)
+        {
+            if (interactorScript.itemHolder.HasItem())
+            {
+                interactorScript.Drop();
+            }
+            else
+            {
+                interactorScript.Pickup();
+            }
+        }
 
         if (interactorScript.itemHolder.HasItem()) {
             Eatable eatable = interactorScript.itemHolder.heldItem.GetComponent<Eatable>();
@@ -523,19 +537,20 @@ public class Player : MonoBehaviour {
 		bool gustHeld = Util.GetButton ("Gust");
         bool gustTriggered = Util.GetButtonDown ("Gust");
 
-        if (backflapTriggered)
-        {
-            //backflapTriggered = !isGrounded && (flapSpeed > 0) && Util.GetAxis("Vertical") < stickYReleaseBackflap;
-            backflapTriggered = !isGrounded && gustHeld && Util.GetAxis("Vertical") < stickYReleaseBackflap;
-        }
-        else if (!isGrounded && /*flapSpeed > 0*/gustHeld)
-        {
-            //backflapTriggered = (flapSpeed > 0) && Util.GetAxis("Vertical") < stickYTriggersBackflap;
-            backflapTriggered = gustHeld && Util.GetAxis("Vertical") < stickYTriggersBackflap;
-        } else
-        {
-            backflapTriggered = false;
-        }
+        //if (backflapTriggered)
+        //{
+        //    //backflapTriggered = !isGrounded && (flapSpeed > 0) && Util.GetAxis("Vertical") < stickYReleaseBackflap;
+        //    backflapTriggered = !isGrounded && gustHeld && Util.GetAxis("Vertical") < stickYReleaseBackflap;
+        //}
+        //else if (!isGrounded && /*flapSpeed > 0*/gustHeld)
+        //{
+        //    //backflapTriggered = (flapSpeed > 0) && Util.GetAxis("Vertical") < stickYTriggersBackflap;
+        //    backflapTriggered = gustHeld && Util.GetAxis("Vertical") < stickYTriggersBackflap;
+        //} else
+        //{
+        //    backflapTriggered = false;
+        //}
+        backflapTriggered = Util.GetButton("Backflap");
 
         glideV2Script.backFlapTriggered = backflapTriggered;
 
@@ -910,8 +925,8 @@ public class Player : MonoBehaviour {
 		}
 
         float rotateSpeed = isFlaming ? flameHeadRotateSpeed : regularHeadRotateSpeed;
-        headHoriz = Mathf.SmoothStep(headHoriz, desiredHeadHoriz, rotateSpeed * Time.deltaTime);
-		headVert = Mathf.SmoothStep(headVert, desiredHeadVert, rotateSpeed * Time.deltaTime);
+        headHoriz = Mathf.Lerp(headHoriz, desiredHeadHoriz, rotateSpeed * Time.deltaTime);
+		headVert = Mathf.Lerp(headVert, desiredHeadVert, rotateSpeed * Time.deltaTime);
 
 		foreach (Transform t in headComponents) {
 			Vector3 rot = t.eulerAngles;

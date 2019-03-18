@@ -5,7 +5,8 @@ Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_Name: Food_Fresnel
   m_Shader: {fileID: 4800000, guid: 457b78bdb98aa83488f603f5d4907484, type: 3}
   m_ShaderKeywords: _EMISSION
@@ -64,7 +65,7 @@ Material:
     - _DetailNormalMapScale: 1
     - _Diffemissive: 0
     - _DstBlend: 0
-    - _FresnelIntensity: 0.9
+    - _FresnelIntensity: 0
     - _FresnelPower: 1.9
     - _FresnelSize: 1.79
     - _GlossMapScale: 1

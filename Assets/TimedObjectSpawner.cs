@@ -33,7 +33,7 @@ public class TimedObjectSpawner : MonoBehaviour {
 
         TrimDeadObjects();
 
-        if (spawnableObjects.Count < maxSpawnedObjects - 1)
+        if (spawnedObjects.Count < maxSpawnedObjects - 1)
         {
             SpawnObject();
         } else

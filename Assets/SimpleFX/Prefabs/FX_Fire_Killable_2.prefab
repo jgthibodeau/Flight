@@ -3807,7 +3807,7 @@ ParticleSystem:
     light: {fileID: 108064351222898016, guid: 8d4eae95c15365444be5727d079804b1, type: 3}
     randomDistribution: 1
     color: 1
-    range: 1
+    range: 0
     intensity: 0
     rangeCurve:
       serializedVersion: 2

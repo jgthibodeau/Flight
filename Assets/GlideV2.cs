@@ -381,7 +381,7 @@ public class GlideV2 : MonoBehaviour {
             rigidBody.constraints = RigidbodyConstraints.None;
         }
 
-        if (backFlapTriggered)
+        if (backFlapTriggered && !isGrounded)
         {
             ResetWings();
 
@@ -585,31 +585,55 @@ public class GlideV2 : MonoBehaviour {
     public float maxVelToFlapForward = 20f;
     public float flappingForwardScale = 0.5f;
     public float rollAmountTriggersForwardFlap = 0.9f;
+    public float minForwardPercent = 0f;
     public Vector3 CalculateFlapForceDirection()
     {
+        ////base direction off forward velocity and pitch
+        //if ((isGrounded && limitFlapWhenGrounded) || rigidBody.velocity.magnitude < minVelToFlapForward)
+        //{
+        //    //return transform.up + transform.forward;
+        //    return transform.up;
+        //} else
+        //{
+        //    float forwardPercent;
+
+        //    //if (backFlapHover && (isBackFlapping || ((wingAngleLeft < rollAmountTriggersBackflap && wingAngleRight < rollAmountTriggersBackflap) && !isGrounded)))
+        //    if (wingAngleLeft > rollAmountTriggersForwardFlap && wingAngleRight > rollAmountTriggersForwardFlap) {
+        //        forwardPercent = 1;
+        //    } else {
+        //        float vel = Mathf.Clamp(rigidBody.velocity.magnitude, minVelToFlapForward, maxVelToFlapForward);
+        //        forwardPercent = (vel - minVelToFlapForward) / (maxVelToFlapForward - minVelToFlapForward);
+        //    }
+
+        //    Vector3 dir = (transform.forward * (forwardPercent)) + (transform.up * (1 - forwardPercent)).normalized;
+
+        //    float scale = 1 - (forwardPercent * (1 - flappingForwardScale));
+
+        //    return dir * scale;
+        //}
+
+        float forwardPercent;
         //base direction off forward velocity and pitch
         if ((isGrounded && limitFlapWhenGrounded) || rigidBody.velocity.magnitude < minVelToFlapForward)
         {
-            //return transform.up + transform.forward;
-            return transform.up;
-        } else
-        {
-            float forwardPercent;
-
-            //if (backFlapHover && (isBackFlapping || ((wingAngleLeft < rollAmountTriggersBackflap && wingAngleRight < rollAmountTriggersBackflap) && !isGrounded)))
-            if (wingAngleLeft > rollAmountTriggersForwardFlap && wingAngleRight > rollAmountTriggersForwardFlap) {
-                forwardPercent = 1;
-            } else {
-                float vel = Mathf.Clamp(rigidBody.velocity.magnitude, minVelToFlapForward, maxVelToFlapForward);
-                forwardPercent = (vel - minVelToFlapForward) / (maxVelToFlapForward - minVelToFlapForward);
-            }
-
-            Vector3 dir = (transform.forward * (forwardPercent)) + (transform.up * (1 - forwardPercent)).normalized;
-
-            float scale = 1 - (forwardPercent * (1 - flappingForwardScale));
-            
-            return dir * scale;
+            forwardPercent = minForwardPercent;
         }
+        else if (wingAngleLeft > rollAmountTriggersForwardFlap && wingAngleRight > rollAmountTriggersForwardFlap)
+        {
+            forwardPercent = 1;
+        }
+        else
+        {
+            float vel = Mathf.Clamp(rigidBody.velocity.magnitude, minVelToFlapForward, maxVelToFlapForward);
+            forwardPercent = (vel - minVelToFlapForward) / (maxVelToFlapForward - minVelToFlapForward);
+            forwardPercent = Mathf.Max(forwardPercent, minForwardPercent);
+        }
+
+        Vector3 dir = (transform.forward * (forwardPercent)) + (transform.up * (1 - forwardPercent)).normalized;
+
+        float scale = 1 - (forwardPercent * (1 - flappingForwardScale));
+
+        return dir * scale;
 
 
 

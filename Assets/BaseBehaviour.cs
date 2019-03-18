@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(BehaviourController))]
 public class BaseBehaviour : MonoBehaviour
 {
     protected BehaviourController behaviourController;

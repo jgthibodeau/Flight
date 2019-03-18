@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 using Panda;
 
 public class FleeBehaviour : BaseBehaviour
@@ -14,17 +15,18 @@ public class FleeBehaviour : BaseBehaviour
     public LayerMask visionIgnore;
 
     [Task]
-    bool hasTarget_flee;
-    private Vector3 fleeFromTarget;
+    public bool hasTarget_flee;
+    public Transform fleeFromTarget;
+    public Vector3 fleeFromPosition;
 
     [Task]
     void GetTarget_Flee()
     {
-        Transform target = GetFleeTarget();
-        if (target != null)
+        fleeFromTarget = GetFleeTarget();
+        if (fleeFromTarget != null)
         {
             hasTarget_flee = true;
-            fleeFromTarget = target.position;
+            fleeFromPosition = fleeFromTarget.position;
         }
         Task.current.Succeed();
     }
@@ -55,21 +57,78 @@ public class FleeBehaviour : BaseBehaviour
     void Flee()
     {
         UpdateAgent();
-
-        Transform newTarget = GetFleeTarget();
-        if (newTarget != null)
+        
+        if (fleeFromTarget != null)
         {
-            fleeFromTarget = newTarget.position;
+            fleeFromPosition = fleeFromTarget.position;
         }
 
-        Vector3 direction = transform.position - fleeFromTarget;
-        Vector3 destination = fleeFromTarget + direction.normalized * fleeDistance;
-        destination = behaviourController.GetNavMeshPoint(destination, fleeDistance);
+        Vector3 direction = transform.position - fleeFromPosition;
+        Vector3 destination = Vector3.zero;
 
-        behaviourController.SetDestination(destination);
+        //int steps = 2;
+        //float step = fleeDistance / steps;
+        //for (int i = 0; i <= steps; i++)
+        //{
+        //    destination = fleeFromPosition + direction.normalized * (fleeDistance * Util.ConvertScale(0, steps, 1, 0, i));
 
-        if (behaviourController.AtDestination())
+        //    if (behaviourController.GetNavMeshPoint(destination, 2f, out destination))
+        //    {
+        //        behaviourController.SetDestination(destination);
+        //        break;
+        //    }
+        //}
+        destination = transform.position + direction.normalized * 2f;
+        if (behaviourController.GetNavMeshPoint(destination, 5f, out destination))
         {
+            bool validDirection = true;
+
+            NavMeshHit hit;
+            if (NavMesh.Raycast(transform.position, destination, out hit, NavMesh.AllAreas))
+            {
+                //forward
+                destination = transform.position + transform.forward * 2f;
+                if (NavMesh.Raycast(transform.position, destination, out hit, NavMesh.AllAreas))
+                {
+                    //right
+                    destination = transform.position + transform.right * 2f;
+                    if (NavMesh.Raycast(transform.position, destination, out hit, NavMesh.AllAreas))
+                    {
+                        //left
+                        destination = transform.position - transform.right * 2f;
+                        if (NavMesh.Raycast(transform.position, destination, out hit, NavMesh.AllAreas))
+                        {
+                            //back
+                            destination = transform.position - transform.forward * 2f;
+                            if (NavMesh.Raycast(transform.position, destination, out hit, NavMesh.AllAreas))
+                            {
+                                validDirection = false;
+                            }
+                        }
+                    }
+                }
+
+                validDirection = behaviourController.GetNavMeshPoint(destination, 5f, out destination);
+            }
+            
+            if (validDirection)
+            {
+                behaviourController.SetDestination(destination);
+            }
+        }
+
+        DebugExtension.DebugCircle(destination, Color.yellow, 0.5f);
+
+        //if (behaviourController.GetNavMeshPoint(destination, fleeDistance, out destination))
+        //if (behaviourController.RandomNavPoint(destination, 2f, out destination))
+        //{
+        //    behaviourController.SetDestination(destination);
+        //}
+
+        if (Vector3.Distance(transform.position, fleeFromPosition) >= fleeDistance)
+        {
+            fleeFromTarget = null;
+            fleeFromPosition = Vector3.zero;
             hasTarget_flee = false;
         }
         Task.current.Succeed();

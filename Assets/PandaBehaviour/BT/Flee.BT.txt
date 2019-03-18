@@ -2,4 +2,7 @@ tree("Flee")
 	sequence
 		GetTarget_Flee
 		hasTarget_flee
+		SetAnimationTrigger("Panic")
+		PlayAnimation("run")
+		SetAnimationMoveSpeed
 		Flee

@@ -1,0 +1,5 @@
+tree("Fall")
+	sequence
+		not IsGrounded
+		ResetDestination_Wander
+		Fall
