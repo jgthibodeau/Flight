@@ -44,7 +44,7 @@ public class FallBehaviour : BaseBehaviour
 
         if (!wasGrounded && isGrounded)
         {
-            Debug.Log("wasnt grounded but now is grounded");
+            //Debug.Log("wasnt grounded but now is grounded");
             behaviourController.Reset();
         }
 

@@ -538,19 +538,19 @@ Animation:
   serializedVersion: 3
   m_Animation: {fileID: 7400020, guid: c8a560101cbff8745b2edc10489b31bb, type: 3}
   m_Animations:
-  - {fileID: 7400000, guid: f06214adf85ea45448f1524e7b45005f, type: 2}
-  - {fileID: 7400000, guid: 9fef6a05f30aa7340a605507fe6cb711, type: 2}
-  - {fileID: 7400000, guid: e3d78acf32ff3394a91b1b3e2ab8cf05, type: 2}
-  - {fileID: 7400000, guid: 0b814f4ce17226b44854d34580c582b5, type: 2}
-  - {fileID: 7400000, guid: dab82f5f9016da449870d93e0fa57c55, type: 2}
-  - {fileID: 7400000, guid: 06227f08384182c4486537d72f9d8900, type: 2}
-  - {fileID: 7400000, guid: 75316acd3b79189429493625cd7b0070, type: 2}
-  - {fileID: 7400000, guid: 13d5fccadcd579443b9cb9083f471408, type: 2}
-  - {fileID: 7400000, guid: 046b83e9d8c309042aca113a17d65cda, type: 2}
-  - {fileID: 7400000, guid: 0c3bb6c314dc9d84b975611bdf4c2a28, type: 2}
-  - {fileID: 7400000, guid: da24b89e950aea946914b0bab81edf12, type: 2}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   m_WrapMode: 0
-  m_PlayAutomatically: 1
+  m_PlayAutomatically: 0
   m_AnimatePhysics: 0
   m_CullingType: 1
 --- !u!95 &963261014472306854

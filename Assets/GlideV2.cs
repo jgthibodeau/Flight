@@ -188,7 +188,7 @@ public class GlideV2 : MonoBehaviour {
 		speed = rigidBody.velocity.magnitude;
 
 		//flap wings
-		if (flapping && !boosting && !boostHeld) {
+		if ((flapping/* || backFlapTriggered*/) && !boosting && !boostHeld) {
 			birdAnimator.FlapSpeed = 2f;// + flapAnimationScale * flapSpeed;
 			birdAnimator.Flapping = true;
 
@@ -381,7 +381,7 @@ public class GlideV2 : MonoBehaviour {
             rigidBody.constraints = RigidbodyConstraints.None;
         }
 
-        if (backFlapTriggered && !isGrounded)
+        if (backFlapTriggered && CanBackFlap())
         {
             ResetWings();
 
@@ -439,7 +439,7 @@ public class GlideV2 : MonoBehaviour {
             //Util.DrawRigidbodyRay(rigidBody, transform.position, desiredForward.eulerAngles * 5, Color.black);
         }
 
-        else if (flapping)
+        else if (flapping/* || backFlapTriggered*/)
         {
             //			pitchLeft = 0f;
             //			pitchRight = 0f;
@@ -491,6 +491,12 @@ public class GlideV2 : MonoBehaviour {
 				Util.DrawRigidbodyRay (rigidBody, flapPositionRight, flapForceRight, Color.blue);
 			//}
 		}
+    }
+
+    public float backflapHeight = 2f;
+    public bool CanBackFlap()
+    {
+        return !isGrounded/* && !Physics.Raycast(transform.position, Vector3.down, backflapHeight, playerScript.layerMaskForGround)*/;
     }
 
     public float GetFlapSpeed()

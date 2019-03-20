@@ -791,6 +791,8 @@ public class Player : MonoBehaviour {
     //}
 
     public float minSpeedForYaw, maxSpeedForYaw;
+    [Range(0,1)]
+    public float minYaw;
     void OneStickFlightCleanup()
     {
         //TODO clean up input so rolling is smoother
@@ -860,7 +862,7 @@ public class Player : MonoBehaviour {
         float yaw = input.x;
         if (speed < minSpeedForYaw)
         {
-            yaw *= Util.ConvertScale(0, minSpeedForYaw, 0, 1, speed);
+            yaw *= Util.ConvertScale(0, minSpeedForYaw, minYaw, 1, speed);
         }
         else if (speed < maxSpeedForYaw)
         {

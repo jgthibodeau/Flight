@@ -26,12 +26,12 @@ public class WanderBehaviour : BaseBehaviour
     {
         if (!hasDestination_Wander)
         {
-            Debug.Log("determining wander target");
+            //Debug.Log("determining wander target");
             Vector3 origin = stayCloseToAnchor ? anchor.position : transform.position;
             Vector3 destination;
             if (behaviourController.RandomNavPoint(origin, maxWanderDistance, out destination))
             {
-                Debug.Log(destination);
+                //Debug.Log(destination);
                 behaviourController.SetDestination(destination);
                 hasDestination_Wander = true;
             }

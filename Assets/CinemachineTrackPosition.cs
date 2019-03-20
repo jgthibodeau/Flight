@@ -7,33 +7,59 @@ public class CinemachineTrackPosition : MonoBehaviour
 {
     public float defaultFreeY = 0.5f;
     public float defaultFreeX = 0f;
+    public float defaultYSpeed = 0.5f;
+    public float defaultXSpeed = 0.5f;
+
+    public float cameraResetTime = 0.5f;
 
     public CinemachineFreeLook freeLook;
 
+    private bool recentering;
+
     //public CinemachineVirtualCameraBase thisCamera;
-    //public CinemachineStateDrivenCamera stateCamera;
+    public CinemachineStateDrivenCamera stateCamera;
 
     // Start is called before the first frame update
     void Start()
     {
         freeLook = GetComponent<CinemachineFreeLook>();
         //thisCamera = GetComponent<CinemachineVirtualCameraBase>();
-        //stateCamera = GetComponentInParent<CinemachineStateDrivenCamera>();
+        stateCamera = GetComponentInParent<CinemachineStateDrivenCamera>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        //if(thisCamera.VirtualCameraGameObject != stateCamera.LiveChild.VirtualCameraGameObject && !stateCamera.IsBlending)
+        //if (Util.GetButtonDown("Center Camera"))
         //{
-        //    thisCamera.VirtualCameraGameObject.transform.position = stateCamera.LiveChild.VirtualCameraGameObject.transform.position;
-        //    thisCamera.VirtualCameraGameObject.transform.rotation = stateCamera.LiveChild.VirtualCameraGameObject.transform.rotation;
-        //    thisCamera.UpdateCameraState(Vector3.up, Time.deltaTime);
+        //    ResetFreeAxis();
         //}
-        if (Util.GetButton("Center Camera"))
-        {
-            ResetFreeAxis();
-        }
+
+        //if (Util.GetButtonUp("Center Camera"))
+        //{
+        //    Invoke("SetFree", cameraResetTime);
+        //}
+
+        //if (recentering)
+        //{
+        //    freeLook.m_XAxis.Value = defaultFreeY;
+        //}
+
+        stateCamera.m_AnimatedTarget.SetBool("Recenter", Util.GetButton("Center Camera"));
+    }
+
+    public void ResetFreeAxis()
+    {
+        ResetFreeX();
+        ResetFreeY();
+        freeLook.m_BindingMode = CinemachineTransposer.BindingMode.LockToTargetWithWorldUp;
+
+        ResetFreeY();
+        ResetFreeX();
+        freeLook.m_YAxis.m_MaxSpeed = 0;
+        freeLook.m_XAxis.m_MaxSpeed = 0;
+
+        recentering = true;
     }
 
     public void ResetFreeY()
@@ -52,9 +78,11 @@ public class CinemachineTrackPosition : MonoBehaviour
         }
     }
 
-    public void ResetFreeAxis()
+    public void SetFree()
     {
-        ResetFreeX();
-        ResetFreeY();
+        freeLook.m_YAxis.m_MaxSpeed = defaultYSpeed;
+        freeLook.m_XAxis.m_MaxSpeed = defaultXSpeed;
+        freeLook.m_BindingMode = CinemachineTransposer.BindingMode.SimpleFollowWithWorldUp;
+        recentering = false;
     }
 }

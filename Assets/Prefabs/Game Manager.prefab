@@ -10476,7 +10476,7 @@ MonoBehaviour:
       joystick: 0
     - name: Backflap
       description: Hover
-      positive: 122
+      positive: 118
       negative: 0
       altPositive: 0
       altNegative: 0
@@ -10714,7 +10714,7 @@ MonoBehaviour:
       rebindable: 1
       snap: 0
       invert: 0
-      type: 6
+      type: 0
       axis: 8
       joystick: 0
     - name: Flame
@@ -10794,7 +10794,7 @@ MonoBehaviour:
       joystick: 0
     - name: Center Camera
       description: Center Camera
-      positive: 353
+      positive: 359
       negative: 0
       altPositive: 0
       altNegative: 0
