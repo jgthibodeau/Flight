@@ -19,7 +19,10 @@ public class Walk : MonoBehaviour {
 	public float rigidBodyDrag = 1f;
 	public float rigidBodyAngularDrag = 20f;
 	public float walkSpeed;
+    public float minWalkPercent = 0;
+    public float minWalkAngle, maxWalkAngle;
 	public float flameWalkSpeed;
+    public float strafeSpeed;
 	public float runSpeed;
 
 	public bool gradualRun = true;
@@ -68,9 +71,10 @@ public class Walk : MonoBehaviour {
 			ResetWalkSpeed ();
 		} else
         {
-            right = 0;
-            forward = 0;
-            RigidbodyWalk();
+            RigidbodyStrafe();
+            //right = 0;
+            //forward = 0;
+            //RigidbodyWalk();
         }
 	}
 
@@ -78,6 +82,26 @@ public class Walk : MonoBehaviour {
 		currentSpeedIncreaseDelay = speedIncreaseDelay;
 		currentSpeed = walkSpeed;
         dragonAnimator.MoveSpeed = 0;
+    }
+
+    void RigidbodyStrafe()
+    {
+        rigidBody.drag = rigidBodyDrag;
+        rigidBody.angularDrag = rigidBodyAngularDrag;
+
+        Vector3 inputVector = Vector3.ClampMagnitude(new Vector3(right, 0, forward), 1);
+        float inputSpeed = inputVector.magnitude;
+        float speed = rigidBody.velocity.magnitude;
+
+        //Quaternion targetRotation;
+
+        if (inputSpeed >= minWalkInput)
+        {
+            Vector3 moveDirection = CalculateDesiredMovementDirection(inputVector);
+            //moveDirection = Vector3.ProjectOnPlane(moveDirection, groundNormal).normalized * inputSpeed;
+            moveDirection *= strafeSpeed;
+            rigidBody.AddForce(moveDirection, walkForceMode);
+        }
     }
 
 	void RigidbodyWalk() {
@@ -126,6 +150,9 @@ public class Walk : MonoBehaviour {
 				}
 
 				currentSpeed = Mathf.Clamp (currentSpeed, walkSpeed, runSpeed);
+
+                currentSpeed *= CalculateAngleWalkPercent();
+
 				moveDirection *= currentSpeed;
 			} else {
 				if (isRunning) {
@@ -201,7 +228,14 @@ public class Walk : MonoBehaviour {
 		}
 	}
 
-	private Vector3 CalculateVelocityChange(Vector3 inputVector)
+    private float CalculateAngleWalkPercent()
+    {
+        float currentAngle = Vector3.Angle(transform.up, Vector3.up);
+        return Util.ConvertScale(minWalkAngle, maxWalkAngle, 1, minWalkPercent, currentAngle);
+    }
+
+
+    private Vector3 CalculateVelocityChange(Vector3 inputVector)
 	{
 		// Calculate how fast we should be moving
 		Vector3 relativeVelocity = Camera.main.transform.TransformDirection(inputVector) * walkSpeed;

@@ -578,9 +578,45 @@ namespace AC.LSky
 			evaluateTime = 0.0f
 
 		};
-		//--------------------------------------------------------------------------------------
 
-		public UnityEngine.Rendering.AmbientMode ambientMode = UnityEngine.Rendering.AmbientMode.Skybox;
+        //-------------------------------------------------------------------------------------------------------------
+        public LSkyColor cloudColor = new LSkyColor()
+        {
+            colorType = LSkyColorType.Color,
+            inputColor = new Color(0.632f, 0.794f, 1.0f, 1.0f),
+
+            gradient = new Gradient()
+            {
+                colorKeys = new GradientColorKey[]
+                {
+                    new GradientColorKey(new Color(0.632f, 0.794f, 1.0f, 1.0f), 0.0f),
+                    new GradientColorKey(new Color(0.632f, 0.794f, 1.0f, 1.0f), 0.5f),
+                    new GradientColorKey(new Color(0.632f, 0.794f, 1.0f, 1.0f), 1.0f)
+                },
+
+                alphaKeys = new GradientAlphaKey[]
+                {
+                    new GradientAlphaKey(1.0f, 0.0f),
+                    new GradientAlphaKey(1.0f, 1.0f)
+                }
+            },
+
+            evaluateTime = 0.0f
+        };
+
+        [LSkyFloatAttribute(0.0f, 10f, 0.0f, 0.0f, 1.0f, 10f, DefautlColors.white)]
+        public LSkyFloat cloudIntensity = new LSkyFloat()
+        {
+
+            valueType = LSkyValueType.Value,
+            inputValue = 0.3f,
+            curve = AnimationCurve.Linear(0.0f, 0.3f, 1.0f, 0.3f),
+            evaluateTime = 0.0f
+
+        };
+        //--------------------------------------------------------------------------------------
+
+        public UnityEngine.Rendering.AmbientMode ambientMode = UnityEngine.Rendering.AmbientMode.Skybox;
 
 		public LSkyColor ambientSkyColor = new LSkyColor()
 		{
@@ -865,10 +901,15 @@ namespace AC.LSky
 			moonLightColor.evaluateTime      = MOON_DIR_HALF_EVALUATE_TIME;
 			moonLightIntensity.evaluateTime  = MOON_DIR_HALF_EVALUATE_TIME;
 			moonLightMultiplier.evaluateTime = SUN_DIR_EVALUATE_TIME;
-			//-------------------------------------------------------------------------------------------------------------
 
-			// Ambient
-			switch (ambientMode) 
+            //-------------------------------------------------------------------------------------------------------------
+
+            cloudColor.evaluateTime = SUN_DIR_EVALUATE_TIME;
+            cloudIntensity.evaluateTime = SUN_DIR_EVALUATE_TIME;
+            //-------------------------------------------------------------------------------------------------------------
+
+            // Ambient
+            switch (ambientMode) 
 			{
 				case UnityEngine.Rendering.AmbientMode.Skybox:
 				ambientIntensity.evaluateTime = SUN_DIR_EVALUATE_TIME;

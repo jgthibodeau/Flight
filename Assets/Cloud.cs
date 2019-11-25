@@ -10,8 +10,9 @@ public class Cloud : MonoBehaviour {
 
 //	[HideInInspector]
 	public Transform player;
-//	[HideInInspector]
-	public Vector3 speed;
+    public Rigidbody playerRb;
+    //	[HideInInspector]
+    public Vector3 speed;
 	[HideInInspector]
 	public float maxDistance;
 	[HideInInspector]
@@ -37,11 +38,26 @@ public class Cloud : MonoBehaviour {
 	void Start () {
 		Mesh mesh = GetComponent<MeshFilter> ().mesh;
 		toggleDistance = mesh.bounds.size.magnitude/2 * transform.localScale.x;
-	}
 
-	void Update () {
-		//move cloud
-		transform.position += speed * Time.deltaTime;
+        if (player == null)
+        {
+            player = GameObject.FindGameObjectWithTag("Player").transform;
+        }
+        if (playerRb == null && player != null)
+        {
+            playerRb = player.GetComponentInChildren<Rigidbody>();
+        }
+    }
+
+	void Update ()
+    {
+        if (playerRb == null && player != null)
+        {
+            playerRb = player.GetComponentInChildren<Rigidbody>();
+        }
+
+        //move cloud
+        transform.position += speed * Time.deltaTime;
 
         Vector3 playerPos = player.transform.position;
 		if (Vector3.Distance (playerPos, transform.position) < toggleDistance) {
@@ -54,7 +70,7 @@ public class Cloud : MonoBehaviour {
 	}
 
 	public void CalculateDistance() {
-		Vector3 realPlayerPos = Util.RigidBodyPosition (player.GetComponent<Rigidbody> ());
+		Vector3 realPlayerPos = playerRb != null ? Util.RigidBodyPosition (playerRb) : player.position;
 		playerPos = new Vector2 (realPlayerPos.x, realPlayerPos.z);
 		cloudPos = new Vector2 (transform.position.x, transform.position.z);
 		lastDistance = Vector2.Distance (playerPos, cloudPos);

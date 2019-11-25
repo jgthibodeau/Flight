@@ -45,7 +45,15 @@ namespace AC.LSky
 			Atmosphere();
 			ColorCorrection();
 			Lighting();
-		}
+
+            Color overallColor = sunLightIntensity.OutputValue * sunLightColor.OutputColor + moonLightIntensity.OutputValue * moonLightColor.OutputColor;
+            Shader.SetGlobalColor("LSky_Color", overallColor);
+
+
+            //Vector3 overallDir = sunLightIntensity.OutputValue * SunDirection + moonLightIntensity.OutputValue * MoonDirection;
+            Vector3 overallDir = Vector3.up;
+            Shader.SetGlobalVector("LSky_Dir", overallDir);
+        }
 
 
 		#endregion
@@ -55,10 +63,10 @@ namespace AC.LSky
 		void Sun()
 		{
 
-			Shader.SetGlobalMatrix("LSky_SunMatrix", m_SunLightTransform.worldToLocalMatrix); 
-			Shader.SetGlobalVector("LSky_SunDir", SunDirection);
+			Shader.SetGlobalMatrix("LSky_SunMatrix", m_SunLightTransform.worldToLocalMatrix);
+            Shader.SetGlobalVector("LSky_SunDir", SunDirection);
 
-			if (!enableSunDisc)
+            if (!enableSunDisc)
 			{
 				skyboxMaterial.DisableKeyword("LSKY_ENABLE_SUN_DISC");
 				return;
@@ -67,7 +75,7 @@ namespace AC.LSky
 			skyboxMaterial.EnableKeyword("LSKY_ENABLE_SUN_DISC");
 			skyboxMaterial.SetColor("_SunDiscColor", sunDiscColor.OutputColor);
 			skyboxMaterial.SetFloat("_SunDiscSize", sunDiscSize.OutputValue);
-		}
+        }
 		//-----------------------------------------------------------------------------------------------------------------------------
 
 		void Moon()
@@ -207,10 +215,14 @@ namespace AC.LSky
 			Shader.SetGlobalColor("LSky_DayAtmosphereTint", dayAtmosphereTint.OutputColor);
 			Shader.SetGlobalVector("LSky_SunBetaMiePhase", SunBetaMiePhase(sunMieAnisotropy.OutputValue));
 			Shader.SetGlobalFloat("LSky_SunMieScattering", sunMieScattering.OutputValue);
-			Shader.SetGlobalColor("LSky_SunMieColor", sunMieColor.OutputColor);
-			//-----------------------------------------------------------------------------------------------------------------------------
+            Shader.SetGlobalColor("LSky_SunMieColor", sunMieColor.OutputColor);
 
-			if(nightColorType == LSkyNightColorType.Atmospheric)
+
+            Shader.SetGlobalColor("LSky_CloudColor", cloudColor.OutputColor);
+            Shader.SetGlobalFloat("LSky_CloudIntensity", cloudIntensity.OutputValue);
+            //-----------------------------------------------------------------------------------------------------------------------------
+
+            if (nightColorType == LSkyNightColorType.Atmospheric)
 			{
 				Shader.EnableKeyword("LSKY_NIGHT_COLOR_ATMOSPHERIC"); 
 				Shader.DisableKeyword("LSKY_NIGHT_COLOR_SIMPLE"); 

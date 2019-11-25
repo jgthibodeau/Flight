@@ -32,7 +32,7 @@ TagManager:
   - Enemy
   - Perchable
   - Terrain
-  - BugRigidbody
+  - Vacuum
   - Ocean
   - Trail
   - ToggleableCollider

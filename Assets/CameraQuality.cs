@@ -24,14 +24,17 @@ public class CameraQuality : MonoBehaviour {
 
 		float newFog = minFog - (minFog - maxFog) * percent;
 		lSky.unityFogDensity.inputValue = newFog;
-        
-        Terrain[] terrains = parentTerrain.GetComponentsInChildren<Terrain>();
-        foreach (Terrain terrain in terrains)
+
+        if (parentTerrain != null)
         {
-            TreeTerrain treeTerrain = terrain.GetComponent<TreeTerrain>();
-            if (treeTerrain != null)
+            Terrain[] terrains = parentTerrain.GetComponentsInChildren<Terrain>();
+            foreach (Terrain terrain in terrains)
             {
-                treeTerrain.SetTreeDistance(newFarClip);
+                TreeTerrain treeTerrain = terrain.GetComponent<TreeTerrain>();
+                if (treeTerrain != null)
+                {
+                    treeTerrain.SetTreeDistance(newFarClip);
+                }
             }
         }
     }

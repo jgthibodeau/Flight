@@ -37,6 +37,7 @@ public class CloudSystem : MonoBehaviour {
 
 	public List<Cloud> instancedClouds;
 	public Transform player;
+    public Rigidbody playerRb;
 
 	//MeshParticleEmitter originalEmmiter;
 	//ParticleAnimator originalAnimator;
@@ -50,14 +51,28 @@ public class CloudSystem : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		cloudLayer = LayerMask.NameToLayer ("Cloud");
-		//spawn initial clouds
-//		instancedClouds = new List<Cloud> (numberClouds);
-		//		player = GameObject.FindGameObjectWithTag (playerTag).transform;
-	}
+        if (player == null)
+        {
+            player = GameObject.FindGameObjectWithTag("Player").transform;
+        }
+        if (playerRb == null && player != null)
+        {
+            playerRb = player.GetComponentInChildren<Rigidbody>();
+        }
+        //spawn initial clouds
+        //		instancedClouds = new List<Cloud> (numberClouds);
+        //		player = GameObject.FindGameObjectWithTag (playerTag).transform;
+    }
 
 	// Update is called once per frame
-	void Update () {
-		if (createClouds) {
+	void Update ()
+    {
+        if (playerRb == null && player != null)
+        {
+            playerRb = player.GetComponentInChildren<Rigidbody>();
+        }
+
+        if (createClouds) {
 			instancedClouds = new List<Cloud> (numberClouds);
 			GameObject[] oldClouds = GameObject.FindGameObjectsWithTag (cloudTag);
 			foreach (GameObject cloud in oldClouds) {
@@ -78,7 +93,11 @@ public class CloudSystem : MonoBehaviour {
 //			Vector2 cloudPos = new Vector2 (cloud.transform.position.x, cloud.transform.position.z);
 
 			if (cloud.lastDistance < checkDistance) {
-				cloud.lastDistance += (cloudSpeed + player.GetComponent<Rigidbody> ().velocity).magnitude * Time.deltaTime;
+				cloud.lastDistance += cloudSpeed.magnitude * Time.deltaTime;
+                if (playerRb != null)
+                {
+                    cloud.lastDistance += playerRb.velocity.magnitude * Time.deltaTime;
+                }
 			}
 
 			if (cloud.lastDistance >= checkDistance) {

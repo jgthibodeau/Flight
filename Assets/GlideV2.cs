@@ -27,7 +27,10 @@ public class GlideV2 : MonoBehaviour {
     public float yawScale;
     public float rollScale;
 
-	public float rigidBodyDrag = 0f;
+    public float minSpeedAngularDrag = 0;
+    public float maxSpeedAngularDrag = 30;
+
+    public float rigidBodyDrag = 0f;
     public float minRigidBodyAngularDrag = 1f;
     public float rigidBodyAngularDrag = 10f;
 
@@ -52,7 +55,8 @@ public class GlideV2 : MonoBehaviour {
 	public float flapHoverRotationSpeed = 1f;
 	public ForceMode flapForceMode;
 
-	public enum BoostState {STARTING, GOING, STOPPING, STOPPED};
+    public bool canBoost = false;
+    public enum BoostState {STARTING, GOING, STOPPING, STOPPED};
 	public BoostState boostState = BoostState.STOPPED;
 	public float boostRampUpSpeed = 10f;
 	public float boostRampDownSpeed = 10f;
@@ -250,7 +254,7 @@ public class GlideV2 : MonoBehaviour {
 	}
 
 	public bool CanBoost() {
-		return (boostState == BoostState.STOPPED) && !boostTriggered;
+		return canBoost && (boostState == BoostState.STOPPED) && !boostTriggered;
 	}
 
 	public bool IsFlapping() {
@@ -300,10 +304,10 @@ public class GlideV2 : MonoBehaviour {
                 rigidBody.angularDrag = rigidBodyAngularDrag;
             } else if (IsFlapping())
             {
-                rigidBody.angularDrag = Util.ConvertScale(0, 30, minRigidBodyAngularDragFlapping, rigidBodyAngularDragFlapping, speed);
+                rigidBody.angularDrag = Util.ConvertScale(minSpeedAngularDrag, maxSpeedAngularDrag, minRigidBodyAngularDragFlapping, rigidBodyAngularDragFlapping, speed);
             } else
             {
-                rigidBody.angularDrag = Util.ConvertScale(0, 30, minRigidBodyAngularDrag, rigidBodyAngularDrag, speed);
+                rigidBody.angularDrag = Util.ConvertScale(minSpeedAngularDrag, maxSpeedAngularDrag, minRigidBodyAngularDrag, rigidBodyAngularDrag, speed);
             }
 
             //rotate towards motion
@@ -413,7 +417,6 @@ public class GlideV2 : MonoBehaviour {
             }
             else
             {
-                //transform.up = Vector3.up;
                 rigidBody.constraints = RigidbodyConstraints.FreezePosition | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
                 rigidBody.rotation = Quaternion.LookRotation(transform.forward, Vector3.up);
 
@@ -424,72 +427,24 @@ public class GlideV2 : MonoBehaviour {
                 rigidBody.rotation = desiredForward;
                 Util.DrawRigidbodyRay(rigidBody, transform.position, desiredForward.eulerAngles * 5, Color.black);
             }
-            //else
-            //{
-            //    //transform.up = Vector3.up;
-            //    rigidBody.MoveRotation(Quaternion.LookRotation(transform.forward, Vector3.up));
-            //    rigidBody.constraints = RigidbodyConstraints.FreezePosition | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
-            //}
-
-            ////rotate instead of rolling
-            //float rotateAmount = Util.GetAxis("Roll");
-            //Vector3 rotateForward = transform.forward * (1 - Mathf.Abs(rotateAmount)) + transform.right * rotateAmount;
-            //desiredForward = Quaternion.Slerp(rigidBody.rotation, Quaternion.LookRotation(rotateForward, Vector3.up), Time.fixedDeltaTime * flapHoverRotationSpeed);
-            //rigidBody.MoveRotation(desiredForward);
-            //Util.DrawRigidbodyRay(rigidBody, transform.position, desiredForward.eulerAngles * 5, Color.black);
         }
 
-        else if (flapping/* || backFlapTriggered*/)
+        else if (flapping)
         {
-            //			pitchLeft = 0f;
-            //			pitchRight = 0f;
-
-            //float realFlapSpeed = flapForces [currentFlapTick] * flapSpeed;
-
             Vector3 flapPositionLeft = transform.position + transform.up * playerScript.centerOfGravity.y + transform.forward * playerScript.centerOfGravity.z - transform.right * flapOutDistance;
 			Vector3 flapPositionRight = transform.position + transform.up * playerScript.centerOfGravity.y + transform.forward * playerScript.centerOfGravity.z + transform.right * flapOutDistance;
 
-   //         //if backFlapHover is selected, and we are flapping backwards
-   //         if (backFlapHover && (isBackFlapping || ((wingAngleLeft < rollAmountTriggersBackflap && wingAngleRight < rollAmountTriggersBackflap) && !isGrounded)))
-   //         {
-   //             isBackFlapping = true;
-                
-			//	Vector3 forceDirection = -rigidBody.velocity.normalized;
-			//	Vector3 flapForce = forceDirection * realFlapSpeed;
-			//	rigidBody.AddForce (flapForce, flapForceMode);
-			//	Util.DrawRigidbodyRay (rigidBody, transform.position, flapForce, Color.green);
+			float flapLeft = -2 * wingOutAmountLeft;
+            Vector3 flapForceDirectionLeft = CalculateFlapForceDirectionV2();
+            Vector3 flapForceLeft = flapForceDirectionLeft * realFlapSpeed;
+			rigidBody.AddForceAtPosition (flapForceLeft, flapPositionLeft, flapForceMode);
+			Util.DrawRigidbodyRay (rigidBody, flapPositionLeft, flapForceLeft, Color.red);
 
-
-			//	//rotate to become upright
-			//	Quaternion desiredForward;
-			//	Vector3 projectedForward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
-			//	desiredForward = Quaternion.Slerp (rigidBody.rotation, Quaternion.LookRotation(projectedForward, Vector3.up), Time.fixedDeltaTime * flapHoverUprightRotationSpeed);
-   //             Util.DrawRigidbodyRay(rigidBody, transform.position, desiredForward.eulerAngles * 5, Color.black);
-			//	rigidBody.MoveRotation (desiredForward);
-
-   //             //rotate instead of rolling
-   //             float rotateAmount = Util.GetAxis("roll");
-   //             Vector3 rotateForward = transform.forward * (1 - Mathf.Abs(rotateAmount)) + transform.right * rotateAmount;
-			//	desiredForward = Quaternion.Slerp (rigidBody.rotation, Quaternion.LookRotation (rotateForward, Vector3.up), Time.fixedDeltaTime * flapHoverRotationSpeed);
-			//	rigidBody.MoveRotation (desiredForward);
-
-			//} else {
-				float flapLeft = -2 * wingOutAmountLeft;
-//				Vector3 flapForceDirectionLeft = (transform.forward * (flapLeft) * 0.75f) + (transform.up * (1 - Mathf.Abs (flapLeft)) * 0.25f);
-                //Vector3 flapForceDirectionLeft = (transform.forward * (flapLeft)) + (transform.up * (1 - Mathf.Abs (flapLeft)));
-                Vector3 flapForceDirectionLeft = CalculateFlapForceDirectionV2();
-                Vector3 flapForceLeft = flapForceDirectionLeft * realFlapSpeed;
-				rigidBody.AddForceAtPosition (flapForceLeft, flapPositionLeft, flapForceMode);
-				Util.DrawRigidbodyRay (rigidBody, flapPositionLeft, flapForceLeft, Color.red);
-
-				float flapRight = -2 * wingOutAmountRight;
-//				Vector3 flapForceDirectionRight = (transform.forward * (flapRight) * 0.75f) + (transform.up * (1 - Mathf.Abs (flapRight)) * 0.25f);
-				//Vector3 flapForceDirectionRight = (transform.forward * (flapRight)) + (transform.up * (1 - Mathf.Abs (flapRight)));
-                Vector3 flapForceDirectionRight = CalculateFlapForceDirectionV2();
-                Vector3 flapForceRight = flapForceDirectionRight * realFlapSpeed;
-				rigidBody.AddForceAtPosition (flapForceRight, flapPositionRight, flapForceMode);
-				Util.DrawRigidbodyRay (rigidBody, flapPositionRight, flapForceRight, Color.blue);
-			//}
+			float flapRight = -2 * wingOutAmountRight;
+            Vector3 flapForceDirectionRight = CalculateFlapForceDirectionV2();
+            Vector3 flapForceRight = flapForceDirectionRight * realFlapSpeed;
+			rigidBody.AddForceAtPosition (flapForceRight, flapPositionRight, flapForceMode);
+			Util.DrawRigidbodyRay (rigidBody, flapPositionRight, flapForceRight, Color.blue);
 		}
     }
 
@@ -808,13 +763,13 @@ public class GlideV2 : MonoBehaviour {
 	}
 
 	public float CalculateLiftCoef(float angleOfAttack) {
-		return liftCoef * Mathf.Sin (angleOfAttack * Mathf.PI / 180f);
+		return liftCoef * Mathf.Sin (angleOfAttack * Mathf.Deg2Rad);
 	}
 
-	public float CalculateLift(float liftCoef, float wingOutAmount, float wingAngle) {
+	public float CalculateLift(float calculatedLiftCoef, float wingOutAmount, float wingAngle) {
         float liftSpeed = Mathf.Clamp(speed, 0, maxLiftSpeed);
 
-		float calculatedLift = 0.5f * airDensity * liftSpeed * liftSpeed * wingLiftSurfaceArea * liftCoef * (1 + wingOutAmount);
+		float calculatedLift = 0.5f * airDensity * liftSpeed * liftSpeed * wingLiftSurfaceArea * calculatedLiftCoef * (1 + wingOutAmount);
 		calculatedLift = Mathf.Clamp(calculatedLift, -maxLift, maxLift);
 
         if (calculatedLift < minLift && calculatedLift > -minLift && wingAngle != 0)
@@ -882,7 +837,7 @@ public class GlideV2 : MonoBehaviour {
             }
 
             rigidBody.AddForceAtPosition(transform.right * yaw * yawScale, transform.position + transform.forward);
-
+            Util.DrawRigidbodyRay(rigidBody, transform.position + transform.forward, transform.right * yaw * yawScale, Color.green);
 
             //			//induced
             //			float aspectRatio = 1f / wingLiftSurfaceArea;
@@ -905,6 +860,6 @@ public class GlideV2 : MonoBehaviour {
             //			Vector3 rightInducedPosition = rightPosition;
             //			rigidBody.AddForceAtPosition (rightInducedDragForce, rightInducedPosition, ForceMode.Force);
             //			Util.DrawRigidbodyRay (rigidBody, rightInducedPosition, rightInducedDragForce, Color.blue);
-		}
-	}
+        }
+    }
 }

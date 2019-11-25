@@ -57,7 +57,7 @@ public class UnderwaterCamera : MonoBehaviour {
 			RenderSettings.fogDensity = underwaterFogDensity;
 		}
 
-		underwaterFilter.SetActive (true);
+		//underwaterFilter.SetActive (true);
 		waterMaterial.SetFloat ("_UnderwaterMode", 1);
 	}
 }

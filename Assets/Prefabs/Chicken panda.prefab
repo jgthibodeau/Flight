@@ -204,7 +204,7 @@ Rigidbody:
   m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 112
-  m_CollisionDetection: 2
+  m_CollisionDetection: 0
 --- !u!114 &8617094194844635530
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -238,7 +238,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fireDamage: 0
-  timeToCatchFire: 0
+  timeToCatchFire: 0.1
   currentTimeToCatchFire: 0
   onFire: 0
   fireOutTime: 5

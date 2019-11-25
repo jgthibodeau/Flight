@@ -34,7 +34,7 @@ public class Buoyancy : MonoBehaviour
 	private float voxelHalfHeight;
 	private Vector3 localArchimedesForce;
 	private List<Vector3> voxels;
-	private bool isMeshCollider;
+	private bool isMeshCollider; 
 	private List<Vector3[]> forces; // For drawing force gizmos
 	private Rigidbody rigidBody;
 

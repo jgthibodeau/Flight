@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class StaminaBar : MonoBehaviour {
 	public Stamina stamina;
 	
-	public Image mainStaminaImg;
+	public Image[] mainStaminaImg;
 
 	public GameObject extraStamina;
 	public GameObject extraStaminaImg;
@@ -20,23 +20,27 @@ public class StaminaBar : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		staminaPerExtraBar = staminaPerExtraBarPercent * stamina.maxStamina;
+		//staminaPerExtraBar = staminaPerExtraBarPercent * stamina.maxStamina;
 
-		mainStaminaImg.fillAmount = stamina.currentStamina / stamina.maxStamina;
+        foreach(Image i in mainStaminaImg)
+        {
+            i.fillAmount = stamina.currentStamina / stamina.maxStamina;
+        }
 
-		if (stamina.extraStamina > 0) {
-			extraStamina.SetActive (true);
-			float extraFill = (stamina.extraStamina % staminaPerExtraBar) / staminaPerExtraBar;
-			if (extraFill == 0) {
-				extraFill = 1;
-			}
-			extraStaminaImg.GetComponent<Image> ().fillAmount = extraFill;
+		//if (stamina.extraStamina > 0) {
+  //          Debug.Log(stamina.extraStamina);
+		//	extraStamina.SetActive (true);
+		//	float extraFill = (stamina.extraStamina % staminaPerExtraBar) / staminaPerExtraBar;
+		//	if (extraFill == 0) {
+		//		extraFill = 1;
+		//	}
+		//	extraStaminaImg.GetComponent<Image> ().fillAmount = extraFill;
 
-			CreateExtraStamina ();
-		} else {
-			extraStamina.SetActive (false);
-			CreateExtraStamina ();
-		}
+		//	CreateExtraStamina ();
+		//} else {
+		//	extraStamina.SetActive (false);
+		//	CreateExtraStamina ();
+		//}
 	}
 
 	private void CreateExtraStamina () {

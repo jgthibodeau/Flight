@@ -70,6 +70,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -115,10 +116,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fireDamage: 0
-  timeToCatchFire: 1
+  timeToCatchFire: 0.1
   currentTimeToCatchFire: 0
   onFire: 0
-  fireOutTime: 5
+  fireOutTime: 10
   currentFireOutTime: 0
   fire: {fileID: 1243024262645194}
 --- !u!1 &1217260020984486

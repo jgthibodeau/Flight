@@ -12,9 +12,11 @@ using System.Collections;
 [RequireComponent(typeof(FlameBreath))]
 [RequireComponent(typeof(Health))]
 
-public class Player : MonoBehaviour {
-	private GlideV2 glideV2Script;
-	private Grab grabScript;
+public class Player : MonoBehaviour
+{
+    private GlideV2 glideV2Script;
+    private GlideV3 glideV3Script;
+    private Grab grabScript;
 	private Perch perchScript;
 	private Walk walkScript;
 	private Stamina staminaScript;
@@ -40,13 +42,18 @@ public class Player : MonoBehaviour {
 	public float waterBobAmount, waterBobTime, timeSinceWaterBob;
 	public float airGroundDistance = 0.1f;
 	public float groundDistance = 0.15f;
+    public float fallCheckDistance = 0.5f;
     public float groundCheckRadius = 1f;
     public bool inWater;
 	public bool isGrounded;
     public bool isFlying;
+    public bool isFalling;
 	public bool isUpright;
 	public bool isFlaming;
 	public bool isGusting;
+
+    public enum State { WALKING, FLYING, LANDING, JUMPING, SWIMMING }
+    public State state = State.WALKING;
 
     private Coroutine takeOffTransition;
     private Coroutine landTransition;
@@ -60,15 +67,27 @@ public class Player : MonoBehaviour {
 	public DragonAnimator dragonAnimator;
 	private Rigidbody rigidBody;
 	private bool isFlapping;
-	private Vector3 center;
+    private bool flapTriggered, flapHeld;
+    private Vector3 center;
 	private bool landed;
 	public float gravity;
-	public float groundGravity;
-	public float gravityForwardDistance;
+    public float groundGravity;
+    public float fallingGravity;
+    public float gravityForwardDistance;
 	public float gravityDownDistance;
-	public Vector3 centerOfGravity;
-	public ForceMode gravityForceMode;
-	public bool keepUprightAlways;
+    public Vector3 centerOfGravity;
+    public Vector3 fallingCenterOfGravity;
+    public ForceMode gravityForceMode;
+    public ForceMode groundGravityForceMode;
+    public ForceMode fallingGravityForceMode;
+
+    public bool canJump, canFall;
+    public float jumpForce;
+    public ForceMode jumpForceMode;
+    public bool keepUprightAlways;
+
+    public float jumpDrag = 0;
+    public float jumpAngularDrag = 10;
 
 	public float minHealRate;
 	public float maxHealRate;
@@ -102,7 +121,8 @@ public class Player : MonoBehaviour {
 		rigidBody = transform.GetComponent<Rigidbody> ();
 
 		glideV2Script = transform.GetComponent<GlideV2> ();
-		grabScript = transform.GetComponent<Grab> ();
+        glideV3Script = transform.GetComponent<GlideV3>();
+        grabScript = transform.GetComponent<Grab> ();
 		perchScript = transform.GetComponent<Perch> ();
 		walkScript = transform.GetComponent<Walk> ();
 		staminaScript = transform.GetComponent<Stamina> ();
@@ -111,27 +131,60 @@ public class Player : MonoBehaviour {
 		flameBreathScript = transform.GetComponent<FlameBreath> ();
 		healthScript = transform.GetComponent<Health> ();
 
-		glideV2Script.birdAnimator = birdAnimator;
-		glideV2Script.dragonAnimator = dragonAnimator;
+        glideV2Script.birdAnimator = birdAnimator;
+        glideV2Script.dragonAnimator = dragonAnimator;
 
-		walkScript.birdAnimator = birdAnimator;
+        glideV3Script.birdAnimator = birdAnimator;
+        glideV3Script.dragonAnimator = dragonAnimator;
+
+        walkScript.birdAnimator = birdAnimator;
 		walkScript.dragonAnimator = dragonAnimator;
 
-		glideV2Script.rigidBody = rigidBody;
-		walkScript.rigidBody = rigidBody;
+        glideV2Script.rigidBody = rigidBody;
+        glideV3Script.rigidBody = rigidBody;
+        walkScript.rigidBody = rigidBody;
 
-		glideV2Script.gravity = gravity;
-	}
+        glideV2Script.gravity = gravity;
+        glideV3Script.gravity = gravity;
+    }
 
-	void FixedUpdate () {
+    public float jumpWaitTime = 5;
+    private float nextJumpTime = 5;
+    public float landWaitTime = 20;
+    private float nextLandTime = 20;
+    public float flapWaitTime = 20;
+    private float nextFlapTime = 20;
+    void FixedUpdate () {
 		CheckGround ();
 
 		//assume not fully grounded
 		landed = false;
 		speed = rigidBody.velocity.magnitude;
 
+//		//not on ground
+//		if (!isGrounded || isFlapping) {
+////			if (keepUprightAlways) {
+//			AirGravity ();
+////			}
+//		}
+//		//TODO on ground, but moving fast
+////		else if (speed > ragdollSpeed) {
+////			RagdollGravity ();
+////		}
+//		//on ground and not upright
+//		else if (!isUpright) {
+//			GroundGravity ();
+//		}
+//		//on ground and upright
+//		else {
+//			GroundGravity ();
+////			if (rigidBody.velocity.magnitude <= 0.01f) {
+//				landed = true;
+////			}
+//		}
 		//not on ground
-		if (!isGrounded || glideV2Script.IsFlapping ()) {
+		if (isFlying || isFlapping) {
+		//if (state == State.FLYING) {
 //			if (keepUprightAlways) {
 			AirGravity ();
 //			}
@@ -140,6 +193,10 @@ public class Player : MonoBehaviour {
 //		else if (speed > ragdollSpeed) {
 //			RagdollGravity ();
 //		}
+        else if (!isGrounded && isFalling)
+        {
+            FallingGravity();
+        }
 		//on ground and not upright
 		else if (!isUpright) {
 			GroundGravity ();
@@ -157,48 +214,17 @@ public class Player : MonoBehaviour {
 
         //if isGrounded, then walkScript.isGrounded is true and glideV2Script.isFlying is false by default
 
-        if (isGrounded)
-        {
-            if (takeOffTransition != null)
-            {
-                Debug.Log("isGrounded and takeOffTransition running - killing takeOffTransition");
-                StopCoroutine(takeOffTransition);
-                //takeOffTransition = null;
-                FinishTakeOffTransition();
-            }
 
-            if (isFlying && landTransition == null)
-            {
-                Debug.Log("isGrounded, isFlying, and landTransition null - starting landTransition");
-                landTransition = StartCoroutine(StartLandTransition());
-            }// else if (!isFlying && landTransition != null)
-            //{
-            //    Debug.Log("isGrounded, !isFlying, and landTransition running - killing landTransition");
-            //    StopCoroutine(landTransition);
-            //    landTransition = null;
-            //}
-        } else
-        {
-            if (landTransition != null)
-            {
-                Debug.Log("!isGrounded and landTransition running - killing landTransition");
-                StopCoroutine(landTransition);
-                //landTransition = null;
-                FinishLandTransition();
-            }
-            if (!isFlying && takeOffTransition == null)
-            {
-                Debug.Log("!isGrounded, !isFlying, and takeOffTransition null - starting takeOffTransition");
-                takeOffTransition = StartCoroutine(StartTakeOffTransition());
-            }// else if (isFlying && takeOffTransition != null)
-            //{
-            //    Debug.Log("!isGrounded, isFlying, and takeOffTransition running - killing takeOffTransition");
-            //    StopCoroutine(takeOffTransition);
-            //    takeOffTransition = null;
-            //}
-        }
+        //if grounded && (flying or falling), and not already transitioning to ground
+        //kill current transition
+        //start ground transition
+        //if !grounded && !flying && flapping && not already transitioning to flying
+        //kill current transition
+        //start fly transition
 
 
+        //FlightStateMachine();
+        TakeoffLandTransitions();
 
         //		walkScript.isGrounded = isGrounded && !isFlapping;
         //		if (isFlapping) {
@@ -211,11 +237,256 @@ public class Player : MonoBehaviour {
         //		}
     }
 
+    private void FlightStateMachine()
+    {
+        switch (state)
+        {
+            case State.WALKING:
+                glideV2Script.isGrounded = true;
+                glideV3Script.isGrounded = true;
+                walkScript.isGrounded = true;
+                walkScript.isFlying = false;
+
+                //if jump triggered, jump
+                if (flapTriggered)
+                {
+                    FlapTriggeredState();
+                }
+
+                if (!isGrounded)
+                {
+                    if (Time.time >= nextLandTime)
+                    {
+                        if (canFall)
+                        {
+                            state = State.JUMPING;
+                            nextJumpTime = Time.time + jumpWaitTime;
+                        }
+                        else
+                        {
+                            state = State.FLYING;
+                        }
+                    }
+                }
+                else
+                {
+                    nextLandTime = Time.time + landWaitTime;
+                }
+
+                break;
+            case State.JUMPING:
+                glideV2Script.isGrounded = true;
+                glideV3Script.isGrounded = true;
+                walkScript.isGrounded = false;
+                walkScript.isFlying = false;
+
+                rigidBody.drag = jumpDrag;
+                rigidBody.angularDrag = jumpAngularDrag;
+
+                //if jump triggered, fly
+                if (flapTriggered)
+                {
+                    Debug.Log("Flap");
+                    staminaScript.usingStamina = true;
+                    glideV2Script.setFlapSpeed(1);
+                    glideV3Script.setFlapSpeed(1);
+                    state = State.FLYING;
+                    nextFlapTime = Time.time + flapWaitTime;
+                }
+
+                //if grounded, walk
+                if (isGrounded && Time.time >= nextJumpTime)
+                {
+                    Debug.Log("jump stopped");
+                    glideV2Script.isGrounded = true;
+                    glideV3Script.isGrounded = true;
+                    walkScript.isGrounded = true;
+                    walkScript.isFlying = false;
+
+                    rigidBody.drag = walkScript.rigidBodyDrag;
+                    rigidBody.angularDrag = walkScript.rigidBodyAngularDrag;
+
+                    state = State.WALKING;
+                    nextLandTime = Time.time + landWaitTime;
+                    flapTriggered = false;
+                }
+                break;
+            case State.FLYING:
+                glideV2Script.isGrounded = false;
+                glideV3Script.isGrounded = false;
+                walkScript.isGrounded = false;
+                walkScript.isFlying = true;
+
+                //if flapping, keep flapping
+                if (flapTriggered || flapHeld || Time.time < nextFlapTime)
+                {
+                    staminaScript.usingStamina = true;
+                    glideV2Script.setFlapSpeed(1);
+                    glideV3Script.setFlapSpeed(1);
+                }
+                else
+                {
+                    staminaScript.usingStamina = false;
+                    glideV2Script.setFlapSpeed(0);
+                    glideV3Script.setFlapSpeed(0);
+
+                    //if grounded, land
+                    if (isGrounded)
+                    {
+                        state = State.LANDING;
+                    }
+                }
+
+                break;
+            case State.LANDING:
+                glideV2Script.isGrounded = false;
+                glideV3Script.isGrounded = false;
+                walkScript.isGrounded = false;
+                walkScript.isFlying = false;
+
+                //if landTransition not started, kick it off
+                if (landTransition == null)
+                {
+                    landTransition = StartCoroutine(StartLandTransition());
+                }
+
+                //if no longer grounded, stop landing
+                if (!isGrounded)
+                {
+                    StopCoroutine(landTransition);
+                    landTransition = null;
+
+                    if (flapTriggered || flapHeld)
+                    {
+                        FlapTriggeredState();
+                    }
+
+                    else if (canFall)
+                    {
+                        state = State.JUMPING;
+                        nextJumpTime = Time.time + jumpWaitTime;
+                    }
+                    else
+                    {
+                        state = State.FLYING;
+                    }
+                }
+                break;
+        }
+    }
+
+    private void FlapTriggeredState()
+    {
+        flapTriggered = false;
+        if (canJump)
+        {
+            Debug.Log("Jump");
+            flapTriggered = false;
+            isFalling = true;
+            walkScript.isGrounded = false;
+
+            rigidBody.freezeRotation = false;
+            rigidBody.drag = jumpDrag;
+            rigidBody.angularDrag = jumpAngularDrag;
+
+            Vector3 jumpPosition = rigidBody.position + transform.up * fallingCenterOfGravity.y + transform.forward * fallingCenterOfGravity.z;
+            rigidBody.AddForceAtPosition(Vector3.up * jumpForce, jumpPosition, jumpForceMode);
+            Util.DrawRigidbodyRay(rigidBody, jumpPosition, Vector3.up * jumpForce, Color.green);
+
+            state = State.JUMPING;
+            nextJumpTime = Time.time + jumpWaitTime;
+        }
+        else
+        {
+            Debug.Log("Flap");
+            staminaScript.usingStamina = true;
+            glideV2Script.setFlapSpeed(1);
+            glideV3Script.setFlapSpeed(1);
+            state = State.FLYING;
+            nextFlapTime = Time.time + flapWaitTime;
+        }
+    }
+
+    private void TakeoffLandTransitions()
+    {
+        if (isGrounded)
+        {
+            if (takeOffTransition != null)
+            {
+                Debug.Log("isGrounded and takeOffTransition running - killing takeOffTransition");
+                StopCoroutine(takeOffTransition);
+                //takeOffTransition = null;
+                if (landTransition == null)
+                {
+                    FinishTakeOffTransition();
+                }
+            }
+
+            if (isFlying && landTransition == null)
+            {
+                Debug.Log("isGrounded, isFlying, and landTransition null - starting landTransition");
+                landTransition = StartCoroutine(StartLandTransition());
+                if (takeOffTransition != null)
+                {
+                    StopCoroutine(takeOffTransition);
+                    takeOffTransition = null;
+                }
+            }// else if (!isFlying && landTransition != null)
+            //{
+            //    Debug.Log("isGrounded, !isFlying, and landTransition running - killing landTransition");
+            //    StopCoroutine(landTransition);
+            //    landTransition = null;
+            //}
+            else if (isFalling)
+            {
+                FinishLandTransition();
+            }
+        }
+        else if (isFalling && !isFlapping && !isFlying)
+        {
+            walkScript.isGrounded = false;
+            walkScript.isFlying = false;
+            glideV2Script.isGrounded = true;
+            glideV3Script.isGrounded = true;
+        }
+        else
+        {
+            //if flapping, or not grounded for long enough
+            if (landTransition != null)
+            {
+                Debug.Log("!isGrounded and landTransition running - killing landTransition");
+                StopCoroutine(landTransition);
+                //landTransition = null;
+                if (takeOffTransition == null)
+                {
+                    FinishLandTransition();
+                }
+            }
+            if (isFlapping && !isFlying && takeOffTransition == null)
+            //if (!isFlying && takeOffTransition == null)
+            {
+                Debug.Log("!isGrounded, !isFlying, and takeOffTransition null - starting takeOffTransition");
+                takeOffTransition = StartCoroutine(StartTakeOffTransition());
+                if (landTransition != null)
+                {
+                    StopCoroutine(landTransition);
+                    landTransition = null;
+                }
+            }// else if (isFlying && takeOffTransition != null)
+            //{
+            //    Debug.Log("!isGrounded, isFlying, and takeOffTransition running - killing takeOffTransition");
+            //    StopCoroutine(takeOffTransition);
+            //    takeOffTransition = null;
+            //}
+        }
+    }
+
     public float landTime = 0.5f, takeOffTime = 0.5f;
     IEnumerator StartLandTransition()
     {
         Debug.Log("StartLandTransition");
         glideV2Script.isGrounded = true;
+        glideV3Script.isGrounded = true;
         yield return new WaitForSeconds(landTime);
         FinishLandTransition();
     }
@@ -223,10 +494,13 @@ public class Player : MonoBehaviour {
     void FinishLandTransition()
     {
         Debug.Log("FinishLandTransition");
+        state = State.WALKING;
+        nextLandTime = Time.time + landWaitTime;
         walkScript.isGrounded = true;
         walkScript.isFlying = false;
 
         isFlying = false;
+        isFalling = false;
         landTransition = null;
     }
 
@@ -242,6 +516,7 @@ public class Player : MonoBehaviour {
     {
         Debug.Log("FinishTakeOffTransition");
         glideV2Script.isGrounded = false;
+        glideV3Script.isGrounded = false;
         walkScript.isFlying = true;
 
         isFlying = true;
@@ -302,28 +577,40 @@ public class Player : MonoBehaviour {
 	}
 
 	void AirGravity(){
-		Vector3 gravityForce = Vector3.down * gravity;
-//		rigidBody.AddForceAtPosition (gravityForce, transform.position + transform.up * centerOfGravity.y + transform.forward * centerOfGravity.z, ForceMode.Force);
-		rigidBody.AddForceAtPosition (gravityForce, transform.position + transform.up * centerOfGravity.y + transform.forward * centerOfGravity.z, gravityForceMode);
-//		rigidBody.AddForce (gravityForce, gravityForceMode);
-		Util.DrawRigidbodyRay(rigidBody, transform.position + transform.up * centerOfGravity.y + transform.forward * centerOfGravity.z, gravityForce, Color.gray);
-	}
+        //Vector3 gravityForce = Vector3.down * gravity;
+        //rigidBody.AddForceAtPosition (gravityForce, transform.position + transform.up * centerOfGravity.y + transform.forward * centerOfGravity.z, gravityForceMode);
+        //Util.DrawRigidbodyRay(rigidBody, transform.position + transform.up * centerOfGravity.y + transform.forward * centerOfGravity.z, gravityForce, Color.gray);
+
+        ApplyGravity(gravity, transform.position + transform.up * centerOfGravity.y + transform.forward * centerOfGravity.z, gravityForceMode);
+    }
+
+    void FallingGravity(){
+        //Vector3 gravityForce = Vector3.down * fallingGravity;
+        //rigidBody.AddForceAtPosition (gravityForce, transform.position - transform.up, fallingGravityForceMode);
+        //Util.DrawRigidbodyRay(rigidBody, transform.position + transform.up * fallingCenterOfGravity.y + transform.forward * fallingCenterOfGravity.z, gravityForce, Color.gray);
+
+        rigidBody.freezeRotation = false;
+        ApplyGravity(fallingGravity, transform.position + transform.up * fallingCenterOfGravity.y + transform.forward * fallingCenterOfGravity.z, fallingGravityForceMode);
+    }
 
 	void GroundGravity(){
-//		Vector3 gravityForce = -groundNormal * gravity;
-		Vector3 gravityForce = Vector3.down * groundGravity;
-		rigidBody.AddForceAtPosition (gravityForce, transform.position - transform.up, ForceMode.Acceleration);
-//		rigidBody.AddForceAtPosition (gravityForce/2, transform.position - transform.up * 1 + transform.forward, ForceMode.Force);
-//		rigidBody.AddForceAtPosition (gravityForce/2, transform.position - transform.up * 1 - transform.forward, ForceMode.Force);
+		//Vector3 gravityForce = Vector3.down * groundGravity;
+		//rigidBody.AddForceAtPosition (gravityForce, transform.position - transform.up, groundGravityForceMode);
+		//Util.DrawRigidbodyRay(rigidBody, transform.position + transform.up * centerOfGravity.y + transform.forward * centerOfGravity.z, gravityForce, Color.gray);
 
-		Util.DrawRigidbodyRay(rigidBody, transform.position + transform.up * centerOfGravity.y + transform.forward * centerOfGravity.z, gravityForce, Color.gray);
+        ApplyGravity(groundGravity, transform.position - transform.up, groundGravityForceMode);
+    }
+
+    void RagdollGravity(){
+        ApplyGravity(gravity, transform.position, ForceMode.Force);
 	}
 
-	void RagdollGravity(){
-		Vector3 gravityForce = Vector3.down * gravity;
-		rigidBody.AddForceAtPosition (gravityForce, transform.position, ForceMode.Force);
-		Util.DrawRigidbodyRay(rigidBody, transform.position, gravityForce, Color.gray);
-	}
+    void ApplyGravity(float gravityAmount, Vector3 position, ForceMode forceMode)
+    {
+        Vector3 gravityForce = Vector3.down * gravityAmount;
+        rigidBody.AddForceAtPosition(gravityForce, position, forceMode);
+        Util.DrawRigidbodyRay(rigidBody, position, gravityForce, Color.gray);
+    }
 
 	void CheckGround(){
 		//if flapping, not grounded
@@ -354,62 +641,31 @@ public class Player : MonoBehaviour {
             groundCapsuleHeight = 0.5f;
         }
 
-        //         Debug.DrawLine(characterCollider.bounds.center, new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y - groundCheckDistance, characterCollider.bounds.center.z), Color.red);
-        //         Debug.DrawLine(characterCollider.bounds.center, new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.center.y + groundCheckRadius, characterCollider.bounds.center.z), Color.green);
-        //         Debug.DrawLine(new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y - groundCheckDistance, characterCollider.bounds.center.z), new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y - groundCheckDistance - groundCheckRadius, characterCollider.bounds.center.z), Color.green);
-
-        //         isGrounded = Physics.CheckCapsule (
-        //	characterCollider.bounds.center,
-        //	new Vector3 (characterCollider.bounds.center.x, characterCollider.bounds.min.y - groundCheckDistance, characterCollider.bounds.center.z),
-        //	groundCheckRadius,
-        //	layerMaskForGround.value
-        //);
-
-
-        //Vector3 capsuleStart = characterCollider.bounds.center + (characterCollider.bounds.max.z - groundCheckRadius) * transform.forward - groundCheckDistance * Vector3.up;
-        //Vector3 capsuleEnd = characterCollider.bounds.center - (characterCollider.bounds.min.z - groundCheckRadius) * transform.forward - groundCheckDistance * Vector3.up;
-
-
-        Vector3 capsuleStart = rigidBody.position + groundCapsuleHeight * transform.forward + groundCheckDistance * Vector3.down;
-        Vector3 capsuleEnd = rigidBody.position - groundCapsuleHeight * transform.forward + groundCheckDistance * Vector3.down;
-
-        Vector3 rbOff = rigidBody.velocity * Time.fixedDeltaTime;
-        DebugExtension.DebugCapsule(capsuleStart + rbOff, capsuleEnd + rbOff, Color.red, groundCheckRadius);
-        Debug.DrawLine(capsuleStart + rbOff, capsuleEnd + rbOff, Color.red);
-        Debug.DrawLine(capsuleStart + rbOff, capsuleStart + groundCheckRadius * Vector3.down + rbOff, Color.green);
-        Debug.DrawLine(capsuleEnd + rbOff, capsuleEnd + groundCheckRadius * Vector3.down + rbOff, Color.green);
-
-        isGrounded = Physics.CheckCapsule(
-            capsuleStart,
-            capsuleEnd,
-            groundCheckRadius,
-            layerMaskForGround.value
-        );
+        isGrounded = DoGroundCheck(groundCapsuleHeight, groundCheckDistance);
 
         if (isGrounded) {
-				RaycastHit hit;
-				if (Physics.Raycast (transform.position, -transform.up, out hit, 5f, layerMaskForGround)) {
-					groundNormal = hit.normal;
+			RaycastHit hit;
+			if (Physics.Raycast (transform.position, -transform.up, out hit, 5f, layerMaskForGround)) {
+				groundNormal = hit.normal;
 
-					if (groundNormal.y <= 0.5f) {
-						groundNormal = Vector3.up;
-					}
+				if (groundNormal.y <= 0.5f) {
+					groundNormal = Vector3.up;
 				}
 			}
+		}
 
-			inWater = Physics.CheckCapsule (
-				characterCollider.bounds.center,
-				new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y-0.1f, characterCollider.bounds.center.z),
-				groundCheckDistance,
-				layerMaskForWater.value
-			);
+		inWater = Physics.CheckCapsule (
+			characterCollider.bounds.center,
+			new Vector3(characterCollider.bounds.center.x, characterCollider.bounds.min.y-0.1f, characterCollider.bounds.center.z),
+			groundCheckDistance,
+			layerMaskForWater.value
+		);
 
-			//maybe?
-			//if grounded and not upright, use ragdoll gravity and forces (don't let walk script take over yet)
-			//else, use ground gravity and let walk script take over
-		//}
-
-
+        //check fall height
+        if (!isGrounded && !isFlying && !DoGroundCheck(groundCapsuleHeight, fallCheckDistance))
+        {
+            isFalling = true;
+        }
 			
 //		if (inWater) {
 //			if (timeSinceWaterBob > 0) {
@@ -425,6 +681,25 @@ public class Player : MonoBehaviour {
 		walkScript.groundNormal = groundNormal;
 	}
 
+    bool DoGroundCheck(float capsuleHeight, float groundDistance)
+    {
+        Vector3 capsuleStart = rigidBody.position + capsuleHeight * transform.forward + groundDistance * Vector3.down;
+        Vector3 capsuleEnd = rigidBody.position - capsuleHeight * transform.forward + groundDistance * Vector3.down;
+
+        Vector3 rbOff = rigidBody.velocity * Time.fixedDeltaTime;
+        DebugExtension.DebugCapsule(capsuleStart + rbOff, capsuleEnd + rbOff, Color.red, groundCheckRadius);
+        Debug.DrawLine(capsuleStart + rbOff, capsuleEnd + rbOff, Color.red);
+        Debug.DrawLine(capsuleStart + rbOff, capsuleStart + groundCheckRadius * Vector3.down + rbOff, Color.green);
+        Debug.DrawLine(capsuleEnd + rbOff, capsuleEnd + groundCheckRadius * Vector3.down + rbOff, Color.green);
+
+        return Physics.CheckCapsule(
+            capsuleStart,
+            capsuleEnd,
+            groundCheckRadius,
+            layerMaskForGround.value
+        );
+    }
+
 	void UpdateRendering(){
 //		birdAnimator.WingsOut = glideV2Script.wingsOut;
 //		dragonAnimator.WingsOut = glideV2Script.wingsOut;
@@ -435,6 +710,8 @@ public class Player : MonoBehaviour {
 		dragonAnimator.InWater = inWater;
         //dragonAnimator.Grounded = isGrounded;
         dragonAnimator.Grounded = walkScript.isGrounded;
+        //dragonAnimator.Flying = state == State.FLYING;
+        dragonAnimator.Flying = walkScript.isFlying;
     }
 
 	public void GetInput () {
@@ -447,9 +724,10 @@ public class Player : MonoBehaviour {
 		walkScript.forward = 0;
 		walkScript.right = 0;
 
-		glideV2Script.setFlapSpeed(0);
+        glideV2Script.setFlapSpeed(0);
+        glideV3Script.setFlapSpeed(0);
 
-		bool heal = Util.GetButton ("Heal");
+        bool heal = Util.GetButton ("Heal");
 		bool isHealing = heal && isGrounded && !glideV2Script.IsFlapping() && speed <= 5f;
 		if (isHealing && healthScript.Heal (currentHealRate * Time.deltaTime)) {
 			currentHealRate = Mathf.Clamp (currentHealRate + healRateRate * Time.deltaTime, minHealRate, maxHealRate);
@@ -486,6 +764,7 @@ public class Player : MonoBehaviour {
         } else
         {
             glideV2Script.ResetInput();
+            glideV3Script.ResetInput();
         }
 
         if (!isGusting)
@@ -494,17 +773,11 @@ public class Player : MonoBehaviour {
             walkScript.right = Util.GetAxis("Horizontal");
         }
 
-		float flapSpeed = Util.GetAxis ("Flap");
-		if (staminaScript.HasStamina ()) {
-            glideV2Script.setFlapSpeed(flapSpeed);
-        } else {
-			glideV2Script.setFlapSpeed(0);
-		}
-		staminaScript.usingStamina = flapSpeed != 0;
+        //flapTriggered |= Util.GetButtonDown("Flap");
+        //flapHeld = flapTriggered | Util.GetButton("Flap");
+        Flap();
 
-		isFlapping = flapSpeed > 0;
-
-		bool grabHeld = Util.GetButton ("Grab");
+        bool grabHeld = Util.GetButton ("Grab");
 		bool grab = Util.GetButtonDown ("Grab");
         //		grabScript.grab = grab;
         //if (grab) {
@@ -553,30 +826,27 @@ public class Player : MonoBehaviour {
         backflapTriggered = Util.GetButton("Backflap");
 
         glideV2Script.backFlapTriggered = backflapTriggered;
+        glideV3Script.backFlapTriggered = backflapTriggered;
 
         //if (backflapTriggered)
         //{
         //    glideV2Script.boostHeld = false;
         //} else
         //{
-            //glideV2Script.boostHeld = gustHeld;
-            glideV2Script.boostHeld = gustHeld && !backflapTriggered;
+        //glideV2Script.boostHeld = gustHeld;
+        glideV2Script.boostHeld = gustHeld && !backflapTriggered;
+        glideV3Script.boostHeld = gustHeld && !backflapTriggered;
 
-            if (gustTriggered && !backflapTriggered && discreteStaminaScript.HasStamina())
+        if (gustTriggered && !backflapTriggered && discreteStaminaScript.HasStamina())
+        {
+            if (!isGrounded)
             {
-                if (!isGrounded)
+                if (!glideV2Script.isBackFlapping)
                 {
-                    if (!glideV2Script.isBackFlapping)
+                    if (glideV2Script.CanBoost())
                     {
-                        if (glideV2Script.CanBoost())
-                        {
-                            glideV2Script.boostTriggered = true;
-                            discreteStaminaScript.UseStamina();
-                        }
-                    }
-                    else
-                    {
-                        SpawnGust();
+                        glideV2Script.boostTriggered = true;
+                        discreteStaminaScript.UseStamina();
                     }
                 }
                 else
@@ -584,8 +854,67 @@ public class Player : MonoBehaviour {
                     SpawnGust();
                 }
             }
-        //}
+            else
+            {
+                SpawnGust();
+            }
+        }
 	}
+
+    void Flap()
+    {
+        float flapSpeed = Util.GetAxis("Flap");
+        if (staminaScript.HasStamina())
+        {
+            glideV2Script.setFlapSpeed(flapSpeed);
+            glideV3Script.setFlapSpeed(flapSpeed);
+        }
+        else
+        {
+            glideV2Script.setFlapSpeed(0);
+            glideV3Script.setFlapSpeed(0);
+        }
+        staminaScript.usingStamina = flapSpeed != 0;
+
+        isFlapping = flapSpeed > 0;
+
+
+        //bool flapTriggered = Util.GetButtonDown("Flap");
+        //bool flap = Util.GetButton("Flap");
+
+        //if (isGrounded)
+        //{
+        //    if (flapTriggered)
+        //    {
+        //        //Jump
+        //        Debug.Log("Jump");
+        //        isFalling = true;
+        //        walkScript.isGrounded = false;
+        //        rigidBody.AddForceAtPosition(transform.up * jumpForce, transform.position + transform.up * fallingCenterOfGravity.y + transform.forward * fallingCenterOfGravity.z, jumpForceMode);
+        //    }
+        //    isFlapping = false;
+        //} else
+        //{
+        //    if (flapTriggered)
+        //    {
+        //        Debug.Log("Flap");
+        //        isFlapping = true;
+        //    }
+        //    else if (!flap)
+        //    {
+        //        isFlapping = false;
+        //    }
+        //}
+
+        //if (isFlapping)
+        //{
+        //    glideV2Script.setFlapSpeed(1);
+        //} else
+        //{
+        //    glideV2Script.setFlapSpeed(0);
+        //}
+        //staminaScript.usingStamina = isFlapping;
+    }
 
     void SpawnGust()
     {
@@ -633,167 +962,10 @@ public class Player : MonoBehaviour {
 	public float minPitch = -1f;
 	public float maxPitch = 0.75f;
 
-	void OneStickFlight()
-    {
-        //OneStickFlightClassic();
-        //OneStickFlightYaw();
-        OneStickFlightCleanup();
-  //      return;
-
-		//Vector2 input = new Vector2 (Util.GetAxis ("Horizontal"), Util.GetAxis ("Vertical"));
-		//input = Vector2.ClampMagnitude (input, 1);
-		//float vert = input.y;
-		//float horiz = -input.x;
-
-		////left/right -> more lift on that side and less on the opposite side
-		//if (horiz > 0) {
-		//	glideV2Script.wingAngleLeft = 0;
-		//	glideV2Script.wingAngleRight = -horiz * oneStickRollScale;
-		//} else if (horiz < 0) {
-		//	glideV2Script.wingAngleLeft = horiz * oneStickRollScale;
-		//	glideV2Script.wingAngleRight = 0;
-		//} else {
-		//	glideV2Script.wingAngleLeft = 0;
-		//	glideV2Script.wingAngleRight = 0;
-		//}
-
-		////forward/back -> wings in/out
-		//if (vert > 0) {
-		//	glideV2Script.wingAngleLeft += vert * oneStickForwardPitchScale;
-		//	glideV2Script.wingAngleRight += vert * oneStickForwardPitchScale;
-
-		//	float wingScale = oneStickWingInScale;
-		//	float percent = 0;
-		//	if (transform.forward.y < oneStickWingMinYToPointDown) {
-		//		percent = (1 + transform.forward.y) / (1 + oneStickWingMinYToPointDown);
-		//		wingScale = Mathf.Lerp (oneStickWingInScale, oneStickWingInScalePointingDown, 1 - percent);
-		//	}
-
-		//	glideV2Script.wingOutAmountLeft = -vert * wingScale;
-		//	glideV2Script.wingOutAmountRight = -vert * wingScale;
-
-		//} else {
-		//	glideV2Script.wingAngleLeft += vert * oneStickBackwardPitchScale;
-		//	glideV2Script.wingAngleRight += vert * oneStickBackwardPitchScale;
-
-		//	glideV2Script.wingOutAmountLeft = -vert * oneStickWingOutScale;
-		//	glideV2Script.wingOutAmountRight = -vert * oneStickWingOutScale;
-		//}
-
-		//glideV2Script.wingAngleLeft = Mathf.Clamp (glideV2Script.wingAngleLeft, minPitch, maxPitch);
-		//glideV2Script.wingAngleRight = Mathf.Clamp (glideV2Script.wingAngleRight, minPitch, maxPitch);
-	}
-
-    //void OneStickFlightClassic()
-    //{
-    //    //TODO clean up input so rolling is smoother
-    //    Vector2 input = new Vector2(Util.GetAxis("Horizontal"), Util.GetAxis("Vertical"));
-    //    input = Vector2.ClampMagnitude(input, 1);
-    //    float vert = input.y;
-    //    float horiz = -input.x;
-
-    //    //forward/back -> wings in/out
-    //    if (vert > 0)
-    //    {
-    //        glideV2Script.wingAngleLeft = vert * oneStickForwardPitchScale;
-    //        glideV2Script.wingAngleRight = vert * oneStickForwardPitchScale;
-
-    //        float wingScale = oneStickWingInScale;
-    //        if (transform.forward.y < oneStickWingMinYToPointDown)
-    //        {
-    //            float percent = (1 + transform.forward.y) / (1 + oneStickWingMinYToPointDown);
-    //            wingScale = Mathf.Lerp(oneStickWingInScale, oneStickWingInScalePointingDown, 1 - percent);
-    //        }
-
-    //        glideV2Script.wingOutAmountLeft = vert * wingScale;
-    //        glideV2Script.wingOutAmountRight = vert * wingScale;
-            
-    //        if (transform.forward.y < oneStickWingMaxYToPointDown)
-    //        {
-    //            glideV2Script.wingOutAmountLeft = -1;
-    //            glideV2Script.wingOutAmountRight = -1;
-    //        }
-    //    }
-    //    else
-    //    {
-    //        glideV2Script.wingAngleLeft = vert * oneStickBackwardPitchScale;
-    //        glideV2Script.wingAngleRight = vert * oneStickBackwardPitchScale;
-
-    //        glideV2Script.wingOutAmountLeft = -vert * oneStickWingOutScale;
-    //        glideV2Script.wingOutAmountRight = -vert * oneStickWingOutScale;
-    //    }
-
-    //    //		left/right -> more lift on that side and less on the opposite side
-    //    if (horiz > 0)
-    //    {
-    //        glideV2Script.wingAngleRight -= horiz * oneStickRollScale;
-    //        glideV2Script.wingAngleLeft += horiz * oneStickRollScale;
-    //    }
-    //    else if (horiz < 0)
-    //    {
-    //        glideV2Script.wingAngleRight -= horiz * oneStickRollScale;
-    //        glideV2Script.wingAngleLeft += horiz * oneStickRollScale;
-    //    }
-
-    //    glideV2Script.wingAngleLeft = Mathf.Clamp(glideV2Script.wingAngleLeft, minPitch, maxPitch);
-    //    glideV2Script.wingAngleRight = Mathf.Clamp(glideV2Script.wingAngleRight, minPitch, maxPitch);
-    //}
-
-    //void OneStickFlightYaw()
-    //{
-    //    float vert = Util.GetAxis("Vertical");
-    //    float yaw = Util.GetAxis("Horizontal");
-    //    float horizLeft = Util.GetAxis("Wing Left");
-    //    float horizRight = Util.GetAxis("Wing Right");
-
-    //    //forward/back -> wings in/out
-    //    if (vert > 0)
-    //    {
-    //        glideV2Script.wingAngleLeft = vert * oneStickForwardPitchScale;
-    //        glideV2Script.wingAngleRight = vert * oneStickForwardPitchScale;
-
-    //        float wingScale = oneStickWingInScale;
-    //        float percent = 0;
-    //        if (transform.forward.y < oneStickWingMinYToPointDown)
-    //        {
-    //            percent = (1 + transform.forward.y) / (1 + oneStickWingMinYToPointDown);
-    //            wingScale = Mathf.Lerp(oneStickWingInScale, oneStickWingInScalePointingDown, 1 - percent);
-    //        }
-
-    //        glideV2Script.wingOutAmountLeft = -vert * wingScale;
-    //        glideV2Script.wingOutAmountRight = -vert * wingScale;
-
-
-
-    //        if (transform.forward.y < oneStickWingMaxYToPointDown)
-    //        {
-    //            glideV2Script.wingOutAmountLeft = -1;
-    //            glideV2Script.wingOutAmountRight = -1;
-    //        }
-
-    //    }
-    //    else
-    //    {
-    //        glideV2Script.wingAngleLeft = vert * oneStickBackwardPitchScale;
-    //        glideV2Script.wingAngleRight = vert * oneStickBackwardPitchScale;
-
-    //        glideV2Script.wingOutAmountLeft = -vert * oneStickWingOutScale;
-    //        glideV2Script.wingOutAmountRight = -vert * oneStickWingOutScale;
-    //    }
-    //    glideV2Script.wingAngleRight += horizLeft * oneStickRollScale;
-    //    glideV2Script.wingAngleLeft += horizRight * oneStickRollScale;
-
-    //    glideV2Script.yawV2 = yaw;
-    //    glideV2Script.yaw = yaw;
-
-    //    glideV2Script.wingAngleLeft = Mathf.Clamp(glideV2Script.wingAngleLeft, minPitch, maxPitch);
-    //    glideV2Script.wingAngleRight = Mathf.Clamp(glideV2Script.wingAngleRight, minPitch, maxPitch);
-    //}
-
     public float minSpeedForYaw, maxSpeedForYaw;
     [Range(0,1)]
     public float minYaw;
-    void OneStickFlightCleanup()
+    void OneStickFlight()
     {
         //TODO clean up input so rolling is smoother
         Vector2 input = new Vector2(Util.GetAxis("Roll"), Util.GetAxis("Pitch"));
@@ -872,13 +1044,21 @@ public class Player : MonoBehaviour {
         {
             yaw = 0;
         }
-        
+
         glideV2Script.setYaw(yaw);
-        
         glideV2Script.setWingAngleLeft(wingAngleLeft);
         glideV2Script.setWingAngleRight(wingAngleRight);
         glideV2Script.setWingOutAmountLeft(wingOutAmountLeft);
         glideV2Script.setWingOutAmountRight(wingOutAmountRight);
+
+        //glideV3Script.setBodyInput(new Vector2(Util.GetAxis("Horizontal"), Util.GetAxis("Vertical")).normalized);
+        //glideV3Script.setWingInput(new Vector2(Util.GetAxis("Horizontal"), Util.GetAxis("Vertical")).normalized);
+
+        glideV3Script.setYaw(yaw);
+        glideV3Script.setWingAngleLeft(wingAngleLeft);
+        glideV3Script.setWingAngleRight(wingAngleRight);
+        glideV3Script.setWingOutAmountLeft(wingOutAmountLeft);
+        glideV3Script.setWingOutAmountRight(wingOutAmountRight);
     }
 
     void OnTriggerEnter(Collider collisionInfo) {

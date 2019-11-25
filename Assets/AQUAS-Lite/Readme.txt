@@ -1,5 +1,5 @@
 Thank you for downloading AQUAS Lite!
-The current version is 1.0.4
+The current version is 1.2
 
 For video tutorials and the latest manual please visit the following link:
 

@@ -18,23 +18,30 @@ public class Stamina : MonoBehaviour {
 	public float staminaRegainRate;
 	public float staminaRegainDelay;
 	public float staminaRegainCurrentDelay;
-	
-	// Update is called once per frame
-	void Update () {
+    
+    public float staminaDepletedRegainDelay;
+    public float staminaDepletedRegainCurrentDelay;
+
+    // Update is called once per frame
+    void Update () {
 		if (infiniteStamina) {
 			return;
 		}
 
 		if (usingStamina && HasStamina()) {
-//		if (usingStamina) {
-//			if (HasStamina ()) {
-				UseStamina ();
-				staminaRegainCurrentDelay = staminaRegainDelay;
-//			}
-		} else if (staminaRegainCurrentDelay <= 0 || (delayOnlyWhenMainDepleted && HasMainStamina ()) || (delayOnlyWhenAllDepleted && HasStamina ())) {
+			UseStamina ();
+			staminaRegainCurrentDelay = staminaRegainDelay;
+			staminaDepletedRegainCurrentDelay = staminaDepletedRegainDelay;
+		} else if (staminaRegainCurrentDelay <= 0 || staminaDepletedRegainCurrentDelay <= 0 || (delayOnlyWhenMainDepleted && HasMainStamina ()) || (delayOnlyWhenAllDepleted && HasStamina ())) {
 			RegainStamina ();
-		} else {
-			staminaRegainCurrentDelay -= Time.deltaTime;
+		} else if (!usingStamina) {
+            if (HasStamina() || staminaDepletedRegainCurrentDelay <= 0)
+            {
+                staminaRegainCurrentDelay -= Time.deltaTime;
+            } else
+            {
+                staminaDepletedRegainCurrentDelay -= Time.deltaTime;
+            }
 		}
 	}
 

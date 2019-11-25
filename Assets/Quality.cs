@@ -71,10 +71,16 @@ public class Quality : MonoBehaviour {
             cameraQuality = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CameraQuality>();
         }
 
+        int i = 0;
         while (parentTerrain == null)
         {
             Debug.Log("refreshing parentTerrain");
             parentTerrain = GameObject.FindGameObjectWithTag("MainTerrain");
+            i++;
+            if (i > 10)
+            {
+                break;
+            }
         }
 
     }
@@ -122,11 +128,15 @@ public class Quality : MonoBehaviour {
         RefreshComponents();
 
         foliageDistance = newFoliageDistance;
-		Terrain[] terrains = parentTerrain.GetComponentsInChildren<Terrain> ();
-		foreach (Terrain terrain in terrains) {
-			terrain.detailObjectDistance = newFoliageDistance;
-		}
-//		PlayerPrefs.SetFloat (FOLIAGE_DISTANCE, newFoliageDistance);
+        if (parentTerrain != null)
+        {
+            Terrain[] terrains = parentTerrain.GetComponentsInChildren<Terrain>();
+            foreach (Terrain terrain in terrains)
+            {
+                terrain.detailObjectDistance = newFoliageDistance;
+            }
+            //		PlayerPrefs.SetFloat (FOLIAGE_DISTANCE, newFoliageDistance);
+        }
 	}
 
 	public void SetGrassDensity (float newGrassDensity)
@@ -134,10 +144,14 @@ public class Quality : MonoBehaviour {
         RefreshComponents();
 
         grassDensity = newGrassDensity;
-		Terrain[] terrains = parentTerrain.GetComponentsInChildren<Terrain> ();
-		foreach (Terrain terrain in terrains) {
-			terrain.detailObjectDensity = newGrassDensity;
-		}
-//		PlayerPrefs.SetFloat (GRASS_DENSITY, newGrassDensity);
+        if (parentTerrain != null)
+        {
+            Terrain[] terrains = parentTerrain.GetComponentsInChildren<Terrain>();
+            foreach (Terrain terrain in terrains)
+            {
+                terrain.detailObjectDensity = newGrassDensity;
+            }
+            //		PlayerPrefs.SetFloat (GRASS_DENSITY, newGrassDensity);
+        }
 	}
 }
