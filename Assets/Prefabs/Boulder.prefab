@@ -76,7 +76,7 @@ MonoBehaviour:
   stickDepth: 1
   instantKillLayerMask:
     serializedVersion: 2
-    m_Bits: 4194304
+    m_Bits: 0
   spawnOnCollide: {fileID: 3655625818606564027, guid: bbc41982469c87846829bbcf786af794,
     type: 3}
   source: {fileID: 0}
