@@ -17,6 +17,8 @@ TagManager:
   - Gold
   - Breadcrumb
   - MainTerrain
+  - Projectile
+  - Collide
   layers:
   - Default
   - TransparentFX
@@ -39,10 +41,10 @@ TagManager:
   - Camera
   - Pickupable
   - Interactable
-  - Dispenser
+  - Unused
   - Fire
   - Ragdoll
-  - Arrow
+  - EnemyProjectile
   - Gold
   - Breadcrumb
   - Gust

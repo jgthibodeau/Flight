@@ -64,14 +64,18 @@ public class TimedObjectSpawner : MonoBehaviour {
     IEnumerator Spawn()
     {
         Vector3 newPosition;
+        bool canSpawn = false;
         do
         {
             Vector2 direction = Random.insideUnitCircle;
             direction = direction.normalized * Util.ConvertScale(0, 1, minSpawnRadius, maxSpawnRadius, direction.magnitude);
 
             newPosition = new Vector3(transform.position.x + direction.x, transform.position.y, transform.position.z + direction.y);
+
+            canSpawn = Util.CanSpawn(newPosition, 1f, 5f, nonSpawnableLayers);
+            
             yield return null;
-        } while (!Util.CanSpawn(newPosition, 1f, 10f, nonSpawnableLayers));
+        } while (!canSpawn);
 
         Vector3 newRot = new Vector3(0, Random.RandomRange(0, 360f), 0);
         GameObject go = GameObject.Instantiate(spawnableObjects[Random.Range(0, spawnableObjects.Count - 1)], newPosition, Quaternion.Euler(newRot));
