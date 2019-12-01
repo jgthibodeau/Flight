@@ -102,7 +102,7 @@ public class FlameBreath : MonoBehaviour {
 		mm.startLifetime = flameParticleMaxLifetime * diminishedPercent * rateMultiplier;
 		mm.startSize = rateMultiplier * diminishedPercent;
 
-        float startSpeed = flameParticleMaxSpeed *diminishedPercent * rateMultiplier;
+        float startSpeed = flameParticleMaxSpeed * diminishedPercent * rateMultiplier;
         if (customInheritVelocity)
         {
             float forwardVelocity = Vector3.Dot(rb.velocity, flameParticles.transform.forward);
@@ -128,7 +128,7 @@ public class FlameBreath : MonoBehaviour {
     public void StartFlame () {
 		if (currentUseDelay > 0) {
 			currentUseDelay -= Time.deltaTime;
-		} else {
+		} else if (!infiniteBreath) {
 			currentBreath -= breathUseRate * Time.deltaTime;
 			currentBreath = Mathf.Clamp (currentBreath, 0, maxBreath);
 		}
@@ -163,7 +163,7 @@ public class FlameBreath : MonoBehaviour {
 
 	public float DiminishedPercent() {
 		float percentage = Percentage ();
-		if (percentage > breathPercentStartsDiminishing || infiniteBreath) {
+		if (percentage > breathPercentStartsDiminishing) {
 			return 1f;
 		}
 

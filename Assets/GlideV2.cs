@@ -20,8 +20,10 @@ public class GlideV2 : MonoBehaviour {
 	public bool rotateTowardsMotion;
 
 	public float liftCoef;
+    public float rotatingLiftCoef;
     public float minLift;
-	public float maxLift;
+    public float maxLift;
+    public float maxLiftRotate;
     public float maxLiftSpeed;
 
     public float yawScale;
@@ -36,6 +38,9 @@ public class GlideV2 : MonoBehaviour {
 
     public float minRigidBodyAngularDragFlapping = 1f;
     public float rigidBodyAngularDragFlapping = 10f;
+
+    public float minRigidBodyAngularDragRotate = 1f;
+    public float rigidBodyAngularDragRotate = 10f;
 
     public float inducedDragCoef;
 	public float parasiticDragCoef;
@@ -72,7 +77,7 @@ public class GlideV2 : MonoBehaviour {
 
 	public bool flap = false;
     public bool isBackFlapping;
-    public bool backFlapTriggered;
+    public bool backFlapHeld;
     public float rollAmountTriggersBackflap = 0.9f;
 	public float rollAmountHoldBackflap = 0f;
     public float backFlapStopTime = 0.25f;
@@ -109,14 +114,20 @@ public class GlideV2 : MonoBehaviour {
 	public float liftLeft = 0f;
 	public float liftRight = 0f;
 
-	public Transform leftWing;
+    public float rotateSpeed = 3f;
+    
+    public Transform leftWing;
 	private Vector3 leftWingInitialRotation;
 	public Transform rightWing;
 	private Vector3 rightWingInitialRotation;
 
+    private bool overrideFlight, overrideBackFlap;
+
     //Inputs
     public float wingOutAmountLeft, wingOutAmountRight, wingAngleLeft, wingAngleRight, yaw, flapSpeed, flapDirection;
 	public bool boostTriggered, boostHeld, boosting;
+
+    public bool rotateHeld;
 
     public float controlAcceleration = 15f;
     public float controlResetAcceleration = 5f;
@@ -192,7 +203,7 @@ public class GlideV2 : MonoBehaviour {
 		speed = rigidBody.velocity.magnitude;
 
 		//flap wings
-		if ((flapping/* || backFlapTriggered*/) && !boosting && !boostHeld) {
+		if ((flapping/* || backFlapHeld*/) && !boosting && !boostHeld) {
 			birdAnimator.FlapSpeed = 2f;// + flapAnimationScale * flapSpeed;
 			birdAnimator.Flapping = true;
 
@@ -231,14 +242,14 @@ public class GlideV2 : MonoBehaviour {
             }
         }
         
-		birdAnimator.WingsOut = WingsOut ();
+		birdAnimator.WingsOut = !rotateHeld && WingsOut ();
 		birdAnimator.pitchLeft = wingAngleLeft;
 		birdAnimator.pitchRight = wingAngleRight;
 		birdAnimator.rollLeft = -wingOutAmountLeft;
 		birdAnimator.rollRight = -wingOutAmountRight;
 
 
-		dragonAnimator.WingsOut = WingsOut ();
+		dragonAnimator.WingsOut = !rotateHeld && WingsOut ();
 		dragonAnimator.Boosting = (boostState == BoostState.STARTING) || (boostState == BoostState.GOING);
 		dragonAnimator.pitchLeft = wingAngleLeft;
 		dragonAnimator.pitchRight = wingAngleRight;
@@ -265,9 +276,11 @@ public class GlideV2 : MonoBehaviour {
 		return !flapping && WingsOut();
 	}
 
-	public bool WingsOut() {
-		return !boosting && !boostHeld;
-	}
+	public bool WingsOut()
+    {
+        return !boosting && !boostHeld;
+        //return !rotateHeld && !boosting && !boostHeld;
+    }
 
 	void FixedUpdate () {
         //		SteadyFlapOverTime ();
@@ -276,10 +289,15 @@ public class GlideV2 : MonoBehaviour {
         //		}
 
         //if (!flapping || isGrounded || wingAngleLeft > 0 || wingAngleRight > 0 || (wingAngleLeft > rollAmountTriggersBackflap && wingAngleRight > rollAmountTriggersBackflap))
-        if (isGrounded || !backFlapTriggered)
+        if (isGrounded || !backFlapHeld)
         {
             isBackFlapping = false;
 		}
+
+        if (overrideFlight)
+        {
+            return;
+        }
 
 		if (boostTriggered) {
 			flapping = false;
@@ -293,9 +311,14 @@ public class GlideV2 : MonoBehaviour {
         {
             rigidBody.constraints = RigidbodyConstraints.None;
             ApplyBoostForce ();
-		} else if (WingsOut ()) {
+		} else if (!rotateHeld && WingsOut ()) {
 			WingFlap ();
-		}
+		} else
+        {
+            ResetWings();
+            flapping = false;
+            isBackFlapping = false;
+        }
 
 		if (!isGrounded) {
 			rigidBody.drag = rigidBodyDrag;
@@ -305,6 +328,9 @@ public class GlideV2 : MonoBehaviour {
             } else if (IsFlapping())
             {
                 rigidBody.angularDrag = Util.ConvertScale(minSpeedAngularDrag, maxSpeedAngularDrag, minRigidBodyAngularDragFlapping, rigidBodyAngularDragFlapping, speed);
+            } else if (rotateHeld)
+            {
+                rigidBody.angularDrag = Util.ConvertScale(minSpeedAngularDrag, maxSpeedAngularDrag, minRigidBodyAngularDragRotate, rigidBodyAngularDragRotate, speed);
             } else
             {
                 rigidBody.angularDrag = Util.ConvertScale(minSpeedAngularDrag, maxSpeedAngularDrag, minRigidBodyAngularDrag, rigidBodyAngularDrag, speed);
@@ -318,7 +344,22 @@ public class GlideV2 : MonoBehaviour {
 
 			rigidBody.drag = rigidBodyDrag;
 			AngledDragLift ();
-		} else {
+
+            if (rotateHeld)
+            {
+                Vector3 velocity = rigidBody.velocity;
+                Vector3 direction = velocity.normalized;
+                //Vector3 desiredDirection = Quaternion.AngleAxis(90 * Util.GetAxis("Roll"), transform.up) * Quaternion.AngleAxis(90 * Util.GetAxis("Pitch"), transform.right) * direction;
+                Vector3 desiredDirection = Quaternion.AngleAxis(90 * Util.GetAxis("Roll"), transform.up) * direction;
+
+                direction = Vector3.MoveTowards(direction, desiredDirection, rotateSpeed * Time.fixedDeltaTime);
+
+                rigidBody.velocity = direction * speed;
+
+                //Quaternion rotation = Quaternion.LookRotation(direction, transform.up);
+                //rigidBody.MoveRotation(rotation);
+            }
+        } else {
 			wingAngleLeft = 0;
 			wingAngleRight = 0;
 
@@ -385,7 +426,7 @@ public class GlideV2 : MonoBehaviour {
             rigidBody.constraints = RigidbodyConstraints.None;
         }
 
-        if (backFlapTriggered && CanBackFlap())
+        if ((backFlapHeld && CanBackFlap()) || overrideBackFlap)
         {
             ResetWings();
 
@@ -762,15 +803,28 @@ public class GlideV2 : MonoBehaviour {
 		return angleOfAttack;
 	}
 
-	public float CalculateLiftCoef(float angleOfAttack) {
-		return liftCoef * Mathf.Sin (angleOfAttack * Mathf.Deg2Rad);
-	}
+	public float CalculateLiftCoef(float angleOfAttack)
+    {
+        if (rotateHeld)
+        {
+            return rotatingLiftCoef * Mathf.Sin(angleOfAttack * Mathf.Deg2Rad);
+        } else
+        {
+            return liftCoef * Mathf.Sin(angleOfAttack * Mathf.Deg2Rad);
+        }
+    }
 
 	public float CalculateLift(float calculatedLiftCoef, float wingOutAmount, float wingAngle) {
         float liftSpeed = Mathf.Clamp(speed, 0, maxLiftSpeed);
 
 		float calculatedLift = 0.5f * airDensity * liftSpeed * liftSpeed * wingLiftSurfaceArea * calculatedLiftCoef * (1 + wingOutAmount);
-		calculatedLift = Mathf.Clamp(calculatedLift, -maxLift, maxLift);
+        if (rotateHeld)
+        {
+            calculatedLift = Mathf.Clamp(calculatedLift, -maxLift, maxLiftRotate);
+        } else
+        {
+            calculatedLift = Mathf.Clamp(calculatedLift, -maxLift, maxLift);
+        }
 
         if (calculatedLift < minLift && calculatedLift > -minLift && wingAngle != 0)
         {
@@ -861,5 +915,110 @@ public class GlideV2 : MonoBehaviour {
             //			rigidBody.AddForceAtPosition (rightInducedDragForce, rightInducedPosition, ForceMode.Force);
             //			Util.DrawRigidbodyRay (rigidBody, rightInducedPosition, rightInducedDragForce, Color.blue);
         }
+    }
+
+    private Coroutine currentAltFlightCoroutine;
+    private void StartFlightCoroutine(IEnumerator coroutine)
+    {
+        overrideFlight = true;
+        if (currentAltFlightCoroutine != null)
+        {
+            StopCoroutine(currentAltFlightCoroutine);
+        }
+        currentAltFlightCoroutine = StartCoroutine(coroutine);
+    }
+
+    public float brakeForce, brakeTime;
+    public void Brake()
+    {
+        Debug.Log("braking");
+        //StartFlightCoroutine(BrakeRoutine());
+        StartCoroutine(BrakeRoutine());
+    }
+    private IEnumerator BrakeRoutine()
+    {
+        //apply brake force for brake time seconds
+        overrideBackFlap = true;
+        yield return new WaitForSeconds(brakeTime);
+        overrideBackFlap = false;
+        
+        //overrideFlight = false;
+    }
+
+    public void Dive()
+    {
+        Debug.Log("diving");
+        StartFlightCoroutine(DiveRoutine());
+    }
+    public float diveRotateSpeed, diveSpeed, diveBrakeSpeed;
+    private IEnumerator DiveRoutine()
+    {
+        //rotate velocity towards down at dive speed
+        Vector3 velocity = rigidBody.velocity;
+        Vector3 direction = velocity.normalized;
+        Vector3 desiredDirection = Vector3.down;
+        //float speed = Mathf.Max(velocity.magnitude, diveSpeed);
+        float speed = diveSpeed;
+        while (rigidBody.velocity.magnitude > 0)
+        {
+            rigidBody.velocity = Vector3.MoveTowards(rigidBody.velocity, Vector3.zero, diveBrakeSpeed);
+            if (rigidBody.velocity.magnitude == 0)
+            {
+                break;
+            }
+            yield return new WaitForFixedUpdate();
+        }
+
+        while (direction != desiredDirection)
+        {
+            direction = Vector3.MoveTowards(direction, desiredDirection, diveRotateSpeed * Time.fixedDeltaTime);
+
+            rigidBody.velocity = direction * speed;
+
+            Quaternion rotation = Quaternion.LookRotation(direction, transform.up);
+            rigidBody.MoveRotation(rotation);
+
+            yield return new WaitForFixedUpdate();
+        }
+        overrideFlight = false;
+    }
+
+    public float turnRotateSpeed, turnMoveSpeed, turnBrakeSpeed;
+    public void Turn(float degrees)
+    {
+        Debug.Log("turning " + degrees);
+        StartFlightCoroutine(TurnRoutine(degrees));
+    }
+    private IEnumerator TurnRoutine(float degrees)
+    {
+        //determine direction by rotating about up by degrees
+        //rotate velocity towards direction at turn speed
+        Vector3 velocity = rigidBody.velocity;
+        Vector3 direction = velocity.normalized;
+        Vector3 desiredDirection = Quaternion.AngleAxis(degrees, transform.up) * direction;
+        //float speed = Mathf.Min(velocity.magnitude, turnMoveSpeed);
+        float speed = turnMoveSpeed;
+        while (rigidBody.velocity.magnitude > 0)
+        {
+            rigidBody.velocity = Vector3.MoveTowards(rigidBody.velocity, Vector3.zero, turnBrakeSpeed);
+            if (rigidBody.velocity.magnitude == 0)
+            {
+                break;
+            }
+            yield return new WaitForFixedUpdate();
+        }
+
+        while (direction != desiredDirection)
+        {
+            direction = Vector3.MoveTowards(direction, desiredDirection, turnRotateSpeed * Time.fixedDeltaTime);
+
+            rigidBody.velocity = direction * speed;
+
+            Quaternion rotation = Quaternion.LookRotation(direction, transform.up);
+            rigidBody.MoveRotation(rotation);
+
+            yield return new WaitForFixedUpdate();
+        }
+        overrideFlight = false;
     }
 }

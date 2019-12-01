@@ -51,13 +51,15 @@ public class Player : MonoBehaviour
 	public bool isUpright;
 	public bool isFlaming;
 	public bool isGusting;
+    public bool isRotating;
 
     public enum State { WALKING, FLYING, LANDING, JUMPING, SWIMMING }
     public State state = State.WALKING;
 
     private Coroutine takeOffTransition;
     private Coroutine landTransition;
-
+    
+    public float rotateSpeed;
     public float uprightThreshold;
 	public float speed;
 	public float ragdollSpeed;
@@ -106,13 +108,16 @@ public class Player : MonoBehaviour
     
     public float stickYTriggersBackflap = -0.9f;
     public float stickYReleaseBackflap = 0.9f;
-    public bool backflapTriggered;
+    public bool backFlapHeld, backFlapStuntsEnabled;
 
     [Range(0, 1)]
 	public float leftRightWiggle = 0.01f;
 
-	// Use this for initialization
-	void Start () {
+    public float backflapTapTime = 0.1f;
+    private float backflapStartTime;
+
+    // Use this for initialization
+    void Start () {
 		PerchableLayer = LayerMask.NameToLayer ("Perchable");
 		EnemyLayer = LayerMask.NameToLayer ("Enemy");
 		PreyLayer = LayerMask.NameToLayer ("Prey");
@@ -751,16 +756,11 @@ public class Player : MonoBehaviour
 			rotateHead = false;
 		}
 
+        isRotating = Util.GetButton("Rotate");
+        glideV2Script.rotateHeld = isRotating && !backFlapHeld;
         if (canPitchRoll)
         {
-            //if (twoStickFlight)
-            //{
-            //    TwoStickFlight();
-            //}
-            //else
-            //{
-                OneStickFlight();
-            //}
+            OneStickFlight();
         } else
         {
             glideV2Script.ResetInput();
@@ -807,59 +807,105 @@ public class Player : MonoBehaviour
             }
         }
 
-		bool gustHeld = Util.GetButton ("Gust");
-        bool gustTriggered = Util.GetButtonDown ("Gust");
+		//bool gustHeld = Util.GetButton ("Gust");
+  //      bool gustTriggered = Util.GetButtonDown ("Gust");
 
-        //if (backflapTriggered)
+
+        BackFlap();
+
+
+
+
+        //glideV2Script.boostHeld = gustHeld && !backFlapHeld;
+        //glideV3Script.boostHeld = gustHeld && !backFlapHeld;
+
+        //if (gustTriggered && !backFlapHeld && discreteStaminaScript.HasStamina())
         //{
-        //    //backflapTriggered = !isGrounded && (flapSpeed > 0) && Util.GetAxis("Vertical") < stickYReleaseBackflap;
-        //    backflapTriggered = !isGrounded && gustHeld && Util.GetAxis("Vertical") < stickYReleaseBackflap;
+        //    if (!isGrounded)
+        //    {
+        //        if (!glideV2Script.isBackFlapping)
+        //        {
+        //            if (glideV2Script.CanBoost())
+        //            {
+        //                glideV2Script.boostTriggered = true;
+        //                discreteStaminaScript.UseStamina();
+        //            }
+        //        }
+        //        else
+        //        {
+        //            SpawnGust();
+        //        }
+        //    }
+        //    else
+        //    {
+        //        SpawnGust();
+        //    }
         //}
-        //else if (!isGrounded && /*flapSpeed > 0*/gustHeld)
-        //{
-        //    //backflapTriggered = (flapSpeed > 0) && Util.GetAxis("Vertical") < stickYTriggersBackflap;
-        //    backflapTriggered = gustHeld && Util.GetAxis("Vertical") < stickYTriggersBackflap;
-        //} else
-        //{
-        //    backflapTriggered = false;
-        //}
-        backflapTriggered = Util.GetButton("Backflap");
+    }
 
-        glideV2Script.backFlapTriggered = backflapTriggered;
-        glideV3Script.backFlapTriggered = backflapTriggered;
-
-        //if (backflapTriggered)
-        //{
-        //    glideV2Script.boostHeld = false;
-        //} else
-        //{
-        //glideV2Script.boostHeld = gustHeld;
-        glideV2Script.boostHeld = gustHeld && !backflapTriggered;
-        glideV3Script.boostHeld = gustHeld && !backflapTriggered;
-
-        if (gustTriggered && !backflapTriggered && discreteStaminaScript.HasStamina())
+    void BackFlap()
+    {
+        bool backFlapTurn = false;
+        if (Util.GetButtonDown("Backflap"))
         {
-            if (!isGrounded)
+            backflapStartTime = Time.time;
+        }
+        if (Util.GetButtonUp("Backflap") && Time.time - backflapStartTime < backflapTapTime)
+        {
+            backFlapTurn = true;
+        }
+        backFlapHeld = Util.GetButton("Backflap");
+
+        //Backflap held = do backflap
+        glideV2Script.backFlapHeld = backFlapHeld && (Time.time - backflapStartTime) > backflapTapTime;
+        glideV3Script.backFlapTriggered = glideV2Script.backFlapHeld;
+
+        if (backFlapTurn && backFlapStuntsEnabled)
+        {
+            float forward = Util.GetAxis("Vertical");
+            float right = Util.GetAxis("Horizontal");
+
+            float forwardAbs = Mathf.Abs(forward);
+            float rightAbs = Mathf.Abs(right);
+
+            Debug.Log(forward + " " + right);
+
+            if (forwardAbs > 0 || rightAbs > 0)
             {
-                if (!glideV2Script.isBackFlapping)
+                if (forwardAbs > rightAbs)
                 {
-                    if (glideV2Script.CanBoost())
+                    if (forward > 0)
                     {
-                        glideV2Script.boostTriggered = true;
-                        discreteStaminaScript.UseStamina();
+                        //brake and hard dive
+                        glideV2Script.Dive();
+                    }
+                    else
+                    {
+                        //brake and hard turn 180
+                        glideV2Script.Turn(180);
                     }
                 }
                 else
                 {
-                    SpawnGust();
+                    if (right > 0)
+                    {
+                        //brake and hard turn right
+                        glideV2Script.Turn(90);
+                    }
+                    else
+                    {
+                        //brake and hard turn left
+                        glideV2Script.Turn(-90);
+                    }
                 }
             }
             else
             {
-                SpawnGust();
+                //brake
+                glideV2Script.Brake();
             }
         }
-	}
+    }
 
     void Flap()
     {
@@ -1017,6 +1063,8 @@ public class Player : MonoBehaviour
         }
 
         //		left/right -> more lift on that side and less on the opposite side
+        if (!isRotating)
+        {
         if (horiz > 0)
         {
             wingAngleRight -= horiz * oneStickRollScale * percent;
@@ -1026,23 +1074,25 @@ public class Player : MonoBehaviour
         {
             //glideV2Script.wingAngleRight -= horiz * oneStickRollScale;
             wingAngleLeft += horiz * oneStickRollScale * percent;
+            }
+
         }
 
         wingAngleLeft = Mathf.Clamp(wingAngleLeft, minPitch, maxPitch);
         wingAngleRight = Mathf.Clamp(wingAngleRight, minPitch, maxPitch);
 
-        float yaw = input.x;
-        if (speed < minSpeedForYaw)
+        float yaw = 0;
+        if (!isRotating)
         {
-            yaw *= Util.ConvertScale(0, minSpeedForYaw, minYaw, 1, speed);
-        }
-        else if (speed < maxSpeedForYaw)
-        {
-            yaw *= Util.ConvertScale(minSpeedForYaw, maxSpeedForYaw, 1, 0, speed);
-        }
-        else
-        {
-            yaw = 0;
+            if (speed < minSpeedForYaw)
+            {
+                yaw = input.x * Util.ConvertScale(0, minSpeedForYaw, minYaw, 1, speed);
+            }
+            else if (speed < maxSpeedForYaw)
+            {
+                yaw = input.x * Util.ConvertScale(minSpeedForYaw, maxSpeedForYaw, 1, 0, speed);
+            }
+
         }
 
         glideV2Script.setYaw(yaw);
@@ -1098,12 +1148,12 @@ public class Player : MonoBehaviour
 		float desiredHeadHoriz = 0f;
 		float desiredHeadVert = 0f;
 
-		desiredHeadHoriz = Util.GetAxis ("Horizontal Right") * (isGrounded ? headRotateSideScaleGround : backflapTriggered ? headRotateSideScaleBackflap : headRotateSideScaleAir);
+		desiredHeadHoriz = Util.GetAxis ("Horizontal Right") * (isGrounded ? headRotateSideScaleGround : backFlapHeld ? headRotateSideScaleBackflap : headRotateSideScaleAir);
 		desiredHeadVert = Util.GetAxis ("Vertical Right");
 		if (desiredHeadVert > 0) {
-			desiredHeadVert *= (isGrounded ? headRotateUpScaleGround : backflapTriggered ? headRotateUpScaleBackflap : headRotateUpScaleAir);
+			desiredHeadVert *= (isGrounded ? headRotateUpScaleGround : backFlapHeld ? headRotateUpScaleBackflap : headRotateUpScaleAir);
 		} else {
-			desiredHeadVert *= (isGrounded ? headRotateDownScaleGround : backflapTriggered ? headRotateDownScaleBackflap :  headRotateDownScaleAir);
+			desiredHeadVert *= (isGrounded ? headRotateDownScaleGround : backFlapHeld ? headRotateDownScaleBackflap :  headRotateDownScaleAir);
 		}
 
         float rotateSpeed = isFlaming ? flameHeadRotateSpeed : regularHeadRotateSpeed;

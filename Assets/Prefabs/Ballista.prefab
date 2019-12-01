@@ -698,8 +698,9 @@ MonoBehaviour:
   timeSinceLastFire: 0
   minRange: 25
   maxRange: 200
-  minHeightOffset: 2
-  maxHeightOffset: 2
+  minAngle: 30
+  minHeightOffset: 0
+  maxHeightOffset: 0
   minSpeed: 25
   maxSpeed: 75
   leadTarget: 1

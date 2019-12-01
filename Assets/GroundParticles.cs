@@ -5,7 +5,7 @@ using UnityEngine;
 public class GroundParticles : MonoBehaviour {
 	public bool waterParticle;
 	public LayerMask triggerLayers;
-	public float triggerDistance;
+	public float triggerDistance, minDistance;
 	public float maxEmission;
 	public float minVelocity;
 	public float maxVelocity;
@@ -25,12 +25,17 @@ public class GroundParticles : MonoBehaviour {
 	// Update is called once per frame
 	void FixedUpdate () {
 		//if raycast down from center contains layermask
-		RaycastHit hit;
-		if (target.velocity.magnitude > minVelocity && Physics.Raycast (Util.RigidBodyPosition (target) + Vector3.up, Vector3.down, out hit, triggerDistance, triggerLayers)) {
+		RaycastHit hit, badHit;
+		if (target.velocity.magnitude >= minVelocity
+            && Physics.Raycast (Util.RigidBodyPosition (target), Vector3.down, out hit, triggerDistance, triggerLayers)
+            && !Physics.Raycast(Util.RigidBodyPosition(target), Vector3.down, out badHit, minDistance, triggerLayers)
+        )
+        {
 			//calculate number emission based off distance and speed
 			Vector3 velocityDirection = Vector3.ProjectOnPlane (target.velocity, Vector3.up);
-			float emissionAmount = maxEmission * (1 - hit.distance / triggerDistance);
-			emissionAmount *= Mathf.Clamp (velocityDirection.magnitude / maxVelocity, 0f, 1f);
+            //float emissionAmount = maxEmission * (1 - hit.distance / triggerDistance);
+            //emissionAmount *= Mathf.Clamp (velocityDirection.magnitude / maxVelocity, 0f, 1f);
+            float emissionAmount = Util.ConvertScale(minVelocity, maxVelocity, 0, maxEmission, velocityDirection.magnitude);
 
 			//make sure particle emitter is enabled
 			emission.rateOverTime = emissionAmount;

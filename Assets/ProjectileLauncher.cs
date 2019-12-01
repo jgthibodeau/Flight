@@ -7,6 +7,7 @@ public class ProjectileLauncher : MonoBehaviour
     public float fireRate;
     public float timeSinceLastFire = 0;
     public float minRange, maxRange;
+    public float minAngle = 30;
     public float minHeightOffset, maxHeightOffset;
     public float minSpeed, maxSpeed;
     public bool leadTarget;
@@ -82,9 +83,14 @@ public class ProjectileLauncher : MonoBehaviour
 
     void Fire(Transform target)
     {
+        float angle = Vector3.Angle(Vector3.up, target.position - transform.position);
+
         float distance = Vector3.Distance(target.position, transform.position);
 
-        if (TargetInRange(distance))
+        float horizDistance = Vector2.Distance(new Vector2(target.position.x, target.position.z), new Vector2(transform.position.x, transform.position.z));
+        float vertDistance = Mathf.Abs(target.position.y - transform.position.y);
+
+        if (angle > minAngle && TargetInRange(distance))
         {
             Vector3 position = firePosition.position;
             Rigidbody targetRb = target.GetComponent<Rigidbody>();
@@ -97,8 +103,9 @@ public class ProjectileLauncher : MonoBehaviour
                 float gravity;
 
                 //float height = Mathf.Min(minHeightOffset, maxRange - distance);
-                float height = Util.ConvertScale(minRange, maxRange, minHeightOffset, maxHeightOffset, distance);
-                float speed = Util.ConvertScale(minRange, maxRange, minSpeed, maxSpeed, distance);
+                float height = Util.ConvertScale(minRange, maxRange, minHeightOffset, maxHeightOffset, horizDistance);
+                //float speed = Util.ConvertScale(minRange, maxRange, minSpeed, maxSpeed, distance);
+                float speed = Util.ConvertScale(0, maxRange, minSpeed, maxSpeed, horizDistance);
 
                 if (BallisticTrajectory.solve_ballistic_arc_lateral(position, speed, targetPosition, targetVelocity, height, out fireVelocity, out gravity, out impactPoint))
                 {
