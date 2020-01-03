@@ -33,7 +33,7 @@ namespace TerrainComposer2
         int colorMethodMultiplyBufferKernel, colorMethodTexLerpMaskKernel;
         int[] multiMethodMultiplyBufferKernel;
 
-        public int terrainHeightKernel, terrainAngleKernel, terrainSplatmap0Kernel, terrainSplatmap1Kernel, terrainConvexityKernel;
+        public int terrainHeightKernel, terrainAngleKernel, terrainSplatmapKernel, terrainConvexityKernel;
         public int terrainCollisionHeightKernel, terrainCollisionHeightIncludeKernel, terrainCollisionMaskKernel;
 
         int[] multiMethodTexLerpMaskKernel;
@@ -51,7 +51,7 @@ namespace TerrainComposer2
 
         Vector3 posOld, scaleOld;
         Quaternion rotOld;
-        float bufferLength;
+        int bufferLength;
 
         public RenderTexture[] rtsColor;
         public RenderTexture[] rtsSplatmap;
@@ -147,8 +147,7 @@ namespace TerrainComposer2
             terrainHeightKernel = shader.FindKernel("TerrainHeight");
             terrainAngleKernel = shader.FindKernel("TerrainAngle");
             terrainConvexityKernel = shader.FindKernel("TerrainConvexity"); 
-            terrainSplatmap0Kernel = shader.FindKernel("TerrainSplatmap0");
-            terrainSplatmap1Kernel = shader.FindKernel("TerrainSplatmap1");
+            terrainSplatmapKernel = shader.FindKernel("TerrainSplatmap");
 
             #if UNITY_5_0 || UNITY_5_1 || UNITY_5_2 || UNITY_5_3 || UNITY_5_4
                 terrainCollisionHeightKernel = shader.FindKernel("TerrainCollisionHeight");
@@ -408,7 +407,9 @@ namespace TerrainComposer2
             // for (int i = 0; i < itemGroup.indices.Length; i++) Debug.Log(itemGroup.indices[i].randomPosition);
             // Debug.Log("****************");
 
-            ComputeBuffer itemColorBuffer = new ComputeBuffer(8, 16); 
+            // Debug.LogError(global.previewColors.Length);
+
+            ComputeBuffer itemColorBuffer = new ComputeBuffer(global.previewColors.Length, 16); 
             itemColorBuffer.SetData(global.previewColors);
 
             int resolution = area2D.intResolution.x * area2D.intResolution.y;
@@ -436,9 +437,12 @@ namespace TerrainComposer2
 
             shader.SetVector("totalAreaPos", area2D.totalArea.position);
 
-            shader.SetTexture(kernel, "terrainTexRead", area2D.currentTCTerrain.texHeight);
-            shader.SetFloat("terrainTexReadResolution", area2D.currentTCTerrain.texHeight.width);
-            shader.SetFloat("terrainTexReadNormalResolution", area2D.currentTCTerrain.texHeight.width - area2D.resExpandBorder * 2);
+            if (area2D.currentTCTerrain.texHeight)
+            {
+                shader.SetTexture(kernel, "terrainTexRead", area2D.currentTCTerrain.texHeight);
+                shader.SetFloat("terrainTexReadResolution", area2D.currentTCTerrain.texHeight.width);
+                shader.SetFloat("terrainTexReadNormalResolution", area2D.currentTCTerrain.texHeight.width - area2D.resExpandBorder * 2);
+            }
 
             if (kernel == -1) { Debug.Log("Kernel not found"); return; }
             shader.Dispatch(kernel, Mathf.CeilToInt(resolution / threads), 1, 1);
@@ -574,7 +578,7 @@ namespace TerrainComposer2
             // Reporter.Log("Kernel " + kernel);
 
             int kernel = 0;
-
+            
             // Reporter.Log("previewRes " + item.previewTex.width);
             // shader.SetInt("method", method);
             if (node.useConstant) kernel = shapeConstantKernel;
@@ -614,22 +618,12 @@ namespace TerrainComposer2
 
                     Texture[] textures = area2D.currentTerrain.terrainData.alphamapTextures;
 
-                    if (node.splatSelectIndex < 4)
-                    {
-                        kernel = terrainSplatmap0Kernel;
-                        // if (node.outputId == TC.splatOutput) shader.SetTexture(kernel, "leftSplatmap0", rtsSplatmap[0]);
-                        // else 
-                        shader.SetTexture(kernel, "leftSplatmap0", textures[0]);
-                        shader.SetInt("splatIndex", node.splatSelectIndex);
-                    }
-                    else
-                    {
-                        kernel = terrainSplatmap1Kernel;
-                        // if (node.outputId == TC.splatOutput) shader.SetTexture(kernel, "leftSplatmap1", rtsSplatmap[1]);
-                        // else 
-                        shader.SetTexture(kernel, "leftSplatmap1", textures[1]);
-                        shader.SetInt("splatIndex", node.splatSelectIndex - 4);
-                    }
+                    int splatmapIndex = node.splatSelectIndex / 4;
+
+                    kernel = terrainSplatmapKernel;
+                    shader.SetTexture(kernel, "leftSplatmap", textures[splatmapIndex]);
+                    shader.SetInt("splatIndex", node.splatSelectIndex - (splatmapIndex * 4));
+
                     // RenderTexture[] textures = area2D.currentTerrainArea.rtSplatmaps;
                 }
                 else if (node.inputTerrain == InputTerrain.Collision) 
@@ -644,7 +638,6 @@ namespace TerrainComposer2
                     shader.SetTexture(kernel, "tex1", camCapture.cam.targetTexture);
                     if (rightBuffer != null) shader.SetBuffer(kernel, "rightBuffer", rightBuffer);
                     if (node.heightDetectRange) shader.SetVector("range", node.range / area2D.terrainSize.y); else shader.SetVector("range", new Vector2(0, area2D.terrainSize.y));
-
                 }
 
                 if (node.inputTerrain != InputTerrain.Splatmap && area2D.currentTCTerrain.texHeight != null)
@@ -813,7 +806,8 @@ namespace TerrainComposer2
 
             bufferLength = (int)resolution.x * (int)resolution.y;
             TC_Reporter.Log("Compute node buffer resolution " + resolution.x + " " + resolution.y);
-            ComputeBuffer resultBuffer = new ComputeBuffer((int)bufferLength, 4);
+            // Debug.LogError("BufferLength " + bufferLength.ToString());
+            ComputeBuffer resultBuffer = new ComputeBuffer(bufferLength, 4);
             shader.SetBuffer(kernel, "resultBuffer", resultBuffer);
 
             shader.SetInt("resolutionX", (int)resolution.x);
@@ -866,7 +860,11 @@ namespace TerrainComposer2
             shader.SetInt("outputId", node.outputId);
              
             // Reporter.Log("Run shader");
-            if (kernel == -1) { Debug.Log("Kernel not found"); return null; }
+            if (kernel == -1)
+            {
+                Debug.Log("Kernel not found");
+                return null;
+            }
             shader.Dispatch(kernel, Mathf.CeilToInt(bufferLength / _threads), 1, 1);
 
             DisposeBuffers(ref localCurveKeys, ref localCurveCalc);
@@ -1296,7 +1294,7 @@ namespace TerrainComposer2
 
         public void RunTerrainTexFromTerrainData(TerrainData terrainData, ref RenderTexture rtHeight)
         {
-            Debug.Log("Run terrain tex from TerrainData "+terrainData.name);
+            // Debug.Log("Run terrain tex from TerrainData " + terrainData.name);
             int heightmapResolution = terrainData.heightmapResolution - 1;
 
             float[,] heights2D = terrainData.GetHeights(0, 0, heightmapResolution, heightmapResolution);

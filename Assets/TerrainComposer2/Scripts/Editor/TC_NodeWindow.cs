@@ -92,12 +92,15 @@ namespace TerrainComposer2
             if (correctSetup == -1)
             {
                 correctSetup = -3;
-                window.Close();
+
+                closeMe = true;
             }
         }
 
+        bool closeMe;
+
         void OnInspectorUpdate()
-        {
+        { 
             Repaint();
         }
 
@@ -107,6 +110,12 @@ namespace TerrainComposer2
             {
                 TC.repaintNodeWindow = false;
                 Repaint();
+            }
+
+            if (closeMe)
+            {
+                closeMe = false;
+                Close();
             }
         }
 
@@ -154,7 +163,7 @@ namespace TerrainComposer2
 
             TD.hoverItem = null;
 
-            TD.rectWindow = new Rect(0, 0, TC_NodeWindow.window.position.width, TC_NodeWindow.window.position.height);
+            TD.rectWindow = new Rect(0, 0, window.position.width, window.position.height);
 
             settings.selectionOld = Selection.activeTransform;
 
@@ -165,7 +174,7 @@ namespace TerrainComposer2
 
             TD.eventCurrent = eventCurrent;
 
-            GUI.DrawTexture(new Rect(0, 0, TC_NodeWindow.window.position.width, TC_NodeWindow.window.position.height), TD.texShelfBackground1);
+            GUI.DrawTexture(new Rect(0, 0, window.position.width, window.position.height), TD.texShelfBackground1);
 
             settings.HasMasterTerrain();
 
@@ -664,7 +673,7 @@ namespace TerrainComposer2
 
                 if (filePath != "")
                 {
-                    PrefabUtility.CreatePrefab(filePath, TC_Area2D.current.terrainLayer.gameObject); ;
+                    TD.CreatePrefab(filePath, TC_Area2D.current.terrainLayer.gameObject); 
                 }
                 else TC.AddMessage("Can't find path.");
             }

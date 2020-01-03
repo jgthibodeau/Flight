@@ -77,13 +77,19 @@ namespace TerrainComposer2
             }
         }
 
-        public bool SetCurrentArea(TCUnityTerrain tcTerrain, int outputId)
+        public void SetCurrentArea(TCUnityTerrain tcTerrain)
         {
-            // Debug.Log(tcTerrain.terrain.name);
-            Terrain terrain = currentTerrain = tcTerrain.terrain;
+            currentTerrain = tcTerrain.terrain;
             currentTCUnityTerrain = tcTerrain;
             currentTCTerrain = tcTerrain;
             currentTerrainArea = terrainAreas[0];
+        }
+
+        public bool SetCurrentArea(TCUnityTerrain tcTerrain, int outputId)
+        {
+            // Debug.Log(tcTerrain.terrain.name);
+            SetCurrentArea(tcTerrain);
+            Terrain terrain = currentTerrain;
 
             if (!currentTCUnityTerrain.active) return false;
 
@@ -113,7 +119,7 @@ namespace TerrainComposer2
             {
                 intResolution.x = intResolution.y = terrain.terrainData.alphamapResolution;
                 resolution2 = intResolution;
-                splatLength = currentTerrain.terrainData.splatPrototypes.Length;
+                splatLength = TC.GetTerrainSplatTextureLength(currentTerrain);
                 splatmapLength = currentTerrain.terrainData.alphamapTextures.Length;
             }
             else if (outputId == TC.treeOutput) { intResolution.x = intResolution.y = (int)(terrain.terrainData.size.x / terrainLayer.treeResolutionPM); resolution2 = intResolution; }

@@ -60,7 +60,19 @@ namespace TerrainComposer2
             GUI.changed = false;
 
             GUILayout.Space(5);
-                DrawCreateTerrain();
+            DrawCreateTerrain();
+            GUILayout.Space(5);
+            if (GUILayout.Button("Scan for Terrains", GUILayout.Width(150)))
+            {
+                terrainArea.GetTerrainsFromChildren();
+                terrainArea.GetAll();
+                return;
+            }
+
+            #if !UNITY_5 && !UNITY_2017 && !UNITY_2018_1 && !UNITY_2018_2
+            GUILayout.Space(10);
+                DrawPerformance();
+            #endif
             GUILayout.Space(10);
                 DrawTerrainAreaTiles();
             GUILayout.Space(10);
@@ -145,7 +157,7 @@ namespace TerrainComposer2
         {
             EditorGUILayout.BeginHorizontal();
             if (terrainArea.createTerrainTab) GUI.backgroundColor = Color.green;
-            if (GUILayout.Button("Create Terrain", EditorStyles.miniButtonMid, GUILayout.Width(100), GUILayout.Height(19.0f)))
+            if (GUILayout.Button("Create Terrain", EditorStyles.miniButtonMid, GUILayout.Width(100)))
             {
                 terrainArea.createTerrainTab = !terrainArea.createTerrainTab;
             }
@@ -160,6 +172,29 @@ namespace TerrainComposer2
                 DrawCreateTerrain(0, 0);
             }
         }
+
+        #if !UNITY_5 && !UNITY_2017 && !UNITY_2018_1 && !UNITY_2018_2
+        public void DrawPerformance()
+        {
+            TD.DrawLabelWidthUnderline("Performance", 14);
+
+            GUI.color = Color.green;
+            EditorGUILayout.BeginVertical("Box");
+            GUI.color = Color.white;
+            
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Draw Instanced", GUILayout.Width(160));
+            GUI.changed = false;
+            terrainArea.drawInstanced = EditorGUILayout.Toggle(terrainArea.drawInstanced, GUILayout.Width(25));
+            if (GUI.changed)
+            {
+                if (terrainArea.terrains.Count > 0 && terrainArea.terrains[0].terrain != null) terrainArea.terrains[0].terrain.drawInstanced = terrainArea.drawInstanced;
+            }
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.EndVertical();
+        }
+        #endif
         
         public void DrawTerrainAreaTiles()
         {
@@ -226,14 +261,7 @@ namespace TerrainComposer2
             GUI.backgroundColor = Color.white;
         }
 
-        Color color_terrain; // !
-        float progress_bar; // !
-        TerrainCollider terrainCollider; // !
-
-        public void ShowNotification(GUIContent guiContent) // !
-        {
-
-        }
+        TerrainCollider terrainCollider;
 
         bool hasTerrain;
         bool hasTerrainData;
@@ -341,7 +369,7 @@ namespace TerrainComposer2
                 {
                     CloseTerrainTabs();
                     terrainArea.splatTab = true;
-                    currentTerrain.GetSplatTextures();
+                    currentTerrain.GetSplatTextures(terrainArea);
                 }
                 else CloseTerrainTabs();
             }
@@ -570,13 +598,19 @@ namespace TerrainComposer2
 
                 EditorGUILayout.BeginHorizontal();
                 GUILayout.Space(60 + space);
+#if UNITY_5 || UNITY_2017 || UNITY_2018_1 || UNITY_2018_2 || UNITY_2018_3 || UNITY_2018_4
                 EditorGUILayout.LabelField("Cast Shadows", GUILayout.Width(147.0f));
                 currentTerrain.castShadows = EditorGUILayout.Toggle(currentTerrain.castShadows, GUILayout.Width(25.0f));
+#else
+                EditorGUILayout.LabelField("Shadow Casting Mode", GUILayout.Width(147.0f)); 
+                currentTerrain.shadowCastingMode = (UnityEngine.Rendering.ShadowCastingMode)EditorGUILayout.EnumPopup(currentTerrain.shadowCastingMode);
+#endif
                 EditorGUILayout.EndHorizontal();
 
                 EditorGUILayout.BeginHorizontal();
                 GUILayout.Space(60 + space);
                 EditorGUILayout.LabelField("Material", GUILayout.Width(147.0f));
+#if UNITY_5 || UNITY_2017 || UNITY_2018_1 || UNITY_2018_2 || UNITY_2018_3 || UNITY_2019_1
                 currentTerrain.materialType = (Terrain.MaterialType)EditorGUILayout.EnumPopup(currentTerrain.materialType);
                 EditorGUILayout.EndHorizontal();
 
@@ -610,6 +644,10 @@ namespace TerrainComposer2
                     currentTerrain.terrain.materialTemplate = (Material)EditorGUILayout.ObjectField(currentTerrain.terrain.materialTemplate, typeof(Material), true);
                     EditorGUILayout.EndHorizontal();
                 }
+#else
+                    currentTerrain.materialTemplate = (Material)EditorGUILayout.ObjectField(currentTerrain.materialTemplate, typeof(Material), true);
+                    EditorGUILayout.EndHorizontal(); 
+#endif
 
                 EditorGUILayout.BeginHorizontal();
                 GUILayout.Space(60 + space);
@@ -814,30 +852,40 @@ namespace TerrainComposer2
                     {
                         if (currentTerrain.splatSettingsFoldout)
                         {
-                            EditorGUILayout.BeginHorizontal();
-                            GUILayout.Space(73 + space);
-                            
+                            TC_SplatPrototype splat = currentTerrain.splatPrototypes[countSplat];
 
-                            float tileSize = currentTerrain.splatPrototypes[countSplat].tileSize.x;
                             bool guiChanged2 = GUI.changed;
                             GUI.changed = false;
-                            tileSize = EditorGUILayout.FloatField("Tile Size", tileSize);
-                            if (GUI.changed)
-                            {
-                                currentTerrain.splatPrototypes[countSplat].tileSize = new Vector2(tileSize, tileSize);
-                                Apply();
-                                SceneView.RepaintAll();
-                                guiChanged = true;
-                            }
-                            GUI.changed = guiChanged2;
 
+#if !UNITY_5 && !UNITY_2017 && !UNITY_2018_1 && !UNITY_2018_2
+                            EditorGUILayout.BeginHorizontal();
+                            GUILayout.Space(73 + space);
+                            splat.normalScale = EditorGUILayout.FloatField("Normal Scale", splat.normalScale);
+                            EditorGUILayout.EndHorizontal();
+#endif
+
+                            EditorGUILayout.BeginHorizontal();
+                            GUILayout.Space(73 + space);
+
+                            float tileSize = splat.tileSize.x;
+                            tileSize = EditorGUILayout.FloatField("Tile Size", tileSize);
+                           
                             EditorGUILayout.EndHorizontal();
 
                             EditorGUILayout.BeginHorizontal();
                             GUILayout.Space(73 + space);
                             // EditorGUILayout.LabelField("Tile Offset", GUILayout.Width(125.0f));
-                            currentTerrain.splatPrototypes[countSplat].tileOffset = EditorGUILayout.Vector2Field("Tile Offset", currentTerrain.splatPrototypes[countSplat].tileOffset);
+                            splat.tileOffset = EditorGUILayout.Vector2Field("Tile Offset", splat.tileOffset);
                             EditorGUILayout.EndHorizontal();
+
+                            if (GUI.changed)
+                            {
+                                splat.tileSize = new Vector2(tileSize, tileSize);
+                                Apply();
+                                SceneView.RepaintAll();
+                                guiChanged = true;
+                            }
+                            GUI.changed = guiChanged2;
                         }
                     }
                     else
@@ -910,7 +958,7 @@ namespace TerrainComposer2
                     
                     if (GUILayout.Button(new GUIContent("+", tooltipText), GUILayout.Width(25.0f)))
                     {
-                        currentTerrain.add_treeprototype(currentTerrain.treePrototypes.Count);
+                        currentTerrain.AddTreePrototype(currentTerrain.treePrototypes.Count);
                         if (eventCurrent.shift && currentTerrain.treePrototypes.Count > 1)
                         {
                             // !script.copy_terrain_tree(currentTerrain.treePrototypes[currentTerrain.treePrototypes.Count - 2], currentTerrain.treePrototypes[currentTerrain.treePrototypes.Count - 1]);
@@ -965,7 +1013,7 @@ namespace TerrainComposer2
                     if (GUILayout.Button(new GUIContent("+", tooltipText), GUILayout.Width(25.0f)))
                     {
                         UndoRegister("Add Tree");
-                        currentTerrain.add_treeprototype(countTree + 1);
+                        currentTerrain.AddTreePrototype(countTree + 1);
                         if (eventCurrent.shift)
                         {
                             currentTerrain.CopyTree(currentTerrain.treePrototypes[countTree], currentTerrain.treePrototypes[countTree + 1]);
@@ -1335,7 +1383,7 @@ namespace TerrainComposer2
             }
             if (terrainArea.splatTab)
             {
-                if (terrainArea.applyChanges == ApplyChanges.Terrain) terrainArea.terrains[terrainArea.terrainSelect].ApplySplatTextures();
+                if (terrainArea.applyChanges == ApplyChanges.Terrain) terrainArea.terrains[terrainArea.terrainSelect].ApplySplatTextures(terrainArea, null);
                 else if (terrainArea.applyChanges == ApplyChanges.TerrainArea || terrainArea.applyChanges == ApplyChanges.AllTerrainAreas) terrainArea.ApplySplatTextures(currentTerrain);
                 // else if (terrainArea.applyChanges == ApplyChanges.AllTerrainAreas) GlobalManager.singleton.ApplySplatTexturesTerrainAreas(currentTerrain);
                 TC.RefreshOutputReferences(TC.splatOutput);
@@ -1520,6 +1568,14 @@ namespace TerrainComposer2
             tileY = EditorGUILayout.IntSlider(tileY, 1, 32);
             terrainArea.selectTiles = new Int2(tileX, tileY);
             EditorGUILayout.EndHorizontal();
+
+#if !UNITY_5 && !UNITY_2017 && !UNITY_2018_1 && !UNITY_2018_2
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Space(space);
+            EditorGUILayout.LabelField(new GUIContent("Share Splat Textures", "Use the same Splat Textures (U2018.3 new Terrain Layers) for all terrains"), GUILayout.Width(160.0f));
+            terrainArea.useSameTerrainLayersForAllTerrains = EditorGUILayout.Toggle(terrainArea.useSameTerrainLayersForAllTerrains, GUILayout.Width(25));
+            EditorGUILayout.EndHorizontal();
+#endif
 
             if (GUI.changed)
             {

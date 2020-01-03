@@ -447,7 +447,7 @@ namespace TerrainComposer2
 			GUI.color = color;
 			rect = GetLeftRect(rect);
 			if (rect.width > TC_NodeWindow.window.position.width) rect.width = TC_NodeWindow.window.position.width;
-			GUI.DrawTexture(rect, tex);
+			GUI.DrawTexture(rect, tex); 
 		}
 		
 		static public void DragDropNode(TC_ItemBehaviour item, Rect rectStartDrag, Rect rectDrop, Vector2 pos, bool isDragable = true, bool checkForPosDrop = true)
@@ -472,7 +472,7 @@ namespace TerrainComposer2
 						//    }
 						//}
 
-						if (DragAndDrop.objectReferences.Length == 0)
+						// if (DragAndDrop.objectReferences.Length == 0)
 						{
 							// Debug.Log("Drag " + item.name);
 							if (Selection.activeGameObject == item.gameObject)
@@ -577,11 +577,29 @@ namespace TerrainComposer2
 			return item.parentItem.t.GetChild(siblingIndex + 1).GetComponent<TC_ItemBehaviour>();
 		}
 
+        static public bool IsPrefab(UnityEngine.Object obj)
+        {
+            #if UNITY_5 || UNITY_2017 || UNITY_2018_1 || UNITY_2018_2
+                return (PrefabUtility.GetPrefabType(obj) == PrefabType.Prefab);
+            #else
+                return (PrefabUtility.GetPrefabAssetType(obj) != PrefabAssetType.NotAPrefab);
+            #endif
+        }
+
+        static public void CreatePrefab(string path, GameObject go)
+        {
+            #if UNITY_5 || UNITY_2017 || UNITY_2018_1 || UNITY_2018_2
+                PrefabUtility.CreatePrefab(path, go);
+            #else
+                PrefabUtility.SaveAsPrefabAsset(go, path);
+            #endif
+        }
+
 		static public bool GetItemDropPosition(TC_ItemBehaviour itemReceive, TC_ItemBehaviour itemToDrop, Rect rectNode)
 		{
 			Vector2 mousePos = eventCurrent.mousePosition;
 			bool clone = eventCurrent.alt;
-			bool isPrefab = (PrefabUtility.GetPrefabType(itemToDrop) == PrefabType.Prefab);
+            bool isPrefab = IsPrefab(itemToDrop);
 
 			if (!itemReceive.nodeFoldout)
 			{
@@ -654,7 +672,7 @@ namespace TerrainComposer2
 		{
 			if (itemReceive == itemToDrop) return false;
 
-			bool isPrefab = (PrefabUtility.GetPrefabType(itemToDrop) == PrefabType.Prefab);
+			bool isPrefab = IsPrefab(itemToDrop);
 
 			if (itemToDrop.level == 0 && !isPrefab) return false;
 			
@@ -785,7 +803,7 @@ namespace TerrainComposer2
 		{
 			if (!clone && checkForPrefab)
 			{
-				if (PrefabUtility.GetPrefabType(itemToDrop) == PrefabType.Prefab) clone = true;
+				if (IsPrefab(itemToDrop)) clone = true;
 			}
 			
 			TC_SelectItemGroup selectItemGroupReceive = itemReceive as TC_SelectItemGroup;
@@ -848,7 +866,7 @@ namespace TerrainComposer2
 
 		static public void DropItemAsChild(TC_ItemBehaviour itemReceive, TC_ItemBehaviour itemToDrop, int startIndex, bool clone)
 		{
-			if (PrefabUtility.GetPrefabType(itemToDrop) == PrefabType.Prefab) clone = true;
+            if (IsPrefab(itemToDrop)) clone = true;
 			if (clone) itemToDrop = itemToDrop.Duplicate(null);
 
 			Undo.SetTransformParent(itemToDrop.transform, itemReceive.transform, "Move " + itemToDrop.name);

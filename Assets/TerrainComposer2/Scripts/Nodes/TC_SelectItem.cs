@@ -96,7 +96,7 @@ namespace TerrainComposer2
 
             if (!localSettings.hasMasterTerrain) return 0;
 
-            if (outputId == TC.splatOutput) return localSettings.masterTerrain.terrainData.splatPrototypes.Length;
+            if (outputId == TC.splatOutput) return TC.GetTerrainSplatTextureLength(localSettings.masterTerrain);
             if (outputId == TC.grassOutput) return localSettings.masterTerrain.terrainData.detailPrototypes.Length;
             if (outputId == TC.treeOutput) return localSettings.masterTerrain.terrainData.treePrototypes.Length;
             
@@ -128,9 +128,12 @@ namespace TerrainComposer2
 
             if (localSettings.hasMasterTerrain)
             {
-                if (selectIndex < localSettings.masterTerrain.terrainData.splatPrototypes.Length && selectIndex >= 0)
+                Texture2D splatTexture;
+                int length = TC.GetTerrainSplatTexture(localSettings.masterTerrain, selectIndex, out splatTexture);
+
+                if (selectIndex < length && selectIndex >= 0)
                 {
-                    preview.tex = localSettings.masterTerrain.terrainData.splatPrototypes[selectIndex].texture;
+                    preview.tex = splatTexture;
                     if (preview.tex != null) name = Mathw.CutString(preview.tex.name, TC.nodeLabelLength);
                 }
                 else active = false;
@@ -145,10 +148,14 @@ namespace TerrainComposer2
 
             if (settings.hasMasterTerrain)
             {
-                if (selectIndex < settings.masterTerrain.terrainData.treePrototypes.Length && selectIndex >= 0)
+                TreePrototype[] treePrototypes = settings.masterTerrain.terrainData.treePrototypes;
+                if (selectIndex < treePrototypes.Length && selectIndex >= 0)
                 {
-                    preview.tex = UnityEditor.AssetPreview.GetAssetPreview(settings.masterTerrain.terrainData.treePrototypes[selectIndex].prefab);
-                    name = Mathw.CutString(settings.masterTerrain.terrainData.treePrototypes[selectIndex].prefab.name, TC.nodeLabelLength);
+                    if (treePrototypes[selectIndex].prefab)
+                    {
+                        preview.tex = UnityEditor.AssetPreview.GetAssetPreview(treePrototypes[selectIndex].prefab);
+                        name = Mathw.CutString(treePrototypes[selectIndex].prefab.name, TC.nodeLabelLength);
+                    }
                 }
                 else active = false;
             }
@@ -180,9 +187,10 @@ namespace TerrainComposer2
 
             if (localSettings.hasMasterTerrain)
             {
-                if (selectIndex < localSettings.masterTerrain.terrainData.detailPrototypes.Length && selectIndex >= 0)
+                DetailPrototype[] detailPrototypes = localSettings.masterTerrain.terrainData.detailPrototypes;
+                if (selectIndex < detailPrototypes.Length && selectIndex >= 0)
                 {
-                    DetailPrototype detailPrototype = localSettings.masterTerrain.terrainData.detailPrototypes[selectIndex];
+                    DetailPrototype detailPrototype = detailPrototypes[selectIndex];
                     if (detailPrototype.usePrototypeMesh)
                     {
                         #if UNITY_EDITOR

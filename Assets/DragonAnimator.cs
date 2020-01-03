@@ -6,7 +6,7 @@ public class DragonAnimator : MonoBehaviour {
     public Player player;
 
 	public float FadeLength;
-	public bool Flapping, BackFlap, Grounded, Flying, WingsOut, Walking, Hopping, InWater, Flame, Attack, Healing, Boosting, BoostTriggered, Gusting, GustTriggered;
+	public bool Flapping, BackFlap, StableBackFlap, Grounded, Flying, WingsOut, Walking, Hopping, InWater, Flame, Attack, Healing, Boosting, BoostTriggered, Gusting, GustTriggered;
     private bool AnimationFlapping;
 	private bool Attacking;
 	public float FlapSpeed;
@@ -60,6 +60,7 @@ public class DragonAnimator : MonoBehaviour {
 	void LateUpdate () {
 		animator.SetBool ("Flapping", FlapSpeed != 0);
 		animator.SetBool ("BackFlap", FlapSpeed != 0 && BackFlap);
+        animator.SetBool ("StableBackFlap", FlapSpeed != 0 && StableBackFlap);
         animator.SetBool ("Grounded", Grounded);
         animator.SetBool ("Flying", Flying);
         animator.SetBool ("WingsOut", WingsOut);

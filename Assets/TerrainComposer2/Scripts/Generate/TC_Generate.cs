@@ -375,10 +375,10 @@ namespace TerrainComposer2
 				// TC.AddMessage("The 'Height' output is not generated. Enable 'Height' output for TC2 to regenerate the height textures.", 0, 4);
 				if (!area2D.terrainLayer.layerGroups[TC.heightOutput].visible)
 				{
-					Debug.Log("Not Active");
-					area2D.terrainLayer.layerGroups[TC.heightOutput].visible = true;
-					area2D.terrainLayer.layerGroups[TC.heightOutput].GetItems(true, false, false);
-					disableHeightOuput = true;
+                    // Debug.Log("Not Active");
+                    // area2D.terrainLayer.layerGroups[TC.heightOutput].visible = true;
+                    // area2D.terrainLayer.layerGroups[TC.heightOutput].GetItems(true, false, false);
+                    // disableHeightOuput = true;
 				}
 			}
 
@@ -387,16 +387,25 @@ namespace TerrainComposer2
 
 			//TODO Debug.Log ("TC_Generate.Generate: Generating ID " + outputId + " " + (instantGenerate? "instantly" : "delayed") + " in rect " + generateRect.ToString () + "!");
 			TC_TerrainArea terrainArea = area2D.terrainAreas[0];
+
 			for (int i = 0; i < terrainArea.terrains.Count; i++)
 			{
 				TCUnityTerrain tcTerrain = terrainArea.terrains[i];
+
+                if (tcTerrain.texHeight == null)
+                {
+                    area2D.SetCurrentArea(tcTerrain);
+                    RenderTexture rtHeight = tcTerrain.rtHeight;
+                    TC_Compute.instance.RunTerrainTexFromTerrainData(tcTerrain.terrain.terrainData, ref rtHeight);
+                    RenderTextureHeightToTexHeight(rtHeight, tcTerrain, tcTerrain.terrain);
+                }
 
 				Vector2 terrainLocalPos = new Vector2 ((float)tcTerrain.tileX/terrainArea.tiles.x, (float)tcTerrain.tileZ/terrainArea.tiles.y);
 				Vector2 terrainLocalSize = new Vector2 (1f/terrainArea.tiles.x, 1f/terrainArea.tiles.y);
 				Rect terrainRect = new Rect (terrainLocalPos, terrainLocalSize);
 				//Debug.Log ("Terrain tile " + tcTerrain.tileX + "/" + tcTerrain.tileZ + " in " + terrainArea.tiles.x + "/" + terrainArea.tiles.y + " tiles has rect " + terrainRect);
 				Rect terrainGenRect;
-				if (tcTerrain.active && Mathw.OverlapRect (generateRect, terrainRect, out terrainGenRect))
+				if (tcTerrain.active && Mathw.OverlapRect(generateRect, terrainRect, out terrainGenRect))
 				{
 					Rect relTerrainGenRect = new Rect ((terrainGenRect.x-terrainLocalPos.x)*terrainArea.tiles.x, (terrainGenRect.y-terrainLocalPos.y)*terrainArea.tiles.y, 
 														terrainGenRect.width*terrainArea.tiles.x, terrainGenRect.height*terrainArea.tiles.y);
@@ -1014,7 +1023,18 @@ namespace TerrainComposer2
 #endif
 		}
 
-		public void ComputeHeight(Rect generateRect)
+        void RenderTextureHeightToTexHeight(RenderTexture rtHeight, TC_Terrain tcTerrain, Terrain terrain)
+        {
+            TC_Compute.InitTexture(ref tcTerrain.texHeight, "HeightTexture " + terrain.name, rtHeight.width, true);
+
+            RenderTexture rtActiveOld = RenderTexture.active;
+            RenderTexture.active = rtHeight;
+            tcTerrain.texHeight.ReadPixels(new Rect(0, 0, rtHeight.width, rtHeight.height), 0, 0);
+            tcTerrain.texHeight.Apply();
+            RenderTexture.active = rtActiveOld;
+        }
+
+        public void ComputeHeight(Rect generateRect)
 		{
 			// Debug.Log("ComputeHeight");
 			TC_LayerGroup heightLayerGroup = area2D.terrainLayer.layerGroups[TC.heightOutput];
@@ -1056,15 +1076,10 @@ namespace TerrainComposer2
 				// else Debug.Log("Pass");
 				
 				RenderTexture rtHeight = area2D.currentTCTerrain.rtHeight;
-				 
-				TC_Compute.InitTexture(ref area2D.currentTCTerrain.texHeight, "HeightTexture "+area2D.currentTCUnityTerrain.terrain.name, rtHeight.width, true);
-				// Debug.Log(area2D.currentTCTerrain.texHeight.mipmapCount);
 
-				RenderTexture rtActiveOld = RenderTexture.active;
-				RenderTexture.active = rtHeight;
-				area2D.currentTCTerrain.texHeight.ReadPixels(new Rect(0, 0, rtHeight.width, rtHeight.height), 0, 0);
-				area2D.currentTCTerrain.texHeight.Apply(); 
-				RenderTexture.active = rtActiveOld;
+                RenderTextureHeightToTexHeight(rtHeight, area2D.currentTCTerrain, area2D.currentTerrain);
+
+				// Debug.Log(area2D.currentTCTerrain.texHeight.mipmapCount);
 				
 				//if (TC_Settings.instance.isRTPDetected && TC_Settings.instance.autoNormalmapRTP)
 				//{
@@ -1090,6 +1105,8 @@ namespace TerrainComposer2
 
 				TC.InitArray(ref heights, (int)pixelRect.height, (int)pixelRect.width);
 				TC.InitArray(ref heightsReadback, resolution * resolution);
+
+                // Debug.LogError("Resolution " + resolution + " buffer " + buffer.count);
 
 				// TODO: Can read directly into heights with rearranging the array
 				buffer.GetData(heightsReadback);
@@ -1382,8 +1399,13 @@ namespace TerrainComposer2
 				TC.AddMessage("Trees can be assigned on the Terrain Area GameObject -> Trees tab.", 2);
 				return;
 			}
+            //if (area2D.currentTCTerrain.texHeight == null)
+            //{
+            //    TC.AddMessage("You need to generate a heightmap first", 0, 7);
+            //    return;
+            //}
 
-			if (firstTreeTerrain == area2D.currentTCTerrain)
+            if (firstTreeTerrain == area2D.currentTCTerrain)
 			{
 				area2D.terrainLayer.ResetPlaced();
 				firstTreeTerrain = null;
@@ -1518,8 +1540,13 @@ namespace TerrainComposer2
 				TC.AddMessage("No objects nodes are active.");
 				return;
 			}
+            //if (area2D.currentTCTerrain.texHeight == null)
+            //{
+            //    TC.AddMessage("You need to generate a heightmap first", 0, 7);
+            //    return;
+            //}
 
-			if (firstObjectTerrain == area2D.currentTCTerrain) { area2D.terrainLayer.ResetPlaced(); firstObjectTerrain = null; }
+            if (firstObjectTerrain == area2D.currentTCTerrain) { area2D.terrainLayer.ResetPlaced(); firstObjectTerrain = null; }
 
 			int resolution = area2D.intResolution.x;
 
@@ -1773,17 +1800,19 @@ namespace TerrainComposer2
 			}
 
 			return tcUnityTerrain.objectsParent;
-		}
-
-		struct ItemMap
+        }
+        
+        #pragma warning disable 0649
+        struct ItemMap
 		{
 			public int index;
 			public float density;
 			public float maskValue;
 			public Vector3 pos;
 		};
+        #pragma warning restore 0649
 
-		[System.Serializable]
+        [System.Serializable]
 		public class GenerateStackEntry
 		{
 			public List<GenerateStack> stack = new List<GenerateStack>();

@@ -32,7 +32,7 @@ public class GlideV2 : MonoBehaviour {
     public float minSpeedAngularDrag = 0;
     public float maxSpeedAngularDrag = 30;
 
-    public float rigidBodyDrag = 0f;
+    public float rigidBodyDrag = 0f, backFlapRigidBodyDrag = 1;
     public float minRigidBodyAngularDrag = 1f;
     public float rigidBodyAngularDrag = 10f;
 
@@ -56,9 +56,17 @@ public class GlideV2 : MonoBehaviour {
 	public float flapForwardDistance;
 	public float flapUpDistance;
 	public float flapOutDistance;
-	public float flapHoverUprightRotationSpeed = 1f;
+    public float goodFlapScale = 2;
+    public float flapHoverUprightRotationSpeed = 1f;
 	public float flapHoverRotationSpeed = 1f;
-	public ForceMode flapForceMode;
+    public float flapHoverMoveSpeed = 1f;
+    public float backFlapStableAngle = 0.1f;
+    public float backFlapStableSpeed = 2f;
+    public float backFlapStopSpeed = 1f;
+    public float maxBackFlapStopSpeed = 100f;
+    public bool backFlapRotateOnly;
+
+    public ForceMode flapForceMode;
 
     public bool canBoost = false;
     public enum BoostState {STARTING, GOING, STOPPING, STOPPED};
@@ -124,10 +132,8 @@ public class GlideV2 : MonoBehaviour {
     private bool overrideFlight, overrideBackFlap;
 
     //Inputs
-    public float wingOutAmountLeft, wingOutAmountRight, wingAngleLeft, wingAngleRight, yaw, flapSpeed, flapDirection;
-	public bool boostTriggered, boostHeld, boosting;
-
-    public bool rotateHeld;
+    public float wingOutAmountLeft, wingOutAmountRight, wingAngleLeft, wingAngleRight, yaw, flapDirection;
+	public bool boostTriggered, boostHeld, boosting, flapHeld, rotateHeld;
 
     public float controlAcceleration = 15f;
     public float controlResetAcceleration = 5f;
@@ -139,8 +145,8 @@ public class GlideV2 : MonoBehaviour {
         setWingAngleLeft(0);
         setWingAngleRight(0);
         setYaw(0);
-        setFlapSpeed(0);
         setFlapDirection(0);
+        flapHeld = false;
     }
     public void ResetWings()
     {
@@ -168,11 +174,6 @@ public class GlideV2 : MonoBehaviour {
     public void setYaw(float newVal)
     {
         yaw = smoothInputValue(newVal, yaw, true);
-    }
-    public void setFlapSpeed(float newVal)
-    {
-        //flapSpeed = smoothInputValue(newVal, flapSpeed, false);
-        flapSpeed = newVal;
     }
     public void setFlapDirection(float newVal)
     {
@@ -217,6 +218,7 @@ public class GlideV2 : MonoBehaviour {
 			dragonAnimator.Flapping = false;
 		}
         dragonAnimator.BackFlap = isBackFlapping;
+        dragonAnimator.StableBackFlap = isBackFlapping && backFlapStable;
 
         //audio based on speed
         if (!isGrounded) {
@@ -318,12 +320,14 @@ public class GlideV2 : MonoBehaviour {
             ResetWings();
             flapping = false;
             isBackFlapping = false;
+            backFlapStable = false;
         }
 
 		if (!isGrounded) {
 			rigidBody.drag = rigidBodyDrag;
             if (isBackFlapping && speed < 5)
             {
+                rigidBody.drag = backFlapRigidBodyDrag;
                 rigidBody.angularDrag = rigidBodyAngularDrag;
             } else if (IsFlapping())
             {
@@ -337,7 +341,7 @@ public class GlideV2 : MonoBehaviour {
             }
 
             //rotate towards motion
-            if (rotateTowardsMotion && flapSpeed == 0) {
+            if (rotateTowardsMotion && !flapHeld) {
 				Vector3 rotation = Quaternion.LookRotation (rigidBody.velocity, transform.up).eulerAngles;
 				transform.rotation = Quaternion.Euler (rotation);
 			}
@@ -369,124 +373,205 @@ public class GlideV2 : MonoBehaviour {
 			drag = 0;
 		}
 	}
-
-	void SteadyFlap(){
-		Vector3 flapForce = (transform.forward + transform.up).normalized * flapForwardCoef * flapScale * flapSpeed;
-
-		rigidBody.AddForce (flapForce);
-
-		Util.DrawRigidbodyRay(rigidBody, transform.position, flapForce, Color.red);
-	}
     
 	public int currentFlapTick = 0;
 	public bool flapping;
-	public bool backFlapHover;
 	public float[] flapForces;
-	public float[] flapLiftPercents;
-
-	void SteadyFlapOverTime(){
-        int flapTicks = flapForces.Length;
-
-        if (flapSpeed != 0) {
-			if (CanFlap ()) {
-				flapping = true;
-			} else if (currentFlapTick < flapTicks) {
-				currentFlapTick++;
-			}
-			if (currentFlapTick >= flapTicks) {
-				currentFlapTick = 0;
-			}
-		} else if (flapping) {
-			if (currentFlapTick < flapTicks) {
-				currentFlapTick++;
-			}
-			if (currentFlapTick >= flapTicks) {
-				currentFlapTick = 0;
-				flapping = false;
-			}
-		}
-
-		if (flapping) {
-			float realFlapSpeed = flapForces [currentFlapTick] * flapSpeed;
-			Vector3 flapForceDirection = (transform.forward * (1 + flapDirection) / 2 + transform.up * (1 - flapDirection) / 2).normalized;
-			Vector3 flapForce = flapForceDirection * flapForwardCoef * flapScale * realFlapSpeed;
-
-			Vector3 flapPosition = transform.position + transform.up * playerScript.centerOfGravity.y + transform.forward * playerScript.centerOfGravity.z + transform.up * flapUpDistance + transform.forward * flapForwardDistance;
-			rigidBody.AddForceAtPosition (flapForce, flapPosition, flapForceMode);
-
-			Util.DrawRigidbodyRay (rigidBody, flapPosition, flapForce, Color.red);
-		}
-	}
-
-	void WingFlap() {
+    public int goodFlapTick;
+    
+    void WingFlap() {
         float realFlapSpeed = GetFlapSpeed();
-
-        if (!isGrounded)
-        {
-            rigidBody.constraints = RigidbodyConstraints.None;
-        }
-
+        
         if ((backFlapHeld && CanBackFlap()) || overrideBackFlap)
         {
-            ResetWings();
-
-            backFlapStopCurrentTime = backFlapStopTime;
-            isBackFlapping = true;
-
-            Vector3 forceDirection = -rigidBody.velocity.normalized;
-            Quaternion desiredForward;
-
-            if (Vector3.Angle(forceDirection, Vector3.up) > 0.1f)
+            //BackFlap(realFlapSpeed);
+            BackFlapV2(realFlapSpeed);
+        } else
+        {
+            backFlapStable = false;
+            if (!isGrounded)
             {
-                Vector3 flapForce = forceDirection * realFlapSpeed;
-                rigidBody.AddForce(flapForce, flapForceMode);
-                Util.DrawRigidbodyRay(rigidBody, transform.position, flapForce, Color.green);
-
-
-                //rotate to become upright
-                Vector3 projectedForward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
-                desiredForward = Quaternion.Lerp(rigidBody.rotation, Quaternion.LookRotation(projectedForward, Vector3.up), Time.fixedDeltaTime * flapHoverUprightRotationSpeed);
-                Util.DrawRigidbodyRay(rigidBody, transform.position, projectedForward * 5, Color.white);
-                Util.DrawRigidbodyRay(rigidBody, transform.position, desiredForward.eulerAngles * 5, Color.black);
-                rigidBody.MoveRotation(desiredForward);
-
-                float rotateAmount = Util.GetAxis("Roll");
-                Vector3 rotateForward = transform.forward * (1 - Mathf.Abs(rotateAmount)) + transform.right * rotateAmount;
-                desiredForward = Quaternion.Slerp(rigidBody.rotation, Quaternion.LookRotation(rotateForward, Vector3.up), Time.fixedDeltaTime * flapHoverRotationSpeed);
-                rigidBody.MoveRotation(desiredForward);
-                Util.DrawRigidbodyRay(rigidBody, transform.position, desiredForward.eulerAngles * 5, Color.black);
+                rigidBody.constraints = RigidbodyConstraints.None;
             }
-            else
+            if (flapping)
             {
-                rigidBody.constraints = RigidbodyConstraints.FreezePosition | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
-                rigidBody.rotation = Quaternion.LookRotation(transform.forward, Vector3.up);
-
-                //rotate instead of rolling
-                float rotateAmount = Util.GetAxis("Roll");
-                Vector3 rotateForward = transform.forward * (1 - Mathf.Abs(rotateAmount)) + transform.right * rotateAmount;
-                desiredForward = Quaternion.Slerp(rigidBody.rotation, Quaternion.LookRotation(rotateForward, Vector3.up), Time.fixedDeltaTime * flapHoverRotationSpeed);
-                rigidBody.rotation = desiredForward;
-                Util.DrawRigidbodyRay(rigidBody, transform.position, desiredForward.eulerAngles * 5, Color.black);
+                NormalFlap(realFlapSpeed);
             }
         }
+    }
 
-        else if (flapping)
+    private void BackFlap(float realFlapSpeed)
+    {
+        ResetWings();
+
+        backFlapStopCurrentTime = backFlapStopTime;
+        isBackFlapping = true;
+
+        Quaternion desiredForward;
+
+        bool backFlapStable = CheckBackFlapStability();
+
+        if (!backFlapStable)
         {
-            Vector3 flapPositionLeft = transform.position + transform.up * playerScript.centerOfGravity.y + transform.forward * playerScript.centerOfGravity.z - transform.right * flapOutDistance;
-			Vector3 flapPositionRight = transform.position + transform.up * playerScript.centerOfGravity.y + transform.forward * playerScript.centerOfGravity.z + transform.right * flapOutDistance;
+            Vector3 flapForce = -rigidBody.velocity.normalized * realFlapSpeed;
+            rigidBody.AddForce(flapForce, flapForceMode);
+            Util.DrawRigidbodyRay(rigidBody, transform.position, flapForce, Color.green);
 
-			float flapLeft = -2 * wingOutAmountLeft;
-            Vector3 flapForceDirectionLeft = CalculateFlapForceDirectionV2();
-            Vector3 flapForceLeft = flapForceDirectionLeft * realFlapSpeed;
-			rigidBody.AddForceAtPosition (flapForceLeft, flapPositionLeft, flapForceMode);
-			Util.DrawRigidbodyRay (rigidBody, flapPositionLeft, flapForceLeft, Color.red);
+            //rotate to become upright
+            Vector3 projectedForward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
+            desiredForward = Quaternion.Lerp(rigidBody.rotation, Quaternion.LookRotation(projectedForward, Vector3.up), Time.fixedDeltaTime * flapHoverUprightRotationSpeed);
+            Util.DrawRigidbodyRay(rigidBody, transform.position, projectedForward * 5, Color.white);
+            Util.DrawRigidbodyRay(rigidBody, transform.position, desiredForward.eulerAngles * 5, Color.black);
+            rigidBody.MoveRotation(desiredForward);
 
-			float flapRight = -2 * wingOutAmountRight;
-            Vector3 flapForceDirectionRight = CalculateFlapForceDirectionV2();
-            Vector3 flapForceRight = flapForceDirectionRight * realFlapSpeed;
-			rigidBody.AddForceAtPosition (flapForceRight, flapPositionRight, flapForceMode);
-			Util.DrawRigidbodyRay (rigidBody, flapPositionRight, flapForceRight, Color.blue);
-		}
+            backFlapStable = CheckBackFlapStability();
+
+            if (backFlapStable)
+            {
+                Vector3 forward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
+                rigidBody.rotation = Quaternion.LookRotation(forward, Vector3.up);
+            }
+        }
+        else
+        {
+            //rigidBody.constraints = RigidbodyConstraints.FreezePosition | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+            rigidBody.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+            //rigidBody.rotation = Quaternion.LookRotation(transform.forward, Vector3.up);
+        }
+
+        //backflap movement
+        if (backFlapRotateOnly)
+        {
+            //rotate instead of rolling
+            float rotateAmount = Util.GetAxis("Roll");
+            Vector3 rotateForward = transform.forward * (1 - Mathf.Abs(rotateAmount)) + transform.right * rotateAmount;
+            desiredForward = Quaternion.Slerp(rigidBody.rotation, Quaternion.LookRotation(rotateForward, Vector3.up), Time.fixedDeltaTime * flapHoverRotationSpeed);
+            rigidBody.MoveRotation(desiredForward);
+            Util.DrawRigidbodyRay(rigidBody, transform.position, desiredForward.eulerAngles * 5, Color.black);
+        }
+        else
+        {
+            float turnRight = Util.GetAxis("Horizontal Right");
+            float turnUp = Util.GetAxis("Vertical Right");
+
+            Vector3 rotateForward = transform.forward * (1 - Mathf.Abs(turnRight)) + transform.right * turnRight;
+            desiredForward = Quaternion.Slerp(rigidBody.rotation, Quaternion.LookRotation(rotateForward, Vector3.up), Time.fixedDeltaTime * flapHoverRotationSpeed);
+            rigidBody.MoveRotation(desiredForward);
+            Util.DrawRigidbodyRay(rigidBody, transform.position, desiredForward.eulerAngles * 5, Color.black);
+
+
+            float forward = Util.GetAxis("Vertical");
+            float right = Util.GetAxis("Horizontal");
+
+            Vector3 movement = flapHoverMoveSpeed * (transform.forward * forward + transform.right * right).normalized;
+            rigidBody.AddForce(movement, ForceMode.VelocityChange);
+
+            //rigidBody.MovePosition(rigidBody.position + movement);
+            //rigidBody.MovePosition(transform.position + movement);
+        }
+    }
+
+    private bool backFlapStable;
+    private void BackFlapV2(float realFlapSpeed)
+    {
+        ResetWings();
+
+        backFlapStopCurrentTime = backFlapStopTime;
+        isBackFlapping = true;
+
+        Quaternion desiredForward;
+
+        if (!backFlapStable)
+        {
+            backFlapStable = CheckBackFlapStabilityV2();
+        }
+
+        if (!backFlapStable)
+        {
+            rigidBody.constraints = RigidbodyConstraints.None;
+
+            //Vector3 flapForce = -rigidBody.velocity.normalized * realFlapSpeed;
+            //rigidBody.AddForce(flapForce, flapForceMode);
+            //Util.DrawRigidbodyRay(rigidBody, transform.position, flapForce, Color.green);
+
+            float stoppingSpeed = Util.ConvertScale(0, maxBackFlapStopSpeed, backFlapStopSpeed, maxBackFlapStopSpeed, rigidBody.velocity.magnitude);
+            rigidBody.velocity = Vector3.MoveTowards(rigidBody.velocity, Vector3.zero, backFlapStopSpeed * Time.fixedDeltaTime);
+
+            //rotate to become upright
+            Vector3 projectedForward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
+            desiredForward = Quaternion.Lerp(rigidBody.rotation, Quaternion.LookRotation(projectedForward, Vector3.up), Time.fixedDeltaTime * flapHoverUprightRotationSpeed);
+            Util.DrawRigidbodyRay(rigidBody, transform.position, projectedForward * 5, Color.white);
+            Util.DrawRigidbodyRay(rigidBody, transform.position, desiredForward.eulerAngles * 5, Color.black);
+            rigidBody.MoveRotation(desiredForward);
+
+            //backFlapStable = CheckBackFlapStability();
+
+            //backFlapStable = rigidBody.velocity.magnitude == 0;
+            //if (backFlapStable)
+            //{
+            //    Vector3 forward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
+            //    rigidBody.rotation = Quaternion.LookRotation(forward, Vector3.up);
+            //}
+        }
+        else
+        {
+            //rigidBody.constraints = RigidbodyConstraints.FreezePosition | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+            //rigidBody.velocity = Vector3.zero;
+            rigidBody.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+            //rigidBody.rotation = Quaternion.LookRotation(transform.forward, Vector3.up);
+
+            Vector3 forward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
+            rigidBody.rotation = Quaternion.LookRotation(forward, Vector3.up);
+        }
+
+        //backflap movement
+        if (backFlapRotateOnly)
+        {
+            //rotate instead of rolling
+            float rotateAmount = Util.GetAxis("Roll");
+            Vector3 rotateForward = transform.forward * (1 - Mathf.Abs(rotateAmount)) + transform.right * rotateAmount;
+            desiredForward = Quaternion.Slerp(rigidBody.rotation, Quaternion.LookRotation(rotateForward, Vector3.up), Time.fixedDeltaTime * flapHoverRotationSpeed);
+            rigidBody.MoveRotation(desiredForward);
+            Util.DrawRigidbodyRay(rigidBody, transform.position, desiredForward.eulerAngles * 5, Color.black);
+        }
+        else
+        {
+            float turnRight = Util.GetAxis("Horizontal Right");
+            float turnUp = Util.GetAxis("Vertical Right");
+
+            Vector3 rotateForward = transform.forward * (1 - Mathf.Abs(turnRight)) + transform.right * turnRight;
+            desiredForward = Quaternion.Slerp(rigidBody.rotation, Quaternion.LookRotation(rotateForward, Vector3.up), Time.fixedDeltaTime * flapHoverRotationSpeed);
+            rigidBody.MoveRotation(desiredForward);
+            Util.DrawRigidbodyRay(rigidBody, transform.position, desiredForward.eulerAngles * 5, Color.black);
+
+
+            if (backFlapStable)
+            {
+                float forward = Util.GetAxis("Vertical");
+                float right = Util.GetAxis("Horizontal");
+
+                Vector3 movement = flapHoverMoveSpeed * (transform.forward * forward + transform.right * right).normalized;
+                //rigidBody.AddForce(movement, ForceMode.VelocityChange);
+
+                //rigidBody.MovePosition(rigidBody.position + movement);
+                //rigidBody.MovePosition(transform.position + movement);
+
+                rigidBody.velocity = movement;
+            }
+        }
+    }
+
+    public bool CheckBackFlapStability()
+    {
+        return Vector3.Angle(-rigidBody.velocity.normalized, Vector3.up) <= backFlapStableAngle;
+    }
+
+    public bool CheckBackFlapStabilityV2()
+    {
+        //rigidBody.velocity.magnitude <= 0.5f
+
+        Debug.Log(rigidBody.velocity.magnitude + " <= " + backFlapStableSpeed + ", " + Vector3.Angle(transform.up, Vector3.up) + " <= " + backFlapStableAngle);
+        return (rigidBody.velocity.magnitude <= backFlapStableSpeed) && (Vector3.Angle(transform.up, Vector3.up) <= backFlapStableAngle);
     }
 
     public float backflapHeight = 2f;
@@ -495,6 +580,26 @@ public class GlideV2 : MonoBehaviour {
         return !isGrounded/* && !Physics.Raycast(transform.position, Vector3.down, backflapHeight, playerScript.layerMaskForGround)*/;
     }
 
+    private void NormalFlap(float realFlapSpeed)
+    {
+        Vector3 flapPositionLeft = transform.position + transform.up * playerScript.centerOfGravity.y + transform.forward * playerScript.centerOfGravity.z - transform.right * flapOutDistance;
+        Vector3 flapPositionRight = transform.position + transform.up * playerScript.centerOfGravity.y + transform.forward * playerScript.centerOfGravity.z + transform.right * flapOutDistance;
+
+        float flapLeft = -2 * wingOutAmountLeft;
+        Vector3 flapForceDirectionLeft = CalculateFlapForceDirectionV2();
+        Vector3 flapForceLeft = flapForceDirectionLeft * realFlapSpeed;
+        rigidBody.AddForceAtPosition(flapForceLeft, flapPositionLeft, flapForceMode);
+        Util.DrawRigidbodyRay(rigidBody, flapPositionLeft, flapForceLeft, Color.red);
+
+        float flapRight = -2 * wingOutAmountRight;
+        Vector3 flapForceDirectionRight = CalculateFlapForceDirectionV2();
+        Vector3 flapForceRight = flapForceDirectionRight * realFlapSpeed;
+        rigidBody.AddForceAtPosition(flapForceRight, flapPositionRight, flapForceMode);
+        Util.DrawRigidbodyRay(rigidBody, flapPositionRight, flapForceRight, Color.blue);
+    }
+    
+    private bool goodFlap;
+    private bool nextFlapGood;
     public float GetFlapSpeed()
     {
         int flapTicks = flapForces.Length;
@@ -502,42 +607,29 @@ public class GlideV2 : MonoBehaviour {
 
         if (isBackFlapping)
         {
-            //if (flapSpeed != 0)
-            //{
-                flapping = true;
-            //} else
-            //{
-                //flapping = false;
-            //}
+            flapping = true;
             currentFlapTick = flapTicks;
             flapForce = flapForces[(int)(flapForces.Length * 0.5f)];
         }
 
         else if (backFlapStopCurrentTime > 0)
         {
-            flapping = flapSpeed != 0;
+            flapping = flapHeld;
             flapForce = 0;
-            //if (flapSpeed != 0)
-            //{
-            //    flapForce = flapForces[(int)(flapForces.Length * 0.5f)];
-            //    flapForce = Util.ConvertScale(backFlapStopTime, 0, flapForce / 4, flapForce, backFlapStopCurrentTime);
-                backFlapStopCurrentTime -= Time.fixedDeltaTime;
-
-                //rigidBody.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
-            //} else
-            //{
-            //    backFlapStopCurrentTime = 0;
-            //    flapForce = 0;
-            //}
+            backFlapStopCurrentTime -= Time.fixedDeltaTime;
         }
 
         else
         {
-            if (flapSpeed != 0)
+            if (flapHeld)
             {
                 if (CanFlap())
                 {
                     flapping = true;
+                    if (currentFlapTick > goodFlapTick)
+                    {
+                        nextFlapGood = true;
+                    }
                 }
                 else if (flapping && currentFlapTick < flapTicks)
                 {
@@ -545,12 +637,14 @@ public class GlideV2 : MonoBehaviour {
                     if (currentFlapTick >= flapTicks)
                     {
                         currentFlapTick = 0;
+                        goodFlap = nextFlapGood;
+                        nextFlapGood = false;
                     }
                 }
                 else
                 {
                     currentFlapTick = 0;
-                    //flapping = false;
+                    nextFlapGood = false;
                 }
             }
             else if (flapping)
@@ -561,12 +655,18 @@ public class GlideV2 : MonoBehaviour {
                 }
                 if (currentFlapTick >= flapTicks)
                 {
+                    nextFlapGood = false;
                     currentFlapTick = 0;
                     flapping = false;
                 }
             }
             
             flapForce = flapForces[(int)(flapForces.Length * 0.5f)];
+
+            //if (goodFlap)
+            //{
+            //    flapForce *= goodFlapScale;
+            //}
         }
 
         return flapForce * flapForwardCoef * flapScale * 0.5f;

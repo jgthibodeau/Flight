@@ -52,7 +52,12 @@ namespace TerrainComposer2
              
             SetCamera(collisionDirection, outputId);
 
+            float oldLodBias = QualitySettings.lodBias;
+            QualitySettings.lodBias = Mathf.Infinity;
+            
             cam.Render();
+
+            QualitySettings.lodBias = oldLodBias;
         }
 
         public void DisposeRTCapture()

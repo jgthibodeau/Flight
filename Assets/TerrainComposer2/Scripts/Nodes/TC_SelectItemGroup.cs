@@ -106,14 +106,14 @@ namespace TerrainComposer2
 
             if (itemList.Count > 1)
             {
-                int length = TC_Settings.instance.masterTerrain.terrainData.splatPrototypes.Length;
+                int length = TC.GetTerrainSplatTextureLength(TC_Settings.instance.masterTerrain);
 
                 if (outputId == TC.splatOutput)
                 {
-                    Texture2D[] texArray = new Texture2D[length];
+                    Texture2D[] texArray = TC.GetTerrainSplatTextures(TC_Settings.instance.masterTerrain);
+
                     for (int i = 0; i < length; i++)
                     {
-                        texArray[i] = TC_Settings.instance.masterTerrain.terrainData.splatPrototypes[i].texture;
                         TC.SetTextureReadWrite(texArray[i]);
                     }
                     CalcPreview(texArray);
@@ -235,8 +235,9 @@ namespace TerrainComposer2
                     {
                         if (TC_Settings.instance.hasMasterTerrain)
                         {
-                            if (selectItem.splatCustomValues == null) selectItem.splatCustomValues = new float[TC_Settings.instance.masterTerrain.terrainData.splatPrototypes.Length];
-                            else if (selectItem.splatCustomValues.Length != TC_Settings.instance.masterTerrain.terrainData.splatPrototypes.Length) selectItem.splatCustomValues = Mathw.ResizeArray(selectItem.splatCustomValues, TC_Settings.instance.masterTerrain.terrainData.splatPrototypes.Length);
+                            int length = TC.GetTerrainSplatTextureLength(TC_Settings.instance.masterTerrain);
+                            if (selectItem.splatCustomValues == null) selectItem.splatCustomValues = new float[length];
+                            else if (selectItem.splatCustomValues.Length != length) selectItem.splatCustomValues = Mathw.ResizeArray(selectItem.splatCustomValues, length);
                         }
                         selectItem.CalcSplatCustomTotal();
                     }

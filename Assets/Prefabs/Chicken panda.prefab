@@ -97,6 +97,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -218,10 +219,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   invincible: 0
-  maxHealth: 100
-  currentHealth: 100
+  maxHealth: 25
+  currentHealth: 25
   deathParticles: {fileID: 0}
-  spawnOnDeath: {fileID: 1500232402973442, guid: 597f25de2c733b4438a4a4d0237ae9ee,
+  spawnOnDeath: {fileID: 1500232402973442, guid: bd423d99f2c14204fa81429cbd62011a,
     type: 3}
   minSpawnForce: {x: -0.5, y: 0.5, z: 0.5}
   maxSpawnForce: {x: -0.5, y: 1, z: 0.5}

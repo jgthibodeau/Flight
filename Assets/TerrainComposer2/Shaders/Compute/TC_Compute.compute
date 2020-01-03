@@ -61,6 +61,7 @@ Texture2D<float4> rightSplatmap0;
 Texture2D<float4> rightSplatmap1;   
 Texture2D<float4> rightSplatmap2;   
 Texture2D<float4> rightSplatmap3;   
+Texture2D<float4> leftSplatmap;
 Texture2D<float4> leftSplatmap0;   
 Texture2D<float4> leftSplatmap1;    
 Texture2D<float4> leftSplatmap2;
@@ -551,27 +552,13 @@ void TerrainConvexity (uint id : SV_DispatchThreadID)
 	SetPreviewTex();
 }
 
-#pragma kernel TerrainSplatmap0
+#pragma kernel TerrainSplatmap 
 [numthreads(512,1,1)] 
-void TerrainSplatmap0 (uint id : SV_DispatchThreadID)
+void TerrainSplatmap (uint id : SV_DispatchThreadID)
 { 
 	GetPosUV(id);
 
-	h = leftSplatmap0.SampleLevel(_LinearClamp, uv, 0)[splatIndex];  
-	ApplySplatVertical();
-
-	resultBuffer[id] = h;
-
-	SetPreviewTex();
-} 
-
-#pragma kernel TerrainSplatmap1
-[numthreads(512,1,1)] 
-void TerrainSplatmap1 (uint id : SV_DispatchThreadID)
-{ 
-	GetPosUV(id);
-
-	h = leftSplatmap1.SampleLevel(_LinearClamp, uv, 0)[splatIndex];
+	h = leftSplatmap.SampleLevel(_LinearClamp, uv, 0)[splatIndex];  
 	ApplySplatVertical();
 
 	resultBuffer[id] = h;

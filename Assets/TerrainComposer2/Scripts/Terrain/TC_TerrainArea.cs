@@ -38,6 +38,8 @@ namespace TerrainComposer2
         public Int2 tiles;
         public Int2 selectTiles;
         public bool tileLink = true;
+        public bool useSameTerrainLayersForAllTerrains = true;
+        public bool drawInstanced;
 
         public Rect area;
         public Vector3 terrainSize = new Vector3(2048, 750, 2048);
@@ -71,8 +73,20 @@ namespace TerrainComposer2
             }
 
             SetNeighbors();
+            AssignMaterials();
             // GetTerrainsFromChildren();
             // if (terrains.Count == 0) terrains.Add(new TCTerrain());
+        }
+
+        void AssignMaterials()
+        {
+#if !UNITY_5 && !UNITY_2017 && !UNITY_2018 && !UNITY_2019_1
+            for (int i = 0; i < terrains.Count; i++)
+            { 
+                terrains[i].materialTemplate = new Material(Shader.Find("Nature/Terrain/Diffuse"));
+                if (terrains[i].terrain) terrains[i].terrain.materialTemplate = terrains[i].materialTemplate;
+            }
+#endif
         }
 
         public bool IsRTPAddedToTerrains()
@@ -261,6 +275,7 @@ namespace TerrainComposer2
 
         public void SetNeighbors()
         {
+#if UNITY_5 || UNITY_2017 || UNITY_2018_1 || UNITY_2018_2
             for (int i = 0; i < terrains.Count; i++)
             {
                 TCUnityTerrain t = terrains[i];
@@ -273,10 +288,12 @@ namespace TerrainComposer2
 
                 t.terrain.SetNeighbors(left, top, right, bottom);
             }
+#endif
         }
 
         public void ResetNeighbors()
         {
+#if UNITY_5 || UNITY_2017 || UNITY_2018_1 || UNITY_2018_2
             for (int i = 0; i < terrains.Count; i++)
             {
                 TCUnityTerrain t = terrains[i];
@@ -284,6 +301,7 @@ namespace TerrainComposer2
 
                 t.terrain.SetNeighbors(null, null, null, null);
             }
+#endif
         }
 
         public Terrain GetTerrainTile(int tileX, int tileZ)
@@ -312,10 +330,15 @@ namespace TerrainComposer2
             }
         }
 
-        void GetTerrainsFromChildren()
+        public void GetTerrainsFromChildren()
         {
             Terrain[] unityTerrains = GetComponentsInChildren<Terrain>(true);
             terrains.Clear();
+
+            if (unityTerrains.Length > 0)
+            {
+                terrainSize = unityTerrains[0].terrainData.size;
+            }
 
             for (int i = 0; i < unityTerrains.Length; i++)
             {
@@ -340,7 +363,7 @@ namespace TerrainComposer2
         }
 
         public void CreateTerrains()
-        {
+        { 
             TerrainData terrainData;
             GameObject terrainObject;
             Terrain terrain;
@@ -379,7 +402,11 @@ namespace TerrainComposer2
                     // terrainObject.transform.hideFlags = HideFlags.NotEditable;
                     terrain = (Terrain)terrainObject.AddComponent(typeof(Terrain));
                     terrainCollider = (TerrainCollider)terrainObject.AddComponent(typeof(TerrainCollider));
-                    
+
+#if !UNITY_5 && !UNITY_2017 && !UNITY_2018_1 && !UNITY_2018_2
+                    terrain.allowAutoConnect = true;
+#endif
+
                     tileName = "_x" + x.ToString() + "_y" + y.ToString();
                     terrain.name = terrainName + tileName;
 
@@ -387,6 +414,10 @@ namespace TerrainComposer2
                     terrainData.size = terrains[0].size;
                     terrain.terrainData = terrainData;
                     terrainCollider.terrainData = terrainData;
+
+#if !UNITY_5 && !UNITY_2017 && !UNITY_2018 && !UNITY_2019_1
+                    terrains[countTerrain].materialTemplate = new Material(Shader.Find("Nature/Terrain/Diffuse"));
+#endif
 
                     terrains[countTerrain].terrain = terrain;
                     terrains[countTerrain].ApplyAllSettings(terrains[0], settingsEditor);
@@ -398,16 +429,16 @@ namespace TerrainComposer2
                     //    terrain.materialTemplate = terrainArea.terrains[0].terrain.materialTemplate;
                     //}
 
-                    #if UNITY_EDITOR
+#if UNITY_EDITOR
                     string path = "Assets" + terrainDataPath.Replace(Application.dataPath, String.Empty);
                     path += "/" + terrain.name + ".asset";
                     UnityEditor.AssetDatabase.DeleteAsset(path);
                     UnityEditor.AssetDatabase.CreateAsset(terrainData, path);
-                    #endif
+#endif
 
                     // Debug.Log(terrains[countTerrain].splatPrototypes.Count);
 
-                    terrains[countTerrain].ApplySplatTextures();
+                    terrains[countTerrain].ApplySplatTextures(this, null);
                     terrains[countTerrain].ApplyTrees();
                     terrains[countTerrain].ApplyGrass();
 
@@ -544,12 +575,12 @@ namespace TerrainComposer2
 
         public void ApplySplatTextures(TCUnityTerrain sTerrain)
         {
-            for (int i = 0; i < terrains.Count; i++) terrains[i].ApplySplatTextures(sTerrain);
+            for (int i = 0; i < terrains.Count; i++) terrains[i].ApplySplatTextures(this, sTerrain);
         }
 
         public void GetSplatTextures()
         {
-            for (int i = 0; i < terrains.Count; i++) terrains[i].GetSplatTextures();
+            for (int i = 0; i < terrains.Count; i++) terrains[i].GetSplatTextures(this);
         }
 
         public void ApplyTrees()

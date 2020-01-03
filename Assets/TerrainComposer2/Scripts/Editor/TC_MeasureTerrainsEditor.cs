@@ -278,10 +278,13 @@ namespace TerrainComposer2
 
                 float splatTotal = 0;
 
-                for (int i = 0; i < mt.splat.Length; ++i)
+                Texture2D[] splatTextures = TC.GetTerrainSplatTextures(mt.terrain);
+
+                for (int i = 0; i < splatTextures.Length; ++i)
                 {
                     EditorGUILayout.BeginHorizontal();
-                    TC_ItemBehaviourEditor.DrawPreviewTexture(mt.terrain.terrainData.splatPrototypes[i].texture, Color.white, Color.white, mt.textureSize, mt.textureSize);
+                    
+                    TC_ItemBehaviourEditor.DrawPreviewTexture(splatTextures[i], Color.white, Color.white, mt.textureSize, mt.textureSize);
                     float splatValue = mt.splat[0, 0, i];
                     EditorGUILayout.LabelField("");
                     Rect rect = GUILayoutUtility.GetLastRect();

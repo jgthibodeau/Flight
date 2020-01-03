@@ -10,6 +10,7 @@ public class FreeFormCameraTarget : MonoBehaviour
     public Player player;
     ThirdPersonCamera.Follow follow;
     public bool freeFormActive;
+    public bool enableX = true, enableY = true;
     public float offsetScaleX, offsetScaleY, freeFormScaleX, freeFormScaleY, resetScale;
     public float maxYAngle = 60;
     public float minYAngle = -60;
@@ -41,8 +42,8 @@ public class FreeFormCameraTarget : MonoBehaviour
         }
         else
         {
-            float x = Util.GetAxis("Horizontal Right");
-            float y = -Util.GetAxis("Vertical Right");
+            float x = enableX ? Util.GetAxis("Horizontal Right") : 0;
+            float y = enableY ? -Util.GetAxis("Vertical Right") : 0;
 
             float velocity = rb.velocity.magnitude;
 

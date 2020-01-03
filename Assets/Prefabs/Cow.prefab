@@ -75,10 +75,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   invincible: 0
-  maxHealth: 100
-  currentHealth: 100
+  maxHealth: 25
+  currentHealth: 25
   deathParticles: {fileID: 0}
-  spawnOnDeath: {fileID: 22708773009930382, guid: cf06e0fa874e30c49bc18133ec01aecc,
+  spawnOnDeath: {fileID: 22708773009930382, guid: f5340ab711917fc449303ef093c7172f,
     type: 3}
   minSpawnForce: {x: -0.5, y: 0.5, z: 0.5}
   maxSpawnForce: {x: -0.5, y: 1, z: 0.5}
@@ -98,7 +98,7 @@ MonoBehaviour:
   timeToCatchFire: 0.1
   currentTimeToCatchFire: 0
   onFire: 0
-  fireOutTime: 5
+  fireOutTime: 10
   currentFireOutTime: 0
   fire: {fileID: 2381409471590956000}
 --- !u!114 &8548030171625541691

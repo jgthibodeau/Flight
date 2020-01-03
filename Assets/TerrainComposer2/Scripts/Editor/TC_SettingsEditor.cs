@@ -117,7 +117,7 @@ namespace TerrainComposer2
             }
             TD.DrawProperty(defaultTerrainHeight);
             TD.DrawProperty(generateOffset);
-            EditorGUILayout.Slider(resExpandBorderPercentage, 0.0625f, 1);
+            EditorGUILayout.Slider(resExpandBorderPercentage, 0, 1);
             // TD.DrawProperty(scrollAdd);
             EditorGUILayout.EndVertical();
 

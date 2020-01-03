@@ -6,12 +6,19 @@ using UnityEngine.UI;
 public class FireBar : MonoBehaviour {
 	public Image[] images;
 	public FlameBreath breath;
+    public bool invert;
 
 	// Update is called once per frame
 	void Update () {
         foreach (Image img in images)
         {
-            img.fillAmount = 1 - breath.Percentage();
+            if (invert)
+            {
+                img.fillAmount = 1 - breath.Percentage();
+            } else
+            {
+                img.fillAmount = breath.Percentage();
+            }
         }
 	}
 }

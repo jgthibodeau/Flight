@@ -52,8 +52,10 @@ public class FlameBreath : MonoBehaviour {
 	public float rateMultiplier;
 
 	public float maxedOutRateMultiplier;
-	public float maxBreath;
-	public float currentBreath;
+    public float minBreath;
+    public float maxBreath;
+    public float maxRecharge;
+    public float currentBreath;
 
 	public float breathUseRate;
 	public float breathUseDelay;
@@ -128,12 +130,12 @@ public class FlameBreath : MonoBehaviour {
     public void StartFlame () {
 		if (currentUseDelay > 0) {
 			currentUseDelay -= Time.deltaTime;
-		} else if (!infiniteBreath) {
+        } else if (!infiniteBreath) {
 			currentBreath -= breathUseRate * Time.deltaTime;
-			currentBreath = Mathf.Clamp (currentBreath, 0, maxBreath);
-		}
+        }
+        currentBreath = Mathf.Clamp(currentBreath, minBreath, maxBreath);
 
-        currentRegainDelay = currentBreath > 0 ? breathRegainDelay : breathMaxedOutRegainDelay;
+        currentRegainDelay = currentBreath > minBreath ? breathRegainDelay : breathMaxedOutRegainDelay;
 
 		if (rateMultiplier == 0) {
 			flameParticles.Play ();
@@ -147,8 +149,10 @@ public class FlameBreath : MonoBehaviour {
 		if (currentRegainDelay > 0) {
 			currentRegainDelay -= Time.deltaTime;
 		} else {
-			currentBreath += breathRegainRate * Time.deltaTime;
-			currentBreath = Mathf.Clamp (currentBreath, 0, maxBreath);
+            if (currentBreath < maxRecharge)
+            {
+                RegainFlame(breathRegainRate * Time.deltaTime, maxRecharge);
+            }
 		}
 		currentUseDelay = breathUseDelay;
 
@@ -159,9 +163,20 @@ public class FlameBreath : MonoBehaviour {
 				flameParticles.Stop ();
 			}
 		}
-	}
+    }
 
-	public float DiminishedPercent() {
+    public void RegainFlame(float amount)
+    {
+        RegainFlame(amount, maxBreath);
+    }
+
+    public void RegainFlame(float amount, float max)
+    {
+        currentBreath += amount;
+        currentBreath = Mathf.Clamp(currentBreath, minBreath, max);
+    }
+
+    public float DiminishedPercent() {
 		float percentage = Percentage ();
 		if (percentage > breathPercentStartsDiminishing) {
 			return 1f;

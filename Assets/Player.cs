@@ -15,7 +15,6 @@ using System.Collections;
 public class Player : MonoBehaviour
 {
     private GlideV2 glideV2Script;
-    private GlideV3 glideV3Script;
     private Grab grabScript;
 	private Perch perchScript;
 	private Walk walkScript;
@@ -34,8 +33,11 @@ public class Player : MonoBehaviour
 
 	public bool twoStickFlight = true;
     public Transform[] headCameraTargets;
+    public Transform headCameraTarget, headCameraBackFlapTarget;
+    [Range(0, 1)]
+    public float headCameraYScale = 1, headCameraXScale = 1, headCameraBackFlapYScale = 1, headCameraBackFlapXScale = 1;
 
-	public ThirdPersonCamera.Follow follow;
+    public ThirdPersonCamera.Follow follow;
 
 	public LayerMask layerMaskForGround;
 	public LayerMask layerMaskForWater;
@@ -61,7 +63,7 @@ public class Player : MonoBehaviour
     
     public float rotateSpeed;
     public float uprightThreshold;
-	public float speed;
+	public float speed, previousSpeed;
 	public float ragdollSpeed;
 	public Vector3 groundNormal;
 	private Collider characterCollider;
@@ -126,7 +128,6 @@ public class Player : MonoBehaviour
 		rigidBody = transform.GetComponent<Rigidbody> ();
 
 		glideV2Script = transform.GetComponent<GlideV2> ();
-        glideV3Script = transform.GetComponent<GlideV3>();
         grabScript = transform.GetComponent<Grab> ();
 		perchScript = transform.GetComponent<Perch> ();
 		walkScript = transform.GetComponent<Walk> ();
@@ -139,18 +140,13 @@ public class Player : MonoBehaviour
         glideV2Script.birdAnimator = birdAnimator;
         glideV2Script.dragonAnimator = dragonAnimator;
 
-        glideV3Script.birdAnimator = birdAnimator;
-        glideV3Script.dragonAnimator = dragonAnimator;
-
         walkScript.birdAnimator = birdAnimator;
 		walkScript.dragonAnimator = dragonAnimator;
 
         glideV2Script.rigidBody = rigidBody;
-        glideV3Script.rigidBody = rigidBody;
         walkScript.rigidBody = rigidBody;
 
         glideV2Script.gravity = gravity;
-        glideV3Script.gravity = gravity;
     }
 
     public float jumpWaitTime = 5;
@@ -164,7 +160,8 @@ public class Player : MonoBehaviour
 
 		//assume not fully grounded
 		landed = false;
-		speed = rigidBody.velocity.magnitude;
+        previousSpeed = speed;
+        speed = rigidBody.velocity.magnitude;
 
 //		//not on ground
 //		if (!isGrounded || isFlapping) {
@@ -229,7 +226,8 @@ public class Player : MonoBehaviour
 
 
         //FlightStateMachine();
-        TakeoffLandTransitions();
+        //TakeoffLandTransitions();
+        TakeoffLandTransitionsV2();
 
         //		walkScript.isGrounded = isGrounded && !isFlapping;
         //		if (isFlapping) {
@@ -248,7 +246,6 @@ public class Player : MonoBehaviour
         {
             case State.WALKING:
                 glideV2Script.isGrounded = true;
-                glideV3Script.isGrounded = true;
                 walkScript.isGrounded = true;
                 walkScript.isFlying = false;
 
@@ -281,7 +278,6 @@ public class Player : MonoBehaviour
                 break;
             case State.JUMPING:
                 glideV2Script.isGrounded = true;
-                glideV3Script.isGrounded = true;
                 walkScript.isGrounded = false;
                 walkScript.isFlying = false;
 
@@ -293,8 +289,7 @@ public class Player : MonoBehaviour
                 {
                     Debug.Log("Flap");
                     staminaScript.usingStamina = true;
-                    glideV2Script.setFlapSpeed(1);
-                    glideV3Script.setFlapSpeed(1);
+                    glideV2Script.flapHeld = true;
                     state = State.FLYING;
                     nextFlapTime = Time.time + flapWaitTime;
                 }
@@ -304,7 +299,6 @@ public class Player : MonoBehaviour
                 {
                     Debug.Log("jump stopped");
                     glideV2Script.isGrounded = true;
-                    glideV3Script.isGrounded = true;
                     walkScript.isGrounded = true;
                     walkScript.isFlying = false;
 
@@ -318,7 +312,6 @@ public class Player : MonoBehaviour
                 break;
             case State.FLYING:
                 glideV2Script.isGrounded = false;
-                glideV3Script.isGrounded = false;
                 walkScript.isGrounded = false;
                 walkScript.isFlying = true;
 
@@ -326,14 +319,12 @@ public class Player : MonoBehaviour
                 if (flapTriggered || flapHeld || Time.time < nextFlapTime)
                 {
                     staminaScript.usingStamina = true;
-                    glideV2Script.setFlapSpeed(1);
-                    glideV3Script.setFlapSpeed(1);
+                    glideV2Script.flapHeld = true;
                 }
                 else
                 {
                     staminaScript.usingStamina = false;
-                    glideV2Script.setFlapSpeed(0);
-                    glideV3Script.setFlapSpeed(0);
+                    glideV2Script.flapHeld = false;
 
                     //if grounded, land
                     if (isGrounded)
@@ -345,7 +336,6 @@ public class Player : MonoBehaviour
                 break;
             case State.LANDING:
                 glideV2Script.isGrounded = false;
-                glideV3Script.isGrounded = false;
                 walkScript.isGrounded = false;
                 walkScript.isFlying = false;
 
@@ -405,10 +395,46 @@ public class Player : MonoBehaviour
         {
             Debug.Log("Flap");
             staminaScript.usingStamina = true;
-            glideV2Script.setFlapSpeed(1);
-            glideV3Script.setFlapSpeed(1);
+            glideV2Script.flapHeld = true;
             state = State.FLYING;
             nextFlapTime = Time.time + flapWaitTime;
+        }
+    }
+
+    private void TakeoffLandTransitionsV2()
+    {
+        //if we are not grounded, check for ground and attempt to land
+        if (isGrounded)
+        {
+            bool landTransitionNeeded = (isFlying && !isFlapping) || isFalling;
+            
+            if (landTransitionNeeded && landTransition == null)
+            {
+                Debug.Log("Land - starting land transition");
+                if (takeOffTransition != null)
+                {
+                    Debug.Log("Land - killing takeoff transition");
+                    StopCoroutine(takeOffTransition);
+                }
+                landTransition = StartCoroutine(StartLandTransition());
+            }
+        }
+
+        //if we are grounded, check for flapping
+        else
+        {
+            bool takeoffTransitionNeeded = isFlapping && !isFlying;
+
+            if (takeoffTransitionNeeded && takeOffTransition == null)
+            {
+                Debug.Log("Takeoff - starting transition");
+                if (landTransition != null)
+                {
+                    Debug.Log("Takeoff - killing land transition");
+                    StopCoroutine(landTransition);
+                }
+                takeOffTransition = StartCoroutine(StartTakeOffTransition());
+            }
         }
     }
 
@@ -452,7 +478,6 @@ public class Player : MonoBehaviour
             walkScript.isGrounded = false;
             walkScript.isFlying = false;
             glideV2Script.isGrounded = true;
-            glideV3Script.isGrounded = true;
         }
         else
         {
@@ -460,6 +485,7 @@ public class Player : MonoBehaviour
             if (landTransition != null)
             {
                 Debug.Log("!isGrounded and landTransition running - killing landTransition");
+                Debug.Break();
                 StopCoroutine(landTransition);
                 //landTransition = null;
                 if (takeOffTransition == null)
@@ -489,11 +515,22 @@ public class Player : MonoBehaviour
     public float landTime = 0.5f, takeOffTime = 0.5f;
     IEnumerator StartLandTransition()
     {
+        rigidBody.velocity = Vector3.ProjectOnPlane(transform.forward + transform.up, walkScript.groundNormal).normalized * previousSpeed;
+        
         Debug.Log("StartLandTransition");
         glideV2Script.isGrounded = true;
-        glideV3Script.isGrounded = true;
         yield return new WaitForSeconds(landTime);
+        FinishLandTransition(previousSpeed);
+    }
+
+    void FinishLandTransition(float landSpeed)
+    {
         FinishLandTransition();
+
+        float newWalkSpeed = Util.ConvertScale(10, 60, walkScript.walkSpeed, walkScript.runSpeed, landSpeed);
+        Debug.Log("converted " + landSpeed + " to " + newWalkSpeed);
+        walkScript.currentSpeed = newWalkSpeed;
+        walkScript.currentSpeedIncreaseDelay = 0;
     }
 
     void FinishLandTransition()
@@ -521,7 +558,6 @@ public class Player : MonoBehaviour
     {
         Debug.Log("FinishTakeOffTransition");
         glideV2Script.isGrounded = false;
-        glideV3Script.isGrounded = false;
         walkScript.isFlying = true;
 
         isFlying = true;
@@ -627,7 +663,8 @@ public class Player : MonoBehaviour
 
 		//if in air
 		//if (!isGrounded || glideV2Script.IsFlapping()) {
-        if (!glideV2Script.isGrounded) {
+        //if (!glideV2Script.isGrounded) {
+        if (!isGrounded) {
 			//check for ground with small distance below player
 			groundCheckDistance = airGroundDistance;
         }
@@ -637,7 +674,8 @@ public class Player : MonoBehaviour
         }
 
         //if (!isGrounded)
-        if (!glideV2Script.isGrounded)
+        //if (!glideV2Script.isGrounded)
+        if (!isGrounded)
         {
             groundCapsuleHeight = 1f;
         }
@@ -649,14 +687,7 @@ public class Player : MonoBehaviour
         isGrounded = DoGroundCheck(groundCapsuleHeight, groundCheckDistance);
 
         if (isGrounded) {
-			RaycastHit hit;
-			if (Physics.Raycast (transform.position, -transform.up, out hit, 5f, layerMaskForGround)) {
-				groundNormal = hit.normal;
-
-				if (groundNormal.y <= 0.5f) {
-					groundNormal = Vector3.up;
-				}
-			}
+            FindGroundNormal();
 		}
 
 		inWater = Physics.CheckCapsule (
@@ -685,6 +716,20 @@ public class Player : MonoBehaviour
 		isUpright = uprightAngle < uprightThreshold;
 		walkScript.groundNormal = groundNormal;
 	}
+
+    void FindGroundNormal()
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, -transform.up, out hit, 5f, layerMaskForGround))
+        {
+            groundNormal = hit.normal;
+
+            if (groundNormal.y <= 0.5f)
+            {
+                groundNormal = Vector3.up;
+            }
+        }
+    }
 
     bool DoGroundCheck(float capsuleHeight, float groundDistance)
     {
@@ -729,9 +774,6 @@ public class Player : MonoBehaviour
 		walkScript.forward = 0;
 		walkScript.right = 0;
 
-        glideV2Script.setFlapSpeed(0);
-        glideV3Script.setFlapSpeed(0);
-
         bool heal = Util.GetButton ("Heal");
 		bool isHealing = heal && isGrounded && !glideV2Script.IsFlapping() && speed <= 5f;
 		if (isHealing && healthScript.Heal (currentHealRate * Time.deltaTime)) {
@@ -764,7 +806,6 @@ public class Player : MonoBehaviour
         } else
         {
             glideV2Script.ResetInput();
-            glideV3Script.ResetInput();
         }
 
         if (!isGusting)
@@ -858,7 +899,6 @@ public class Player : MonoBehaviour
 
         //Backflap held = do backflap
         glideV2Script.backFlapHeld = backFlapHeld && (Time.time - backflapStartTime) > backflapTapTime;
-        glideV3Script.backFlapTriggered = glideV2Script.backFlapHeld;
 
         if (backFlapTurn && backFlapStuntsEnabled)
         {
@@ -909,21 +949,17 @@ public class Player : MonoBehaviour
 
     void Flap()
     {
-        float flapSpeed = Util.GetAxis("Flap");
+        isFlapping = Util.GetButton("Flap");
         if (staminaScript.HasStamina())
         {
-            glideV2Script.setFlapSpeed(flapSpeed);
-            glideV3Script.setFlapSpeed(flapSpeed);
+            glideV2Script.flapHeld = isFlapping;
         }
         else
         {
-            glideV2Script.setFlapSpeed(0);
-            glideV3Script.setFlapSpeed(0);
+            glideV2Script.flapHeld = false;
         }
-        staminaScript.usingStamina = flapSpeed != 0;
-
-        isFlapping = flapSpeed > 0;
-
+        staminaScript.usingStamina = isFlapping;
+        
 
         //bool flapTriggered = Util.GetButtonDown("Flap");
         //bool flap = Util.GetButton("Flap");
@@ -1100,15 +1136,6 @@ public class Player : MonoBehaviour
         glideV2Script.setWingAngleRight(wingAngleRight);
         glideV2Script.setWingOutAmountLeft(wingOutAmountLeft);
         glideV2Script.setWingOutAmountRight(wingOutAmountRight);
-
-        //glideV3Script.setBodyInput(new Vector2(Util.GetAxis("Horizontal"), Util.GetAxis("Vertical")).normalized);
-        //glideV3Script.setWingInput(new Vector2(Util.GetAxis("Horizontal"), Util.GetAxis("Vertical")).normalized);
-
-        glideV3Script.setYaw(yaw);
-        glideV3Script.setWingAngleLeft(wingAngleLeft);
-        glideV3Script.setWingAngleRight(wingAngleRight);
-        glideV3Script.setWingOutAmountLeft(wingOutAmountLeft);
-        glideV3Script.setWingOutAmountRight(wingOutAmountRight);
     }
 
     void OnTriggerEnter(Collider collisionInfo) {
@@ -1170,12 +1197,21 @@ public class Player : MonoBehaviour
         float rotY = headHoriz * headComponents.Length;
         float rotX = -headVert * headComponents.Length;
 
-        foreach (Transform t in headCameraTargets)
-        {
-            Vector3 headCameraTargetRot = t.localEulerAngles;
-            headCameraTargetRot.y = rotY;
-            headCameraTargetRot.x = rotX;
-            t.localEulerAngles = headCameraTargetRot;
-        }
+        //foreach (Transform t in headCameraTargets)
+        //{
+        //    Vector3 headCameraTargetRot = t.localEulerAngles;
+        //    headCameraTargetRot.y = rotY;
+        //    headCameraTargetRot.x = rotX;
+        //    t.localEulerAngles = headCameraTargetRot;
+        //}
+        Vector3 headCameraTargetRot = headCameraTarget.localEulerAngles;
+        headCameraTargetRot.y = rotY * headCameraYScale;
+        headCameraTargetRot.x = rotX * headCameraXScale;
+        headCameraTarget.localEulerAngles = headCameraTargetRot;
+
+        headCameraTargetRot = headCameraBackFlapTarget.localEulerAngles;
+        headCameraTargetRot.y = rotY * headCameraBackFlapYScale;
+        headCameraTargetRot.x = rotX * headCameraBackFlapXScale;
+        headCameraBackFlapTarget.localEulerAngles = headCameraTargetRot;
     }
 }

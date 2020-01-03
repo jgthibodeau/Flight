@@ -35,7 +35,8 @@ public class Walk : MonoBehaviour {
 	public float hopTransitionSpeed;
 	public float animationSpeedScale;
 	public float minWalkInput;
-	public float minWalkAmount;
+    public float minRunInput = 0.95f;
+    public float minWalkAmount;
 	public float walkTurnSpeed;
 	public float flameTurnSpeed;
 	public float maxDirectTurnVelocity = 1f;
@@ -109,7 +110,7 @@ public class Walk : MonoBehaviour {
 		rigidBody.drag = rigidBodyDrag;
 		rigidBody.angularDrag = rigidBodyAngularDrag;
 
-		Vector3 inputVector = Vector3.ClampMagnitude(new Vector3 (right, 0, forward), 1);
+		Vector2 inputVector = Vector2.ClampMagnitude(new Vector2 (right, forward), 1);
 		float inputSpeed = inputVector.magnitude;
 		float speed = rigidBody.velocity.magnitude;
 
@@ -138,15 +139,18 @@ public class Walk : MonoBehaviour {
 			} else if (gradualRun) {
 				//if holding down movement, currentSpeed = walkSpeed
 				//if holding down movement > .95, start counting down delay
-				if (inputSpeed >= 0.95f) {
+				if (inputSpeed >= minRunInput) {
 					if (currentSpeed > walkSpeed || currentSpeedIncreaseDelay <= 0) {
 						currentSpeed += speedIncreaseRate * Time.fixedDeltaTime;
 					} else {
 						currentSpeedIncreaseDelay -= Time.fixedDeltaTime;
 					}
 				} else {
-					currentSpeedIncreaseDelay = speedIncreaseDelay;
 					currentSpeed -= speedIncreaseRate * Time.fixedDeltaTime;
+                    if (currentSpeed <= walkSpeed)
+                    {
+                        currentSpeedIncreaseDelay = speedIncreaseDelay;
+                    }
 				}
 
 				currentSpeed = Mathf.Clamp (currentSpeed, walkSpeed, runSpeed);
@@ -230,7 +234,8 @@ public class Walk : MonoBehaviour {
 
     private float CalculateAngleWalkPercent()
     {
-        float currentAngle = Vector3.Angle(transform.up, Vector3.up);
+        //float currentAngle = Vector3.Angle(transform.up, Vector3.up);
+        float currentAngle = Vector3.Angle(groundNormal, Vector3.up);
         return Util.ConvertScale(minWalkAngle, maxWalkAngle, 1, minWalkPercent, currentAngle);
     }
 
@@ -251,7 +256,7 @@ public class Walk : MonoBehaviour {
 		return velocityChange;
 	}
 
-	private Vector3 CalculateDesiredMovementDirection(Vector3 input) {
+	private Vector3 CalculateDesiredMovementDirection(Vector2 input) {
 //		Vector3 cameraForward = Camera.main.transform.TransformDirection(Vector3.forward);
 		Vector3 cameraForward = Camera.main.transform.forward;
 		cameraForward.y = 0f;
@@ -262,7 +267,7 @@ public class Walk : MonoBehaviour {
 		cameraRight.y = 0f;
 		cameraRight = cameraRight.normalized;
 
-		Vector3 desiredDirection = input.x * cameraRight + input.z * cameraForward;
+		Vector3 desiredDirection = input.x * cameraRight + input.y * cameraForward;
 
 		return desiredDirection;
 	}

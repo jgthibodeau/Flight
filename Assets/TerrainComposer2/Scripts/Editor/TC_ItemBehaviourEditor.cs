@@ -679,15 +679,20 @@ namespace TerrainComposer2
                         if (settings.hasMasterTerrain)
                         {
                             EditorGUILayout.BeginHorizontal();
-                            DrawIntSlider(splatSelectIndex, 0, settings.masterTerrain.terrainData.splatPrototypes.Length - 1, new GUIContent("Splat Index"));
+
+                            Texture2D splatTexture;
+                            int splatLength = TC.GetTerrainSplatTexture(settings.masterTerrain, splatSelectIndex.intValue, out splatTexture);
+                            
+                            DrawIntSlider(splatSelectIndex, 0, splatLength - 1, new GUIContent("Splat Index"));
                             EditorGUILayout.EndHorizontal();
                             EditorGUILayout.BeginHorizontal();
                             GUILayout.Space(5);
                             EditorGUILayout.PrefixLabel(" ");
-                            if (splatSelectIndex.intValue < settings.masterTerrain.terrainData.splatPrototypes.Length)
+                            if (splatSelectIndex.intValue < splatLength)
                             {
-                                DrawPreviewTexture(settings.masterTerrain.terrainData.splatPrototypes[splatSelectIndex.intValue].texture, Color.white, Color.white, 150, 150);
+                                DrawPreviewTexture(splatTexture, Color.white, Color.white, 150, 150);
                             }
+
                             EditorGUILayout.EndHorizontal();
                         }
                     }
@@ -1474,7 +1479,7 @@ namespace TerrainComposer2
 
             if (create)
             {
-                PrefabUtility.CreatePrefab(path, item.gameObject);
+                TD.CreatePrefab(path, item.gameObject);
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
             }
@@ -2333,7 +2338,7 @@ namespace TerrainComposer2
             {
                 if (go.objectReferenceValue != null)
                 {
-                    if (PrefabUtility.GetPrefabType(go.objectReferenceValue) != PrefabType.Prefab) color = Color.red;
+                    if (!TD.IsPrefab(go.objectReferenceValue)) color = Color.red;
                 }
             }
 

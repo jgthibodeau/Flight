@@ -15,11 +15,13 @@ namespace TerrainComposer2
 
             GUI.color = Color.black;
             EditorGUI.DrawPreviewTexture(rect, Texture2D.whiteTexture);
+            Texture2D splatTexture;
 
             for (int i = 0; i < selectItem.splatCustomValues.Length; i++)
             {
                 GUI.color = new Color(1, 1, 1, (selectItem.splatCustomValues[i] / selectItem.splatCustomTotal) * 1.5f);
-                EditorGUI.DrawPreviewTexture(rect, TC_Settings.instance.masterTerrain.terrainData.splatPrototypes[i].texture);
+                TC.GetTerrainSplatTexture(TC_Settings.instance.masterTerrain, i, out splatTexture);
+                EditorGUI.DrawPreviewTexture(rect, splatTexture);
             }
 
             GUI.color = Color.white;

@@ -44,7 +44,7 @@ namespace TerrainComposer2
 
 		static public float GetVersionNumber()
 		{
-			return 2.6f;
+			return 2.7f;
 		}
 		
 		static public int OutputNameToOutputID(string outputName)
@@ -53,18 +53,70 @@ namespace TerrainComposer2
 			return -1;
 		}
 
+        static public int GetTerrainSplatTextureLength(Terrain terrain)
+        {
+            #if UNITY_5 || UNITY_2017 || UNITY_2018_1 || UNITY_2018_2
+                return terrain.terrainData.splatPrototypes.Length;
+            #else
+                return terrain.terrainData.terrainLayers.Length;
+            #endif
+        }
+
+        static public Texture2D[] GetTerrainSplatTextures(Terrain terrain)
+        {
+            #if UNITY_5 || UNITY_2017 || UNITY_2018_1 || UNITY_2018_2
+                SplatPrototype[] splatPrototypes = terrain.terrainData.splatPrototypes;
+
+                Texture2D[] textures = new Texture2D[splatPrototypes.Length];
+
+                for (int i = 0; i < textures.Length; i++) textures[i] = splatPrototypes[i].texture;
+                return textures; 
+            #else 
+                TerrainLayer[] terrainLayers = terrain.terrainData.terrainLayers;
+
+                Texture2D[] textures = new Texture2D[terrainLayers.Length];
+                for (int i = 0; i < textures.Length; i++) textures[i] = terrainLayers[i].diffuseTexture;
+
+                return textures;
+            #endif
+        }
+
+        static public int GetTerrainSplatTexture(Terrain terrain, int index, out Texture2D texture)
+        {
+            int length; 
+
+            #if UNITY_5 || UNITY_2017 || UNITY_2018_1 || UNITY_2018_2
+                SplatPrototype[] splatPrototypes = terrain.terrainData.splatPrototypes;
+                length = splatPrototypes.Length;    
+
+                if (index < splatPrototypes.Length && splatPrototypes[index] != null) texture = splatPrototypes[index].texture;
+                else texture = null;
+
+                return length;
+            #else 
+                TerrainLayer[] terrainLayers = terrain.terrainData.terrainLayers;
+                length = terrainLayers.Length;    
+
+                if (index < terrainLayers.Length && terrainLayers[index] != null) texture = terrainLayers[index].diffuseTexture;
+                else texture = null;
+
+                return length;
+            #endif
+        }
+
 		static public void AutoGenerate(bool waitForNextFrame = true)
 		{
-			AutoGenerate (new Rect (0,0,1,1), waitForNextFrame);
+			AutoGenerate(new Rect (0,0,1,1), waitForNextFrame);
 		}
 
 		static public void AutoGenerate(Rect generateRect, bool waitForNextFrame = true)
 		{
 			// Debug.Log("Auto Generate");
+
 			if (TC_Generate.instance != null) 
 			{
 				TC_Generate.instance.cmdGenerate = true;
-				TC_Generate.instance.autoGenerateRect = Mathw.ClampRect (generateRect, new Rect (0,0,1,1));
+				TC_Generate.instance.autoGenerateRect = Mathw.ClampRect(generateRect, new Rect (0,0,1,1));
 			}
 		}
 
@@ -123,11 +175,11 @@ namespace TerrainComposer2
 
 			for (int i = 0; i < childCount; i++)
 			{
-				#if UNITY_EDITOR
+#if UNITY_EDITOR
 					UnityEngine.GameObject.DestroyImmediate(t.GetChild(childCount - i - 1).gameObject);
-				#else           
+#else
 					UnityEngine.GameObject.Destroy(t.GetChild(childCount - i - 1).gameObject);
-				#endif
+#endif
 			}
 		}
 
@@ -147,7 +199,7 @@ namespace TerrainComposer2
 		{
 			if (tex == null) return;
 
-			#if UNITY_EDITOR
+#if UNITY_EDITOR
 			string path = UnityEditor.AssetDatabase.GetAssetPath(tex);
 			UnityEditor.TextureImporter textureImporter = (UnityEditor.TextureImporter)UnityEditor.AssetImporter.GetAtPath(path);
 
@@ -160,7 +212,7 @@ namespace TerrainComposer2
 					UnityEditor.AssetDatabase.ImportAsset(path, UnityEditor.ImportAssetOptions.ForceUpdate);
 				}
 			}
-			#endif
+#endif
 		}
 
 		static public string GetFileName(string path)
@@ -207,28 +259,28 @@ namespace TerrainComposer2
 
 		static public long GetFileLength(string fullPath)
 		{
-			#if !UNITY_WEBPLAYER
+#if !UNITY_WEBPLAYER
 			System.IO.FileInfo fileInfo = new System.IO.FileInfo(fullPath);
 			return fileInfo.Length;
-			#else
+#else
 			return 0;
-			#endif
+#endif
 		}
 
 		static public void GetInstallPath()
 		{
-			#if UNITY_EDITOR
+#if UNITY_EDITOR
 			if (TC_Settings.instance != null)
 			{
 				installPath = UnityEditor.AssetDatabase.GetAssetPath(UnityEditor.MonoScript.FromMonoBehaviour(TC_Settings.instance));
 				installPath = installPath.Replace("/Scripts/Settings/TC_Settings.cs", "");
 			}
-			#endif
+#endif
 		}
 
 		static public bool LoadGlobalSettings()
 		{
-			#if UNITY_EDITOR
+#if UNITY_EDITOR
 			
 			string file = Application.dataPath.Replace("Assets", "") + installPath + "/Defaults/";
 			if (!FileExists(file + "TC_GlobalSettings.asset"))
@@ -252,7 +304,7 @@ namespace TerrainComposer2
 				else return false;
 			}
 			else return false;
-			#endif
+#endif
 			return true;
 		}
 

@@ -84,7 +84,11 @@ public class TerrainSerialization : MonoBehaviour
         R_SerializationHelper.SerializeVector3(bytes, terrain.transform.position);
         
         R_SerializationHelper.SerializeFloat(bytes, terrain.basemapDistance);
+        #if UNITY_5 || UNITY_2017 || UNITY_2018_1 || UNITY_2018_2 || UNITY_2018_3 || UNITY_2018_4
         R_SerializationHelper.SerializeBool(bytes, terrain.castShadows);
+        #else
+        R_SerializationHelper.SerializeInt(bytes, (int)terrain.shadowCastingMode);
+        #endif
         R_SerializationHelper.SerializeBool(bytes, terrain.collectDetailPatches);
         R_SerializationHelper.SerializeFloat(bytes, terrain.detailObjectDensity);
         R_SerializationHelper.SerializeFloat(bytes, terrain.detailObjectDistance);
@@ -92,8 +96,10 @@ public class TerrainSerialization : MonoBehaviour
         R_SerializationHelper.SerializeBool(bytes, terrain.drawTreesAndFoliage);
         R_SerializationHelper.SerializeInt(bytes, terrain.heightmapMaximumLOD);
         R_SerializationHelper.SerializeFloat(bytes, terrain.heightmapPixelError);
+        #if UNITY_5 || UNITY_2017 || UNITY_2018_1 || UNITY_2018_2 || UNITY_2018_3 || UNITY_2019_1
         R_SerializationHelper.SerializeFloat(bytes, terrain.legacyShininess);
         R_SerializationHelper.SerializeColor(bytes, terrain.legacySpecular);
+        #endif
         R_SerializationHelper.SerializeInt(bytes, terrain.lightmapIndex);
         R_SerializationHelper.SerializeVector4(bytes, terrain.lightmapScaleOffset);
 
@@ -104,8 +110,10 @@ public class TerrainSerialization : MonoBehaviour
         }
         else bytes.Add(0);
 
+        #if UNITY_5 || UNITY_2017 || UNITY_2018_1 || UNITY_2018_2 || UNITY_2018_3 || UNITY_2019_1
         R_SerializationHelper.SerializeInt(bytes, (int)terrain.materialType);
-        R_SerializationHelper.SerializeInt(bytes, terrain.realtimeLightmapIndex);
+        #endif
+        R_SerializationHelper.SerializeInt(bytes, terrain.realtimeLightmapIndex); 
         R_SerializationHelper.SerializeVector4(bytes, terrain.realtimeLightmapScaleOffset);
         R_SerializationHelper.SerializeInt(bytes, (int)terrain.reflectionProbeUsage);
         R_SerializationHelper.SerializeFloat(bytes, terrain.treeBillboardDistance);
@@ -128,7 +136,11 @@ public class TerrainSerialization : MonoBehaviour
         terrain.transform.position = R_SerializationHelper.DeserializeVector3(bytes, ref index);
 
         terrain.basemapDistance = R_SerializationHelper.DeserializeFloat(bytes, ref index);
+#if UNITY_5 || UNITY_2017 || UNITY_2018_1 || UNITY_2018_2 || UNITY_2018_3 || UNITY_2018_4
         terrain.castShadows = R_SerializationHelper.DeserializeBool(bytes, ref index);
+#else
+        terrain.shadowCastingMode = (UnityEngine.Rendering.ShadowCastingMode)R_SerializationHelper.DeserializeInt(bytes, ref index);
+#endif
         terrain.collectDetailPatches = R_SerializationHelper.DeserializeBool(bytes, ref index);
         terrain.detailObjectDensity = R_SerializationHelper.DeserializeFloat(bytes, ref index);
         terrain.detailObjectDistance = R_SerializationHelper.DeserializeFloat(bytes, ref index);
@@ -137,8 +149,11 @@ public class TerrainSerialization : MonoBehaviour
 
         terrain.heightmapMaximumLOD = R_SerializationHelper.DeserializeInt(bytes, ref index);
         terrain.heightmapPixelError = R_SerializationHelper.DeserializeFloat(bytes, ref index);
+
+#if UNITY_5 || UNITY_2017 || UNITY_2018_1 || UNITY_2018_2 || UNITY_2018_3 || UNITY_2019_1
         terrain.legacyShininess = R_SerializationHelper.DeserializeFloat(bytes, ref index);
         terrain.legacySpecular = R_SerializationHelper.DeserializeColor(bytes, ref index);
+#endif
         terrain.lightmapIndex = R_SerializationHelper.DeserializeInt(bytes, ref index);
 
         terrain.lightmapScaleOffset = R_SerializationHelper.DeserializeVector4(bytes, ref index);
@@ -146,7 +161,9 @@ public class TerrainSerialization : MonoBehaviour
         {
             R_SerializationHelper.DeserializeString(bytes, ref index);
         }
+#if UNITY_5 || UNITY_2017 || UNITY_2018_1 || UNITY_2018_2 || UNITY_2018_3 || UNITY_2019_1
         terrain.materialType = (Terrain.MaterialType)R_SerializationHelper.DeserializeInt(bytes, ref index);
+#endif
         terrain.realtimeLightmapIndex = R_SerializationHelper.DeserializeInt(bytes, ref index);
         terrain.realtimeLightmapScaleOffset = R_SerializationHelper.DeserializeVector4(bytes, ref index);
         terrain.reflectionProbeUsage = (UnityEngine.Rendering.ReflectionProbeUsage)R_SerializationHelper.DeserializeInt(bytes, ref index);
@@ -182,6 +199,7 @@ public class TerrainSerialization : MonoBehaviour
 
 
         // Splat textures
+#if UNITY_5 || UNITY_2017 || UNITY_2018_1 || UNITY_2018_2
         SplatPrototype[] splatPrototypes = terrainData.splatPrototypes;
         R_SerializationHelper.SerializeInt(bytes, splatPrototypes.Length);
         for (int i = 0; i < splatPrototypes.Length; i++)
@@ -200,6 +218,28 @@ public class TerrainSerialization : MonoBehaviour
             R_SerializationHelper.SerializeVector2(bytes, splat.tileOffset);
             R_SerializationHelper.SerializeVector2(bytes, splat.tileSize);
         }
+#else
+        TerrainLayer[] terrainLayers = terrainData.terrainLayers;
+        R_SerializationHelper.SerializeInt(bytes, terrainLayers.Length);
+        for (int i = 0; i < terrainLayers.Length; i++)
+        {
+            TerrainLayer terrainLayer = terrainLayers[i];
+            R_SerializationHelper.SerializeFloat(bytes, terrainLayer.metallic);
+            if (terrainLayer.normalMapTexture != null)
+            {
+                bytes.Add(1);
+                R_SerializationHelper.SerializeString(bytes, terrainLayer.normalMapTexture.name);
+                R_SerializationHelper.SerializeFloat(bytes, terrainLayer.normalScale);
+            }
+            else bytes.Add(0);
+
+            R_SerializationHelper.SerializeFloat(bytes, terrainLayer.smoothness);
+            R_SerializationHelper.SerializeString(bytes, terrainLayer.diffuseTexture.name);
+            R_SerializationHelper.SerializeVector2(bytes, terrainLayer.tileOffset);
+            R_SerializationHelper.SerializeVector2(bytes, terrainLayer.tileSize);
+        }
+
+#endif
 
         // Tree Prototypes
         TreePrototype[] treePrototypes = terrainData.treePrototypes;
@@ -210,7 +250,7 @@ public class TerrainSerialization : MonoBehaviour
             R_SerializationHelper.SerializeFloat(bytes, tree.bendFactor);
             R_SerializationHelper.SerializeString(bytes, tree.prefab.name);
         }
-
+         
         // Grass
         DetailPrototype[] detailPrototypes = terrainData.detailPrototypes;
         int detailPrototypesLength = detailPrototypes.Length;
@@ -303,6 +343,7 @@ public class TerrainSerialization : MonoBehaviour
         terrainData.wavingGrassTint = R_SerializationHelper.DeserializeColor(bytes, ref index);
 
         // Splat Textures
+#if UNITY_5 || UNITY_2017 || UNITY_2018_1 || UNITY_2018_2
         int splatLength = R_SerializationHelper.DeserializeInt(bytes, ref index);
         SplatPrototype[] splatPrototypes = new SplatPrototype[splatLength];
         for (int i = 0; i < splatLength; i++)
@@ -322,6 +363,29 @@ public class TerrainSerialization : MonoBehaviour
             splatPrototypes[i] = splat;
         }
         terrainData.splatPrototypes = splatPrototypes;
+#else
+        int terrainLayerLength = R_SerializationHelper.DeserializeInt(bytes, ref index);
+        TerrainLayer[] terrainLayers = new TerrainLayer[terrainLayerLength];
+        for (int i = 0; i < terrainLayerLength; i++)
+        {
+            TerrainLayer terrainLayer = new TerrainLayer();
+            terrainLayer.metallic = R_SerializationHelper.DeserializeFloat(bytes, ref index);
+            if (bytes[index++] == 1)
+            {
+                string normalName = R_SerializationHelper.DeserializeString(bytes, ref index);
+                terrainLayer.normalMapTexture = (Texture2D)Resources.Load(normalName);
+                terrainLayer.normalScale = R_SerializationHelper.DeserializeFloat(bytes, ref index);
+            }
+            terrainLayer.smoothness = R_SerializationHelper.DeserializeFloat(bytes, ref index);
+            string splatName = R_SerializationHelper.DeserializeString(bytes, ref index);
+            terrainLayer.diffuseTexture = (Texture2D)Resources.Load(splatName);
+            terrainLayer.tileOffset = R_SerializationHelper.DeserializeVector2(bytes, ref index);
+            terrainLayer.tileSize = R_SerializationHelper.DeserializeVector2(bytes, ref index);
+            terrainLayers[i] = terrainLayer;
+        }
+        terrainData.terrainLayers = terrainLayers;
+
+#endif
 
         // Tree Prototypes
         int treeLength = R_SerializationHelper.DeserializeInt(bytes, ref index);
