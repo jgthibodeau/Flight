@@ -27,6 +27,8 @@ public class Player : MonoBehaviour
     public FreeFormCameraTarget freeFormCameraTarget;
     public PrefabSpawner gustSpawner;
 
+    public Camera camera { get; private set; }
+
     private int PerchableLayer;
 	private int EnemyLayer;
 	private int PreyLayer;
@@ -120,7 +122,9 @@ public class Player : MonoBehaviour
 
     // Use this for initialization
     void Start () {
-		PerchableLayer = LayerMask.NameToLayer ("Perchable");
+        camera = Camera.main;
+
+        PerchableLayer = LayerMask.NameToLayer ("Perchable");
 		EnemyLayer = LayerMask.NameToLayer ("Enemy");
 		PreyLayer = LayerMask.NameToLayer ("Prey");
 
@@ -530,7 +534,7 @@ public class Player : MonoBehaviour
         float newWalkSpeed = Util.ConvertScale(10, 60, walkScript.walkSpeed, walkScript.runSpeed, landSpeed);
         Debug.Log("converted " + landSpeed + " to " + newWalkSpeed);
         walkScript.currentSpeed = newWalkSpeed;
-        walkScript.currentSpeedIncreaseDelay = 0;
+        walkScript.currentRunDelay = 0;
     }
 
     void FinishLandTransition()

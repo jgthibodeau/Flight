@@ -65,6 +65,7 @@ public class GlideV2 : MonoBehaviour {
     public float backFlapStopSpeed = 1f;
     public float maxBackFlapStopSpeed = 100f;
     public bool backFlapRotateOnly;
+    public bool backflapVerticalMovement;
 
     public ForceMode flapForceMode;
 
@@ -536,13 +537,15 @@ public class GlideV2 : MonoBehaviour {
         }
         else
         {
-            float turnRight = Util.GetAxis("Horizontal Right");
-            float turnUp = Util.GetAxis("Vertical Right");
-
-            Vector3 rotateForward = transform.forward * (1 - Mathf.Abs(turnRight)) + transform.right * turnRight;
-            desiredForward = Quaternion.Slerp(rigidBody.rotation, Quaternion.LookRotation(rotateForward, Vector3.up), Time.fixedDeltaTime * flapHoverRotationSpeed);
-            rigidBody.MoveRotation(desiredForward);
-            Util.DrawRigidbodyRay(rigidBody, transform.position, desiredForward.eulerAngles * 5, Color.black);
+            if (!playerScript.isFlaming)
+            {
+                float turnRight = Util.GetAxis("Horizontal Right");
+                
+                Vector3 rotateForward = transform.forward * (1 - Mathf.Abs(turnRight)) + transform.right * turnRight;
+                desiredForward = Quaternion.Slerp(rigidBody.rotation, Quaternion.LookRotation(rotateForward, Vector3.up), Time.fixedDeltaTime * flapHoverRotationSpeed);
+                rigidBody.MoveRotation(desiredForward);
+                Util.DrawRigidbodyRay(rigidBody, transform.position, desiredForward.eulerAngles * 5, Color.black);
+            }
 
 
             if (backFlapStable)
@@ -550,7 +553,9 @@ public class GlideV2 : MonoBehaviour {
                 float forward = Util.GetAxis("Vertical");
                 float right = Util.GetAxis("Horizontal");
 
-                Vector3 movement = flapHoverMoveSpeed * (transform.forward * forward + transform.right * right).normalized;
+                Vector3 forwardDirection = backflapVerticalMovement ? playerScript.camera.transform.forward : transform.forward;
+
+                Vector3 movement = flapHoverMoveSpeed * (forwardDirection * forward + transform.right * right).normalized;
                 //rigidBody.AddForce(movement, ForceMode.VelocityChange);
 
                 //rigidBody.MovePosition(rigidBody.position + movement);
@@ -568,9 +573,6 @@ public class GlideV2 : MonoBehaviour {
 
     public bool CheckBackFlapStabilityV2()
     {
-        //rigidBody.velocity.magnitude <= 0.5f
-
-        Debug.Log(rigidBody.velocity.magnitude + " <= " + backFlapStableSpeed + ", " + Vector3.Angle(transform.up, Vector3.up) + " <= " + backFlapStableAngle);
         return (rigidBody.velocity.magnitude <= backFlapStableSpeed) && (Vector3.Angle(transform.up, Vector3.up) <= backFlapStableAngle);
     }
 

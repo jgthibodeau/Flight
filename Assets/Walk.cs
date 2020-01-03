@@ -2,6 +2,8 @@
 using System.Collections;
 
 public class Walk : MonoBehaviour {
+    [HideInInspector]
+    public Player playerScript;
 	[HideInInspector]
 	public BirdAnimator birdAnimator;
 	[HideInInspector]
@@ -18,20 +20,22 @@ public class Walk : MonoBehaviour {
 
 	public float rigidBodyDrag = 1f;
 	public float rigidBodyAngularDrag = 20f;
-	public float walkSpeed;
+    public float minSpeed = 400;
+    public float walkSpeed = 800;
     public float minWalkPercent = 0;
     public float minWalkAngle, maxWalkAngle;
 	public float flameWalkSpeed;
     public float strafeSpeed;
-	public float runSpeed;
+	public float runSpeed = 2000;
 
 	public bool gradualRun = true;
-	public float currentSpeedIncreaseDelay;
+	public float currentRunDelay;
 	public float currentSpeed;
-	public float speedIncreaseDelay;
-	public float speedIncreaseRate;
+	public float runDelay = 1;
+    public float runSpeedIncreaseRate = 100;
+    public float walkSpeedIncreaseRate = 200;
 
-	public float maxSpeed = 10f;
+    public float maxSpeed = 10f;
 	public float hopTransitionSpeed;
 	public float animationSpeedScale;
 	public float minWalkInput;
@@ -52,8 +56,10 @@ public class Walk : MonoBehaviour {
     public bool jump;
 
 	// Use this for initialization
-	void Start () {
-	}
+	void Start ()
+    {
+        playerScript = GetComponent<Player>();
+    }
 
     /*
      * if grounded -> do walk/run and jump
@@ -80,8 +86,9 @@ public class Walk : MonoBehaviour {
 	}
 
 	void ResetWalkSpeed() {
-		currentSpeedIncreaseDelay = speedIncreaseDelay;
-		currentSpeed = walkSpeed;
+		currentRunDelay = runDelay;
+        //currentSpeed = walkSpeed;
+        currentSpeed = minSpeed;
         dragonAnimator.MoveSpeed = 0;
     }
 
@@ -120,40 +127,64 @@ public class Walk : MonoBehaviour {
 		asi.IsName ("Attack");
 
 		if (inputSpeed >= minWalkInput && !isAttacking && !asi.IsName ("Attack")) {
-//			Debug.Break ();
-			//				Vector3 direction = rigidBody.velocity;
-			//				Vector3 surfaceParallel = direction - groundNormal * Vector3.Dot (direction, groundNormal);
-			//				Quaternion lookDirection = Quaternion.LookRotation (surfaceParallel, groundNormal);
-			//				transform.rotation = Quaternion.Lerp (transform.rotation, lookDirection, Time.fixedDeltaTime * walkTurnSpeed);
-			//
-			//				Vector3 velocityChange = CalculateVelocityChange (inputVector);
-			//				Util.DrawRigidbodyRay (rigidBody, transform.position, velocityChange, Color.cyan);
-			//
-			//				rigidBody.AddForce (velocityChange, ForceMode.VelocityChange);
-
 			Vector3 moveDirection = CalculateDesiredMovementDirection (inputVector);
 			moveDirection = Vector3.ProjectOnPlane (moveDirection, groundNormal).normalized * inputSpeed;
 			if (isFlaming) {
 				moveDirection *= flameWalkSpeed;
 				ResetWalkSpeed ();
 			} else if (gradualRun) {
-				//if holding down movement, currentSpeed = walkSpeed
-				//if holding down movement > .95, start counting down delay
-				if (inputSpeed >= minRunInput) {
-					if (currentSpeed > walkSpeed || currentSpeedIncreaseDelay <= 0) {
-						currentSpeed += speedIncreaseRate * Time.fixedDeltaTime;
-					} else {
-						currentSpeedIncreaseDelay -= Time.fixedDeltaTime;
-					}
-				} else {
-					currentSpeed -= speedIncreaseRate * Time.fixedDeltaTime;
-                    if (currentSpeed <= walkSpeed)
-                    {
-                        currentSpeedIncreaseDelay = speedIncreaseDelay;
-                    }
-				}
+                //if holding down movement, currentSpeed = walkSpeed
+                //if holding down movement > .95, start counting down delay
+                if (currentSpeed < walkSpeed)
+                {
+                    currentSpeed += walkSpeedIncreaseRate * Time.fixedDeltaTime;
 
-				currentSpeed = Mathf.Clamp (currentSpeed, walkSpeed, runSpeed);
+                    currentSpeed = Mathf.Clamp(currentSpeed, minSpeed, walkSpeed);
+                } else
+                {
+                    if (inputSpeed >= minRunInput && currentSpeed < runSpeed)
+                    {
+                        if (currentSpeed > walkSpeed || currentRunDelay <= 0)
+                        {
+                            currentSpeed += runSpeedIncreaseRate * Time.fixedDeltaTime;
+                        }
+                        else
+                        {
+                            currentRunDelay -= Time.fixedDeltaTime;
+                        }
+                    }
+                    else if (currentSpeed > walkSpeed)
+                    {
+                        currentSpeed -= runSpeedIncreaseRate * Time.fixedDeltaTime;
+                        if (currentSpeed <= walkSpeed)
+                        {
+                            currentSpeed = walkSpeed;
+                            currentRunDelay = runDelay;
+                        }
+                    }
+
+                    currentSpeed = Mathf.Clamp(currentSpeed, walkSpeed, runSpeed);
+                }
+
+
+                ////if holding down movement, currentSpeed = walkSpeed
+                ////if holding down movement > .95, start counting down delay
+                //if (inputSpeed >= minRunInput) {
+                //	if (currentSpeed > walkSpeed || currentRunDelay <= 0) {
+                //		currentSpeed += runSpeedIncreaseRate * Time.fixedDeltaTime;
+                //	} else {
+                //		currentRunDelay -= Time.fixedDeltaTime;
+                //	}
+                //} else {
+                //	currentSpeed -= runSpeedIncreaseRate * Time.fixedDeltaTime;
+                //                if (currentSpeed <= walkSpeed)
+                //                {
+                //                    currentRunDelay = runDelay;
+                //                }
+                //}
+
+                //            currentSpeed = Mathf.Clamp(currentSpeed, walkSpeed, runSpeed);
+
 
                 currentSpeed *= CalculateAngleWalkPercent();
 
@@ -168,12 +199,8 @@ public class Walk : MonoBehaviour {
 
 			Util.DrawRigidbodyRay (rigidBody, transform.position + rigidBody.centerOfMass, moveDirection, Color.red);
 			Util.DrawRigidbodyRay (rigidBody, transform.position, groundNormal, Color.red);
-//			Debug.Break ();
 			rigidBody.AddForce (moveDirection, walkForceMode);
-//			rigidBody.AddForceAtPosition (moveDirection, transform.position, walkForceMode);
-
-//			Debug.Break ();
-
+            
 			Vector3 lookAt = transform.position;
 			//				if (rigidBody.velocity.magnitude > maxDirectTurnVelocity) {
 			lookAt += rigidBody.velocity;
@@ -243,7 +270,7 @@ public class Walk : MonoBehaviour {
     private Vector3 CalculateVelocityChange(Vector3 inputVector)
 	{
 		// Calculate how fast we should be moving
-		Vector3 relativeVelocity = Camera.main.transform.TransformDirection(inputVector) * walkSpeed;
+		Vector3 relativeVelocity = playerScript.camera.transform.TransformDirection(inputVector) * walkSpeed;
 
 		// Calcualte the delta velocity
 		Vector3 currRelativeVelocity = rigidBody.velocity;
@@ -257,13 +284,13 @@ public class Walk : MonoBehaviour {
 	}
 
 	private Vector3 CalculateDesiredMovementDirection(Vector2 input) {
-//		Vector3 cameraForward = Camera.main.transform.TransformDirection(Vector3.forward);
-		Vector3 cameraForward = Camera.main.transform.forward;
+//		Vector3 cameraForward = playerScript.camera.transform.TransformDirection(Vector3.forward);
+		Vector3 cameraForward = playerScript.camera.transform.forward;
 		cameraForward.y = 0f;
 		cameraForward = cameraForward.normalized;
 
 //		Vector3 cameraRight = new Vector3(cameraForward.z, 0.0f, -cameraForward.x);
-		Vector3 cameraRight = Camera.main.transform.right;
+		Vector3 cameraRight = playerScript.camera.transform.right;
 		cameraRight.y = 0f;
 		cameraRight = cameraRight.normalized;
 
