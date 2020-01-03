@@ -23,7 +23,6 @@ public class Player : MonoBehaviour
 	private Interactor interactorScript;
 	private FlameBreath flameBreathScript;
 	private Health healthScript;
-    public PlayerCameraController playerCameraController;
     public FreeFormCameraTarget freeFormCameraTarget;
     public PrefabSpawner gustSpawner;
 
@@ -38,9 +37,7 @@ public class Player : MonoBehaviour
     public Transform headCameraTarget, headCameraBackFlapTarget;
     [Range(0, 1)]
     public float headCameraYScale = 1, headCameraXScale = 1, headCameraBackFlapYScale = 1, headCameraBackFlapXScale = 1;
-
-    public ThirdPersonCamera.Follow follow;
-
+    
 	public LayerMask layerMaskForGround;
 	public LayerMask layerMaskForWater;
 	public float waterBobAmount, waterBobTime, timeSinceWaterBob;

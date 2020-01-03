@@ -8,7 +8,6 @@ public class FreeFormCameraTarget : MonoBehaviour
     public bool alignOffsetCameraToWorldUp;
     public Camera camera;
     public Player player;
-    ThirdPersonCamera.Follow follow;
     public bool freeFormActive;
     public bool enableX = true, enableY = true;
     public float offsetScaleX, offsetScaleY, freeFormScaleX, freeFormScaleY, resetScale;
